@@ -1,2 +1,2 @@
-# JAX_bulk_RNAseq
+# JAX bulk RNAseq
 workflows for JAX bulk RNAseq data analysis
