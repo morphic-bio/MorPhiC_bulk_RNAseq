@@ -1,0 +1,281 @@
+---
+title: "Differential expression analysis"
+author: "Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+
+theme_set(theme_classic())
+
+dat_path = "~/research/data/MorPhiC/JAX_RNAseq_ExtraEmbryonic/processed/Tables"
+```
+
+
+## Read in meta data
+```{r fig.width = 3, fig.height=3}
+meta = fread("data/JAX_RNAseq_ExtraEmbryonic_meta.tsv")
+dim(meta)
+meta[1:2,]
+names(meta)
+```
+
+## Read in gene count data and filter genes
+
+```{r fig.width = 4, fig.height=3}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+setequal(names(cts)[-1], meta$file_id)
+
+meta = meta[match(names(cts)[-1], meta$file_id),]
+table(names(cts)[-1] == meta$file_id)
+
+meta$model_short = ""
+meta[model_organ == "extra-embryonic primitive syncytial cells", 
+     model_short := "PrS"]
+
+meta[model_organ == "extra-embryonic mesenchymal cells", 
+     model_short := "ExM"]
+
+table(meta$model_organ, meta$model_short)
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+
+model_s = meta$model_short
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+gene_info = data.frame(Name = cts$Name, 
+                       t(apply(cts_dat, 1, tapply, model_s, min)), 
+                       t(apply(cts_dat, 1, tapply, model_s, median)), 
+                       t(apply(cts_dat, 1, tapply, model_s, get_q75)), 
+                       t(apply(cts_dat, 1, tapply, model_s, max)))
+
+dim(gene_info)
+gene_info[1:2,]
+names(gene_info)[2:9] = paste0(rep(c("ExM_", "PrS_"), times=4), 
+                               rep(c("min", "median", "q75", "max"), each=2))
+gene_info[1:2,]
+
+summary(gene_info)
+
+table(gene_info$ExM_q75 > 0, gene_info$PrS_q75 > 0)
+
+w2kp = which(gene_info$ExM_q75 > 0 | gene_info$PrS_q75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+
+meta$read_depth = colSums(cts_dat)/1e6
+meta$q75 = apply(cts_dat, 2, quantile, probs = 0.75)
+
+
+ggplot(meta, aes(x=read_depth, y=q75, color=ko_strategy, shape = model_short)) +
+    geom_point(size=2, alpha=0.7) + ggtitle("Gene counts") + 
+  scale_shape_manual(values = c(7, 16)) + 
+  xlab("read depth (million)") + ylab("75 percentile of gene expression") + 
+  labs(color = "KO type", shape = "Model") + scale_color_brewer(palette = "Set1")
+
+```
+
+# Analyze samples of different model organ
+
+```{r fig.width = 4, fig.height=3}
+
+table(meta$model_short, meta$ko_gene)
+
+for(model1 in unique(meta$model_short)){
+  print(model1)
+  sample2kp = which(meta$model_short == model1)
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+  summary(meta_m$q75)
+  
+  stopifnot(all(meta_m$file_id == names(cts_dat_m)))
+  
+  cts_dat_n = t(cts_dat_m[gene_info[[paste0(model1, "_q75")]] > 0,])
+  cts_dat_n = log(median(meta_m$q75)*cts_dat_n/meta_m$q75 + 1)
+  dim(cts_dat_n)
+  
+  sample_pca = prcomp(cts_dat_n, center = TRUE, scale. = TRUE)
+  names(sample_pca)
+  pc_scores = sample_pca$x
+  eigen_vals = sample_pca$sdev^2
+  eigen_vals[1:5]/sum(eigen_vals)
+  pvs = round(eigen_vals[1:5]/sum(eigen_vals)*100,1)
+  pvs
+  
+  PC_df = data.frame(pc_scores)
+  PC_df = cbind(PC_df, meta_m)
+  
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_strategy, color=ko_gene)) +
+    geom_point(size=2.5, alpha=0.9) + scale_color_brewer(palette = "Dark2") +
+      scale_shape_manual(values = c(7, 15, 16, 17)) + 
+    labs(color="KO gene", shape ="KO strategy") + 
+    xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+    ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+    ggtitle(model1) + 
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    ) +
+    theme(
+      legend.margin = margin(0, 0, 0, 0), 
+      legend.box.just = "left", 
+      legend.direction = "vertical" 
+    )
+
+  print(gPC)
+  
+  ## Generate sample information matrix
+  
+  cols2kp = c("ko_strategy", "ko_gene", "read_depth", "q75")
+  sample_info = meta_m[,..cols2kp]
+  
+  dim(sample_info)
+  sample_info[1:2,]
+  
+  table(sample_info$ko_strategy, sample_info$ko_gene)
+  
+  sample_info[,ko_group := paste(ko_gene, ko_strategy, sep="_")]
+  table(sample_info$ko_group)
+  
+  sample_info$log_q75 = log(sample_info$q75)
+  
+  table(sample_info$ko_group)
+  
+  dds = DESeqDataSetFromMatrix(cts_dat_m, colData=sample_info, 
+                                    ~ ko_group + log_q75)
+  dds = DESeq(dds)
+  
+  res_rd = results(dds, name = "log_q75")
+  res_rd = as.data.frame(res_rd)
+  dim(res_rd)
+  res_rd[1:2,]
+  
+  table(is.na(res_rd$padj))
+  
+  g0 = ggplot(res_rd %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+    geom_histogram(color="darkblue", fill="lightblue", 
+                   breaks = seq(0,1,by=0.01)) + 
+    ggtitle(paste0(model1, " read depth"))
+  print(g0)
+  
+  ## DE analysis for each KO gene
+  table(sample_info$ko_gene)
+  
+  genos = setdiff(unique(sample_info$ko_gene), "WT")
+  genos
+  
+  for(geno in genos){
+    
+    res_ce = results(dds, contrast = c("ko_group", paste0(geno, "_CE"), "WT_WT"))
+    res_ko = results(dds, contrast = c("ko_group", paste0(geno, "_KO"), "WT_WT"))
+    res_ptc = results(dds, contrast = c("ko_group", paste0(geno, "_PTC"), "WT_WT"))
+    
+    res_ce = signif(data.frame(res_ce), 3)
+    res_ko = signif(data.frame(res_ko), 3)
+    res_ptc = signif(data.frame(res_ptc), 3)
+    
+    res_ce$Name = rownames(res_ce)
+    res_ko$Name = rownames(res_ko)
+    res_ptc$Name = rownames(res_ptc)
+    
+    fwrite(res_ce, sprintf("results/%s_%s_CE_DEseq2.tsv", model1, geno), sep="\t")
+    fwrite(res_ko, sprintf("results/%s_%s_KO_DEseq2.tsv", model1, geno), sep="\t")
+    fwrite(res_ptc, sprintf("results/%s_%s_PTC_DEseq2.tsv", model1, geno), 
+           sep="\t")
+  
+    g1 = ggplot(res_ce %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      geom_histogram(color="darkblue", fill="lightblue", 
+                     breaks = seq(0,1,by=0.01)) + 
+      ggtitle(paste0(geno, "_CE")) 
+    
+    g2 = ggplot(res_ko %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      geom_histogram(color="darkblue", fill="lightblue", 
+                     breaks = seq(0,1,by=0.01)) + 
+      ggtitle(paste0(geno, "_KO")) 
+    
+    g3 = ggplot(res_ptc %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      geom_histogram(color="darkblue", fill="lightblue", 
+                     breaks = seq(0,1,by=0.01)) + 
+      ggtitle(paste0(geno, "_PTC")) 
+    
+    w_ce = which(res_ce$padj < 0.01 & abs(res_ce$log2FoldChange) > log2(1.5))
+    w_ko = which(res_ko$padj < 0.01 & abs(res_ko$log2FoldChange) > log2(1.5))
+    w_ptc = which(res_ptc$padj < 0.01 & abs(res_ptc$log2FoldChange) > log2(1.5))
+
+    m = make_comb_mat(list("CE" = rownames(res_ce)[w_ce], 
+              "KO" = rownames(res_ko)[w_ko], 
+              "PTC" = rownames(res_ptc)[w_ptc]))
+    g_up = UpSet(m)
+    
+    cr1 = cor(res_ce$padj, res_ptc$padj, method = "spearman", use="pair")
+    cr2 = cor(res_ko$padj, res_ptc$padj, method = "spearman", use="pair")
+    
+    df1 = data.frame(padj_CE = res_ce$padj, padj_KO = res_ko$padj, 
+                     padj_PTC = res_ptc$padj)
+    
+    g4 = ggplot(data = df1, mapping = aes(x = -log10(padj_CE), 
+                                          y = -log10(padj_PTC))) +
+      geom_pointdensity() + ggtitle(sprintf("%s, Spearman r = %.2f", geno, cr1)) + 
+      scale_color_viridis()
+    
+    g5 = ggplot(data = df1, mapping = aes(x = -log10(padj_KO), 
+                                          y = -log10(padj_PTC))) +
+      geom_pointdensity() + ggtitle(sprintf("%s, Spearman r = %.2f", geno, cr1)) + 
+      scale_color_viridis()
+    
+    print(g1)
+    print(g2)
+    print(g3)
+    print(g4)
+    print(g5)
+    print(g_up)
+  }
+}
+```
+
+```{r}
+gc()
+sessionInfo()
+renv::snapshot(lockfile = "step2_DE_testing.lock")
+```
+
+
+
