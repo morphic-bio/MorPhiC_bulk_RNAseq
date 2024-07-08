@@ -40,7 +40,8 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-dat_path = "~/research/data/MorPhiC/JAX_RNAseq_ExtraEmbryonic/processed/Tables"
+dat_path = "~/research/data/MorPhiC/December-2023/JAX_RNAseq_ExtraEmbryonic/"
+dat_path = paste0(dat_path, "processed/Tables")
 ```
 
 
@@ -503,15 +504,13 @@ for(model1 in unique(meta$model_condition)){
   dim(res_df)
   res_df[1:2,]
 
-  fwrite(res_df, sprintf("results/%s_DEseq2.tsv", model1), sep="\t")
+  fwrite(res_df, sprintf("results/2023_12_%s_DEseq2.tsv", model1), sep="\t")
 }
 ```
 
 ```{r}
 gc()
 sessionInfo()
-renv::snapshot(lockfile = "step2_DE_testing.lock")
 ```
-
 
 

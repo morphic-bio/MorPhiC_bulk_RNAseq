@@ -38,7 +38,8 @@ library(readxl)
 
 theme_set(theme_classic())
 
-dat_path = "~/research/data/MorPhiC/JAX_RNAseq_ExtraEmbryonic/processed/Tables"
+dat_path = "~/research/data/MorPhiC/December-2023/JAX_RNAseq_ExtraEmbryonic/"
+dat_path = paste0(dat_path, "processed/Tables")
 
 read_header <- function(file_name, sheet){
   
