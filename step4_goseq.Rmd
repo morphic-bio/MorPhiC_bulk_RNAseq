@@ -1,0 +1,180 @@
+---
+title: "Check the over-representation of functional terms"
+author: "Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(RColorBrewer)
+library(goseq)
+library(fgsea)
+
+library(dplyr)
+library(data.table)
+theme_set(theme_classic())
+```
+
+
+## Read in DE results
+
+```{r fig.width = 3, fig.height=3}
+res = fread("results/2023_12_DEseq2.tsv.gz", data.table = FALSE)
+dim(res)
+res[1:2,1:5]
+
+items = names(res)[grep("_padj", names(res))]
+items
+
+gene_sets = list()
+for(it1 in items){
+  id1 = gsub("_padj", "", it1)
+  
+  res_k = res[,c(1, grep(id1, names(res)))]
+  names(res_k) = gsub(paste0(id1, "_"), "", names(res_k))
+  
+  w_up = which(res_k$log2FoldChange > log2(1.5) & res_k$padj < 0.01)
+  w_down = which(res_k$log2FoldChange < -log2(1.5) & res_k$padj < 0.01)
+  
+  gene_sets[[paste0(id1, "_up")]] = res_k$gene_ID[w_up]
+  gene_sets[[paste0(id1, "_down")]] = res_k$gene_ID[w_down]
+}
+
+sapply(gene_sets, length)
+```
+
+## Read in gene annotation 
+```{r fig.width = 3, fig.height=3}
+gene_info = fread("data/gencode_v44_basic_gene_info.tsv", data.table = FALSE)
+dim(gene_info)
+gene_info[1:2,]
+
+table(res$gene_ID %in% gene_info$ensembl_gene_id)
+
+gene_info = gene_info[gene_info$ensembl_gene_id %in% res$gene_ID,]
+dim(gene_info)
+gene_info[1:2,]
+
+t_symbol = table(gene_info$hgnc_symbol)
+table(t_symbol)
+t_symbol[t_symbol > 1]
+
+gene_info = gene_info[gene_info$hgnc_symbol %in% names(t_symbol)[t_symbol==1],]
+dim(gene_info)
+```
+
+## Prepare gene set information
+
+Gene set annotations (by gene symbols) were downloaded from MSigDB website. 
+
+```{r}
+gmtfile = list()
+gmtfile[["reactome"]] = "gene_annotation/c2.cp.reactome.v2023.2.Hs.symbols.gmt"
+gmtfile[["go_bp"]]    = "gene_annotation/c5.go.bp.v2023.2.Hs.symbols.gmt"
+
+pathways = list()
+for(k1 in names(gmtfile)){
+  pathways[[k1]] = gmtPathways(gmtfile[[k1]])
+}
+
+names(pathways)
+sapply(pathways, length)
+```
+
+
+Filter gene sets for size between 10 and 500.
+
+```{r}
+lapply(pathways, function(v){
+  quantile(sapply(v, length), probs = seq(0, 1, 0.1), na.rm = TRUE)
+})
+
+for(k1 in names(pathways)){
+  p1 = pathways[[k1]]
+  pathways[[k1]] = p1[sapply(p1, length) %in% 10:500]
+}
+```
+
+
+## Conduct enrichment analysis
+
+```{r warning = FALSE, message = FALSE}
+dim(gene_info)
+
+max_n2kp = 10
+goseq_res = NULL
+
+for(k in 1:length(gene_sets)){
+  if(length(gene_sets[[k]]) < 10) { next }
+  
+  print(k)
+  set_k = names(gene_sets)[k]
+
+  genes = gene_info$ensembl_gene_id %in% gene_sets[[k]]
+  names(genes) = gene_info$hgnc_symbol
+  table(genes)
+  
+  pwf = nullp(genes, "hg38", "geneSymbol")
+
+  for(k1 in names(pathways)){
+    p1 = pathways[[k1]]
+    res1 = goseq(pwf, "hg38", "geneSymbol", 
+                 gene2cat=goseq:::reversemapping(p1))
+    res1$FDR  = p.adjust(res1$over_represented_pvalue, method="BH")
+    
+    nD = sum(res1$FDR < 0.05)
+    
+    if(nD > 0){
+      res1 = res1[order(res1$FDR),][1:min(nD, max_n2kp),]
+      res1$category = gsub("REACTOME_|GOBP_", "", res1$category)
+      res1$category = gsub("_", " ", res1$category)
+      res1$category = tolower(res1$category)
+      res1$category = substr(res1$category, start=1, stop=120)
+      goseq_res[[set_k]][[k1]] = res1
+    }
+  }
+}
+```
+
+
+## Conduct enrichment analysis
+```{r warning = FALSE, message = FALSE}
+for(n1 in names(goseq_res)){
+  print(n1)
+  print(goseq_res[[n1]])
+}
+
+file_tag = "2023_12"
+
+saveRDS(goseq_res, sprintf("results/gene_set_enrichments_%s.rds", 
+                           file_tag))
+```
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+

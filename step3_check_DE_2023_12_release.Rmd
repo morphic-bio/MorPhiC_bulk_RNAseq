@@ -165,17 +165,17 @@ gene_info$gene_symbol[wEns] = gene_info$ensembl_gene_id[wEns]
 
 ## Read in DE results
 ```{r fig.width = 4, fig.height=3}
-PrS_nor = fread("results/PrS_nor_DEseq2.tsv", data.table = FALSE)
+PrS_nor = fread("results/2023_12_PrS_nor_DEseq2.tsv", data.table = FALSE)
 dim(PrS_nor)
-PrS_nor[1:2,]
+PrS_nor[1:2,1:7]
 
-PrS_hyp = fread("results/PrS_hyp_DEseq2.tsv", data.table = FALSE)
+PrS_hyp = fread("results/2023_12_PrS_hyp_DEseq2.tsv", data.table = FALSE)
 dim(PrS_hyp)
-PrS_hyp[1:2,]
+PrS_hyp[1:2,1:7]
 
-ExM_nor = fread("results/ExM_nor_DEseq2.tsv", data.table = FALSE)
+ExM_nor = fread("results/2023_12_ExM_nor_DEseq2.tsv", data.table = FALSE)
 dim(ExM_nor)
-ExM_nor[1:2,]
+ExM_nor[1:2,1:7]
 
 res = merge(PrS_nor, PrS_hyp)
 res = merge(res, ExM_nor)
@@ -243,8 +243,8 @@ ggplot(df, aes(x=(PTC_nDE), y=(KO_nDE), col=Model, shape=Condition,
     labs(x="PTC", y="KO") + 
     geom_abline(intercept = 0, slope = 1, color = "orange", linetype = "dashed")
 
-ggplot(df, aes(x=CE_log2FoldChange, y=-log10(CE_padj), col=Model, shape=Condition, 
-               label=gene_symbol)) + 
+ggplot(df, aes(x=CE_log2FoldChange, y=-log10(CE_padj), col=Model, 
+               shape=Condition, label=gene_symbol)) + 
     geom_point() +   scale_shape_manual(values = c(7, 16)) + 
     geom_text_repel() + ggtitle("CE") + 
     labs(x="log2 fold change", y="-log10(p-value)")  + 
@@ -252,8 +252,8 @@ ggplot(df, aes(x=CE_log2FoldChange, y=-log10(CE_padj), col=Model, shape=Conditio
     geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
                linetype = "dashed")
 
-ggplot(df, aes(x=KO_log2FoldChange, y=-log10(KO_padj), col=Model, shape=Condition, 
-               label=gene_symbol)) + 
+ggplot(df, aes(x=KO_log2FoldChange, y=-log10(KO_padj), col=Model, 
+               shape=Condition, label=gene_symbol)) + 
     geom_point() +   scale_shape_manual(values = c(7, 16)) + 
     geom_text_repel() + ggtitle("KO") + 
     labs(x="log2 fold change", y="-log10(p-value)")  + 
@@ -263,7 +263,7 @@ ggplot(df, aes(x=KO_log2FoldChange, y=-log10(KO_padj), col=Model, shape=Conditio
 
 ggplot(df, aes(x=PTC_log2FoldChange, y=-log10(PTC_padj), 
                col=Model, shape=Condition, label=gene_symbol)) + 
-    geom_point() +   scale_shape_manual(values = c(7, 16)) + 
+    geom_point() + scale_shape_manual(values = c(7, 16)) + 
     geom_text_repel() + ggtitle("PTC") + 
     labs(x="log2 fold change", y="-log10(p-value)")  + 
     geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
@@ -310,16 +310,21 @@ for(it1 in items){
   print(g2)
 }
 
+fwrite(res, file = "results/2023_12_DEseq2.tsv", append = FALSE, sep = "\t")
+system("gzip results/2023_12_DEseq2.tsv")
 ```
       
 ## Check the results of one KO
+
+For KO of FOSB, check those with significant results by PTC, and insignificant results by KO.
 
 ```{r fig.width = 5, fig.height=3}
 meta$run_id_short = str_replace(meta$run_id, "^[^-]*-", "")
 
 gene = "FOSB"
 
-targets = which(res$PrS_nor_FOSB_KO_padj > 0.01 & res$PrS_nor_FOSB_PTC_padj < 1e-10)
+targets = which(res$PrS_nor_FOSB_KO_padj > 0.01 & 
+                  res$PrS_nor_FOSB_PTC_padj < 1e-10)
 length(targets)
 res$gene_ID[targets]
 
@@ -332,6 +337,7 @@ t(r1)
 
 meta_m$y = data_m[which(rownames(data_m) == "ENSG00000163870"),]/q75
 table(meta_m$ko_strategy)
+
 meta_m$ko_strategy = factor(meta_m$ko_strategy)
 ggplot(meta_m, aes(x = ko_strategy, y = y, color = run_id_short)) + 
   geom_boxplot(outlier.shape = NA) +  ggtitle("FOSB -> TRPA1") + 
@@ -341,8 +347,5 @@ ggplot(meta_m, aes(x = ko_strategy, y = y, color = run_id_short)) +
 ```{r}
 gc()
 sessionInfo()
-renv::snapshot(lockfile = "step2_DE_testing.lock")
 ```
-
-
 

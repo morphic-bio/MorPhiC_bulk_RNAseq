@@ -1,0 +1,120 @@
+---
+title: "Visualize goseq results"
+author: "Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(data.table)
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+library(cowplot)
+
+library(tidyr)
+theme_set(theme_classic())
+```
+
+## Read in results
+
+```{r}
+res = readRDS("results/gene_set_enrichments_2023_12.rds")
+names(res)
+
+PTC = grep("PTC", names(res))
+res = res[PTC]
+
+sapply(res, function(x){sapply(x,nrow)})
+
+df_list = list()
+
+for(label in names(res)){
+  res1 = res[[label]]
+  type = names(res[[label]])
+  
+  df_go = NULL
+  
+  for(gset1 in type){
+    res_g1 = res1[[gset1]]
+    res_g1$type = gset1
+    df_go = rbind(df_go, res_g1)
+  }
+  
+  df_list[[label]] = df_go
+}
+
+```
+
+## Generate plots
+
+```{r fig.width = 7, fig.height = 5}
+nchar_limit = 70
+
+for(k in 1:length(df_list)){
+  d1 = df_list[[k]]
+  
+  if(sum(d1$FDR < 0.05) == 0){ next }
+  
+  d1 = d1[d1$FDR < 0.05,]
+  d1 = d1[order(d1$FDR, decreasing = TRUE),]
+  
+  d1_label = sapply(d1$category, function(x) {
+    space_positions = gregexpr(" ", x)[[1]]
+    if (nchar(x) > nchar_limit) {
+      break_pos = max(space_positions[space_positions < nchar_limit])
+      return(paste0(paste0(rep(" ", nchar_limit-break_pos), collapse=""), 
+                    substr(x, 1, break_pos), "\n", 
+                    substr(x, break_pos+1, nchar(x))))
+    } else {
+      x = paste0(paste0(rep(" ", 1.1*(nchar_limit-nchar(x))), collapse=""), x)
+      return(x)
+    }
+  })
+
+  d1$y = 1:nrow(d1)
+  nm1 = names(df_list)[k]
+  nm1 = gsub("_", " ", nm1)
+  nm1 = gsub("PTC ", "", nm1)
+  nm1 = gsub("nor ", "", nm1)
+  nm1 = gsub("hyp ", "Hyperoxia ", nm1)
+  nm1 = gsub("up", "up-regulated", nm1)
+  nm1 = gsub("down", "down-regulated", nm1)
+
+  g1 = ggplot(d1, aes(x = -log10(FDR), y = y, color=type)) +
+    geom_point(size = 2.5) + 
+    labs(x = "-log10(FDR)", y="", title = nm1) + 
+    scale_y_continuous(breaks = 1:nrow(d1), labels = d1_label) + 
+    theme(legend.position = "top") + 
+    guides(color = guide_legend(title = NULL))
+
+  h1 = 0.75*nrow(d1)/20 + 0.25
+  canvas <- ggdraw() + draw_plot(g1, x = 0, y = 1-h1, width = 1, height = h1) 
+  print(canvas)
+}
+```
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+
