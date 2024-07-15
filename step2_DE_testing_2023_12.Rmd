@@ -490,7 +490,7 @@ for(model1 in unique(meta$model_condition)){
     
     g5 = ggplot(data = df1, mapping = aes(x = -log10(padj_PTC), 
                                           y = -log10(padj_KO))) +
-      geom_pointdensity() + ggtitle(sprintf("%s, Spearman r = %.2f", geno, cr1)) + 
+      geom_pointdensity() + ggtitle(sprintf("%s, Spearman r = %.2f", geno, cr2)) + 
       scale_color_viridis()
     
     print(g4)

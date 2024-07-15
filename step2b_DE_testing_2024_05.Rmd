@@ -80,9 +80,6 @@ rownames(cts_dat) = cts$Name
 ### Discard genes whose expression is 0 in more than 75% of samples
 
 ```{r fig.width = 4, fig.height=3}
-meta$model_system = NA
-meta$model_system = str_extract(meta$differentiated_biomaterial_id, "^[^-]+")
-table(meta$model_system, meta$model_organ)
 
 model_s = meta$model_system
 get_q75 <- function(x){quantile(x, probs = 0.75)}
@@ -410,7 +407,7 @@ for(model1 in unique(meta$model_system)){
     
     g5 = ggplot(data = df1, mapping = aes(x = -log10(padj_PTC), 
                                           y = -log10(padj_KO))) +
-      geom_pointdensity() + ggtitle(sprintf("%s, Spearman r = %.2f", geno, cr1)) + 
+      geom_pointdensity() + ggtitle(sprintf("%s, Spearman r = %.2f", geno, cr2)) + 
       scale_color_viridis()
     
     print(g4)

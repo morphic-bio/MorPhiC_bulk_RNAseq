@@ -232,6 +232,12 @@ meta$ko_strategy[which(is.na(meta$ko_strategy))] = "WT"
 table(meta$ko_gene, useNA = "ifany")
 meta$ko_gene[which(is.na(meta$ko_gene))] = "WT"
 
+meta$model_system = NA
+meta$model_system = str_extract(meta$differentiated_biomaterial_id, "^[^-]+")
+table(meta$model_system, meta$model_organ)
+
+table(meta$model_system, meta$ko_gene)
+
 fwrite(meta, file = "data/JAX_RNAseq2_ExtraEmbryonic_meta_data.tsv", sep="\t")
 ```
 
