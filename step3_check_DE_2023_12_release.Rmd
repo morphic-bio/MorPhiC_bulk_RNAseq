@@ -311,7 +311,7 @@ for(it1 in items){
 }
 
 fwrite(res, file = "results/2023_12_DEseq2.tsv", append = FALSE, sep = "\t")
-system("gzip results/2023_12_DEseq2.tsv")
+system("gzip -f results/2023_12_DEseq2.tsv")
 ```
       
 ## Check the results of one KO

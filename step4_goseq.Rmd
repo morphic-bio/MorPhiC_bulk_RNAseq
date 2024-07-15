@@ -14,6 +14,8 @@ output:
       smooth_scroll: false
     number_sections: false
   df_print: paged
+params:
+  release: "2023_12"
 ---
 
 ```{r setup, include=FALSE}
@@ -34,13 +36,17 @@ library(fgsea)
 library(dplyr)
 library(data.table)
 theme_set(theme_classic())
+
+release = params$release
+release
 ```
 
 
 ## Read in DE results
 
 ```{r fig.width = 3, fig.height=3}
-res = fread("results/2023_12_DEseq2.tsv.gz", data.table = FALSE)
+res = fread(sprintf("results/%s_DEseq2.tsv.gz", release), 
+            data.table = FALSE)
 dim(res)
 res[1:2,1:5]
 
@@ -66,7 +72,8 @@ sapply(gene_sets, length)
 
 ## Read in gene annotation 
 ```{r fig.width = 3, fig.height=3}
-gene_info = fread("data/gencode_v44_basic_gene_info.tsv", data.table = FALSE)
+gene_info = fread("data/gencode_v44_basic_gene_info.tsv", 
+                  data.table = FALSE)
 dim(gene_info)
 gene_info[1:2,]
 
@@ -165,10 +172,8 @@ for(n1 in names(goseq_res)){
   print(goseq_res[[n1]])
 }
 
-file_tag = "2023_12"
-
 saveRDS(goseq_res, sprintf("results/gene_set_enrichments_%s.rds", 
-                           file_tag))
+                           release))
 ```
 
 

@@ -14,6 +14,8 @@ output:
       smooth_scroll: false
     number_sections: false
   df_print: paged
+params:
+  release: "2023_12"
 ---
 
 ```{r setup, include=FALSE}
@@ -31,12 +33,16 @@ library(cowplot)
 
 library(tidyr)
 theme_set(theme_classic())
+
+release = params$release
+release
+
 ```
 
 ## Read in results
 
 ```{r}
-res = readRDS("results/gene_set_enrichments_2023_12.rds")
+res = readRDS(sprintf("results/gene_set_enrichments_%s.rds", release))
 names(res)
 
 PTC = grep("PTC", names(res))

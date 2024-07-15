@@ -1,5 +1,5 @@
 ---
-title: "Check RNAseq data"
+title: "Check RNAseq data of 2024-05 release"
 author: "Wei Sun"
 date: "`r Sys.Date()`"
 output: 
@@ -41,7 +41,7 @@ library(readxl)
 theme_set(theme_classic())
 
 path = "~/research/data/MorPhiC/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
-dat_path = paste0(path, "processed/release98-gencode32/Tables")
+dat_path = paste0(path, "processed/release110-gencode44/Tables")
 
 read_header <- function(file_name, sheet){
   
@@ -237,7 +237,7 @@ fwrite(meta, file = "data/JAX_RNAseq2_ExtraEmbryonic_meta_data.tsv", sep="\t")
 
 ## Check count data
 
-### genesCounts.csv: count data have some extra columns for ISL1
+### genesCounts.csv
 
 ```{r fig.width = 5.5, fig.height=4}
 cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
@@ -245,79 +245,8 @@ dim(cts)
 cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
 
 setdiff(names(cts)[-1], meta$file_id)
-
-dat_path_pre = "~/research/data/MorPhiC/JAX_RNAseq_ExtraEmbryonic/processed/Tables"
-
-cts_pre = fread(file.path(dat_path_pre, "genesCounts.csv"), data.table = FALSE)
-dim(cts_pre)
-cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
-
-sample_names = intersect(names(cts), names(cts_pre))
-sample_names
-
-gene_names = intersect(cts$Name, cts_pre$Name)
-length(gene_names)
-
-cts_repeat = cts[match(gene_names, cts$Name), sample_names]
-cts_pre_repeat = cts_pre[match(gene_names, cts_pre$Name), sample_names]
-
-cts_repeat[1:10,1:2]
-cts_pre_repeat[1:10,1:2]
-
-cts_repeat[1:10,c(1,4)]
-cts_pre_repeat[1:10,c(1,4)]
-
-df1 = data.frame(ISL1_PTC_pre = cts_pre_repeat[,2], 
-                 ISL1_PTC_may = cts_repeat[,2])
-
-ggplot(data = df1, mapping = aes(x = log10(ISL1_PTC_pre + 1), 
-                                 y = log10(ISL1_PTC_may + 1))) +
-  geom_pointdensity() + scale_color_viridis() + 
-  ggtitle("genesCounts") + 
-  geom_abline(slope = 1, intercept = 0, col = "orange")
-
 ```
 
-### featureCounts.csv: count data have some extra columns for ISL1
-
-```{r fig.width = 5.5, fig.height=4}
-cts = fread(file.path(dat_path, "featureCounts.csv"), data.table = FALSE)
-dim(cts)
-cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
-
-setdiff(names(cts)[-1], meta$file_id)
-cts[1:10,c("name", "ISL1_CE_B05_GT23-12151_CACGAGCG-TGGCAGAT_S27_L001")]
-
-dat_path_pre = "~/research/data/MorPhiC/JAX_RNAseq_ExtraEmbryonic/processed/Tables"
-
-cts_pre = fread(file.path(dat_path_pre, "featureCounts.csv"), data.table = FALSE)
-dim(cts_pre)
-cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
-
-sample_names = intersect(names(cts), names(cts_pre))
-sample_names
-
-gene_names = intersect(cts$name, cts_pre$name)
-length(gene_names)
-
-cts_repeat = cts[match(gene_names, cts$name), sample_names]
-cts_pre_repeat = cts_pre[match(gene_names, cts_pre$name), sample_names]
-
-cts_repeat[1:10,1:2]
-cts_pre_repeat[1:10,1:2]
-
-cts_repeat[1:10,c(1,4)]
-cts_pre_repeat[1:10,c(1,4)]
-
-df1 = data.frame(ISL1_PTC_pre = cts_pre_repeat[,2], 
-                 ISL1_PTC_may = cts_repeat[,2])
-
-ggplot(data = df1, mapping = aes(x = log10(ISL1_PTC_pre + 1), 
-                                 y = log10(ISL1_PTC_may + 1))) +
-  geom_pointdensity() + scale_color_viridis() + 
-  ggtitle("featureCounts") + 
-  geom_abline(slope = 1, intercept = 0, col = "orange")
-```
 
 ```{r}
 gc()

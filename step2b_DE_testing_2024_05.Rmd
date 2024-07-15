@@ -1,5 +1,5 @@
 ---
-title: "Differential expression analysis"
+title: "Differential expression analysis for 2024-05 release"
 author: "Wei Sun"
 date: "`r Sys.Date()`"
 output: 
@@ -43,7 +43,7 @@ library(readxl)
 theme_set(theme_classic())
 
 path = "~/research/data/MorPhiC/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
-dat_path = paste0(path, "processed/release98-gencode32/Tables")
+dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
 
 
@@ -68,10 +68,7 @@ cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
 dim(cts)
 cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
 
-extra_cols = setdiff(names(cts)[-1], meta$file_id)
-cts = cts[,-which(names(cts) %in% extra_cols)]
-
-setequal(names(cts)[-1], meta$file_id)
+stopifnot(setequal(names(cts)[-1], meta$file_id))
 
 meta = meta[match(names(cts)[-1], meta$file_id),]
 table(names(cts)[-1] == meta$file_id)
@@ -179,7 +176,7 @@ print(gPC)
 ```
 
 
-## DE analysis with respect to model system
+## DE analysis with respect to model system for WT samples
 
 ```{r fig.width = 4, fig.height=3, message=FALSE, warning=FALSE}
 ## Generate sample information matrix
@@ -427,13 +424,12 @@ for(model1 in unique(meta$model_system)){
   dim(res_df)
   res_df[1:2,]
 
-  fwrite(res_df, sprintf("results/May_release_%s_DEseq2.tsv", model1), sep="\t")
+  fwrite(res_df, sprintf("results/2024_05_%s_DEseq2.tsv", model1), sep="\t")
 }
 ```
 
 ```{r}
 gc()
 sessionInfo()
-renv::snapshot(lockfile = "step2b_DE_testing_May_release.lock")
 ```
 
