@@ -49,7 +49,7 @@ processing file: step5_draw_goseq.Rmd
 11/11                  
 output file: step5_draw_goseq.knit.md
 
-/opt/homebrew/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq_2023_12.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/fk/gk1pvdpx7fz79tx26t0rjc7c0000gp/T//RtmpALQsl9/rmarkdown-str3e31401617a5.html --variable code_folding=hide --variable code_menu=1 
+/opt/homebrew/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq_2023_12.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/fk/gk1pvdpx7fz79tx26t0rjc7c0000gp/T//Rtmp5JLUnR/rmarkdown-str66b05362f364.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq_2023_12.html
 
@@ -68,7 +68,7 @@ processing file: step5_draw_goseq.Rmd
 11/11                  
 output file: step5_draw_goseq.knit.md
 
-/opt/homebrew/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq_2024_05.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/fk/gk1pvdpx7fz79tx26t0rjc7c0000gp/T//RtmpALQsl9/rmarkdown-str3e3194b3ea7.html --variable code_folding=hide --variable code_menu=1 
+/opt/homebrew/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq_2024_05.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --embed-resources --standalone --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/fk/gk1pvdpx7fz79tx26t0rjc7c0000gp/T//Rtmp5JLUnR/rmarkdown-str66b01f2b6a88.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq_2024_05.html
 > 
@@ -109,4 +109,4 @@ loaded via a namespace (and not attached):
 > q(save = "no")
 > proc.time()
    user  system elapsed 
-  3.312   0.684   8.303 
+  3.314   0.682   8.237 

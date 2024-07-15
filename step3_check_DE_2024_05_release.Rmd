@@ -151,7 +151,7 @@ items = unique(str_extract(items, "^[a-zA-Z0-9]+_[a-zA-Z0-9]+"))
 items
 
 fc0 = log2(1.5)
-p0  = 0.01
+p0  = 0.05
 
 gene_symbols = str_extract(items, "[a-zA-Z0-9]+$")
 gene_symbols
@@ -246,8 +246,8 @@ for(it1 in items){
   names(res_k) = gsub(paste0(id1, "_"), "", names(res_k))
   
   res_k$DE = "No"
-  res_k$DE[res_k$log2FoldChange > log2(1.5) & res_k$padj < 0.01] <- "Up"
-  res_k$DE[res_k$log2FoldChange < -log2(1.5) & res_k$padj < 0.01] <- "Down"
+  res_k$DE[res_k$log2FoldChange > log2(1.5) & res_k$padj < 0.05] <- "Up"
+  res_k$DE[res_k$log2FoldChange < -log2(1.5) & res_k$padj < 0.05] <- "Down"
   
   res_k$log2FoldChange[which(res_k$log2FoldChange > 3)] = 3
   res_k$log2FoldChange[which(res_k$log2FoldChange < -3)] = -3
