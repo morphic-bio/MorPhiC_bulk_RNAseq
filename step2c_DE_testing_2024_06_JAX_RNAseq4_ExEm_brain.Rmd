@@ -42,7 +42,7 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-path = "../../MorPhiC/data/June-2024/JAX_RNAseq4_ExEm_brain/"
+path = "../../data/MorPhiC/June-2024/JAX_RNAseq4_ExEm_brain/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
 
@@ -55,6 +55,7 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
+table(meta$biomaterial_id)
 table(table(meta$biomaterial_id))
 table(table(meta$lib_biomaterial_id))
 table(table(meta$differentiated_biomaterial_id))
@@ -81,15 +82,14 @@ table(meta$model_organ, meta$differentiated_timepoint_value)
 unique_timepoints = unique(meta$differentiated_timepoint_value)
 unique_timepoints = sort(unique_timepoints)
 
-meta$differentiated_timepoint_value = as.character(meta$differentiated_timepoint_value)
-meta$differentiated_timepoint_value = factor(meta$differentiated_timepoint_value, 
-                                             levels = as.character(unique_timepoints))
+xx = as.character(meta$differentiated_timepoint_value)
+xx = factor(xx, levels = as.character(unique_timepoints))
+meta$timepoint = xx
 ```
 
 ### Discard genes whose expression is 0 in more than 75% of samples
 
 ```{r fig.width = 4, fig.height=3}
-
 model_s = meta$model_system
 table(model_s, useNA="ifany")
 
@@ -136,7 +136,9 @@ ggplot(meta, aes(x=read_depth, y=q75, color=ko_strategy, shape = model_system)) 
   scale_color_brewer(palette = "Set1")
 
 meta$run_id_short = str_replace(meta$run_id, "^[^-]*-", "")
+
 table(meta$model_system, meta$run_id_short)
+
 ggplot(meta, aes(x=read_depth, y=q75, color=run_id_short, shape = model_system)) +
     geom_point(size=2, alpha=0.7) + ggtitle("Gene counts") + 
   scale_shape_manual(values = c(7, 16)) + 
@@ -155,8 +157,6 @@ meta_m    = meta[sample2kp,]
 summary(meta_m$q75)
 dim(cts_dat_m)
 
-# as of R Version 4.1.2 on Hutch server, names(cts_dat_m) does not give the column names of cts_dat_m
-# use colnames(cts_dat_m) instead
 stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
 table(meta_m$file_id == colnames(cts_dat_m), useNA="ifany")
 
@@ -191,7 +191,6 @@ gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
     color = guide_legend(title = NULL, order = 1),
     shape = guide_legend(title = NULL, order = 2)
   ) + 
-  theme_classic() + 
   theme(
     legend.margin = margin(0, 0, 0, 0), 
     legend.box.just = "left", 
@@ -200,10 +199,10 @@ gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
 
 print(gPC)
 
-table(PC_df$run_id, PC_df$differentiated_timepoint_value)
+table(PC_df$run_id, PC_df$timepoint)
 
 gPC_time = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
-                            color=differentiated_timepoint_value)) +
+                            color=timepoint)) +
   geom_point(size=2.5, alpha=0.7) + 
   #scale_color_brewer(palette = "Dark2") +
   scale_shape_manual(values = c(7, 16)) + 
@@ -215,7 +214,6 @@ gPC_time = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
     color = guide_legend(title = NULL, order = 1),
     shape = guide_legend(title = NULL, order = 2)
   ) + 
-  theme_classic() + 
   theme(
     legend.margin = margin(0, 0, 0, 0), 
     legend.box.just = "left", 
@@ -223,17 +221,15 @@ gPC_time = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
   )
 
 print(gPC_time)
-
-
 ```
 
-# Analyze samples of different model systems
+# Analyze samples of different model systems or batches
 
-For the June 2024 release of JAX_RNAseq4_ExEm_brain, there are two model systems. 
+For the June 2024 release of JAX_RNAseq4_ExEm_brain, there are two model systems: CBO and PrS. However, there is a strong batch effect within PrS, and thus we will analyze the two batches separately.
 
-There is only one gene knock out strategy.
+There is only one gene knock out strategy: PTC. 
 
-```{r fig.width = 6, fig.height=4.5, message=FALSE, warning=FALSE}
+```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
 table(meta$run_id, meta$model_system)
 table(meta$run_id, meta$ko_gene)
 table(meta$ko_strategy, meta$ko_gene)
@@ -242,19 +238,19 @@ unique_model_ss = unique(meta$model_system)
 unique_model_ss = sort(unique_model_ss)
 
 for(model1 in unique_model_ss){
+  print("")
   print("==========================================")
   print(model1)
   print("==========================================")
+  print("")
+  
   sample2kp = which(meta$model_system == model1)
   cts_dat_m = cts_dat[,sample2kp]
   meta_m    = meta[sample2kp,]
  
-  # the line right below cannot be used since colnames(cts_dat_m) 
-  # for this data file does not have clean pattern
-  #table(meta_m$ko_strategy, substr(colnames(cts_dat_m), 1, 7))
   table(meta_m$ko_strategy)
   stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
-  table(meta_m$file_id == colnames(cts_dat_m), useNA="ifany")
+  
   q75 = apply(cts_dat_m, 1, quantile, probs=0.75)
 
   cts_dat_n = t(cts_dat_m[q75 > 0,])
@@ -272,65 +268,20 @@ for(model1 in unique_model_ss){
   PC_df = data.frame(pc_scores)
   PC_df = cbind(PC_df, meta_m)
   
-  colnames(PC_df)[which(colnames(PC_df)=="differentiated_timepoint_value")] = "day"
+  colnames(PC_df)[which(colnames(PC_df)=="timepoint")] = "day"
   
   only_ko_strategy = setdiff(unique(PC_df$ko_strategy), "WT")
-  
-  print(length(unique(PC_df$ko_gene)))
-  print(length(unique(PC_df$run_id_short)))
-  print(length(unique(PC_df$day)))
-  print(table(meta_m$run_id, meta_m$ko_gene))
 
   unique_ko_genes = sort(unique(PC_df$ko_gene))
   unique_ko_genes = c(unique_ko_genes[unique_ko_genes!="WT"], "WT")
   PC_df$ko_gene = factor(PC_df$ko_gene, unique_ko_genes)
   
-  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_gene, color=day)) +
-    geom_point(size=2.5, alpha=0.7) + scale_color_brewer(palette = "Dark2") +
-      scale_shape_manual(values = c(1, 7, 8, 9, 10, 11, 15, 16, 17)[1:length(unique(PC_df$ko_gene))]) + 
-    xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
-    ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
-    ggtitle(paste0(model1, " ", only_ko_strategy, " for knockout genes")) + 
-    guides(
-      color = guide_legend(title = NULL, order = 1),
-      shape = guide_legend(title = NULL, order = 2)
-    ) + 
-    theme_classic() + 
-    theme(
-      legend.margin = margin(0, 0, 0, 0), 
-      legend.box.just = "left", 
-      legend.direction = "vertical" 
-    )
-
-  print(gPC)
+  shapes = c(1, 7, 8, 9, 10, 11, 15, 16, 17)
   
-  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=run_id_short, color=day)) +
-    geom_point(size=2.5, alpha=0.7) + 
-    scale_color_brewer(palette = "Dark2") +
-    scale_shape_manual(values = c(1, 7, 8, 9, 10, 11, 15, 16, 17)[1:length(unique(PC_df$run_id_short))]) + 
-    xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
-    ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
-    ggtitle(paste0(model1, " ", only_ko_strategy, " for knockout genes")) + 
-    guides(
-      color = guide_legend(title = NULL, order = 1),
-      shape = guide_legend(title = NULL, order = 2)
-    ) +
-    theme_classic() + 
-    theme(
-      legend.margin = margin(0, 0, 0, 0), 
-      legend.box.just = "left", 
-      legend.direction = "vertical" 
-    )
-
-  print(gPC)
-  
-  # day 32 only has 1 WT, not going to run DESeq2 on it
-  print(table(meta_m$run_id, meta_m$ko_gene))
-  
-  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=run_id, color=ko_gene)) +
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=run_id_short, color=ko_gene)) +
   geom_point(size=2.5, alpha=0.7) + 
   scale_color_brewer(palette = "Dark2") +
-  scale_shape_manual(values = c(1, 7, 8, 9, 10, 11, 15, 16, 17)[1:length(unique(PC_df$run_id_short))]) + 
+  scale_shape_manual(values = shapes[1:length(unique(PC_df$run_id_short))]) + 
   xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
   ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
   ggtitle(paste0(model1, " ", only_ko_strategy, " for knockout genes")) + 
@@ -338,7 +289,6 @@ for(model1 in unique_model_ss){
     color = guide_legend(title = NULL, order = 1),
     shape = guide_legend(title = NULL, order = 2)
   ) +
-  theme_classic() + 
   theme(
     legend.margin = margin(0, 0, 0, 0), 
     legend.box.just = "left", 
@@ -347,34 +297,22 @@ for(model1 in unique_model_ss){
 
   print(gPC)
 
-  
   ## Generate sample information matrix
-  
-  cols2kp = c("ko_strategy", "ko_gene", "run_id", "run_id_short", "differentiated_timepoint_value", "q75")
+  cols2kp = c("ko_strategy", "ko_gene", "run_id", "run_id_short", "timepoint", "q75")
   sample_info = meta_m[,cols2kp]
-  colnames(sample_info)[which(colnames(sample_info)=="differentiated_timepoint_value")] = "day"
+  colnames(sample_info)[which(colnames(sample_info)=="timepoint")] = "day"
   
   dim(sample_info)
   sample_info[1:2,]
   
-  table(sample_info$ko_strategy, sample_info$ko_gene)
-  
-  sample_info$ko_group = paste(sample_info$ko_gene, 
-                               sample_info$ko_strategy, sep="_")
-  print(table(sample_info$ko_group))
-  print(length(unique(sample_info$ko_group)))
-  print(table(sample_info$run_id, sample_info$ko_group))
-  
-  print(table(sample_info$ko_group, sample_info$day))
-  
-  sample_info$ko_group_run_id = paste(sample_info$ko_group, 
+  sample_info$ko_gene_run_id = paste(sample_info$ko_gene, 
                                       sample_info$run_id_short, sep="_")
-
+  
+  print(table(sample_info$run_id, sample_info$ko_gene))
   print(table(sample_info$ko_gene, sample_info$day)) 
-  print(table(sample_info$ko_group_run_id, sample_info$day)) 
+  print(table(sample_info$ko_gene_run_id, sample_info$day)) 
   
-  
-  # print the table of ko_group and run_id by day
+  # print the table of ko_gene and run_id by day
   unique_timepoints_model_s = unique(sample_info$day)
   unique_timepoints_model_s = as.character(sort(unique_timepoints_model_s))
   
@@ -383,54 +321,66 @@ for(model1 in unique_model_ss){
     print("---------------------------")
     print(paste0("Model system: ", model1))
     print(paste0("On day ", as.character(cur_day), ": "))
-    print(table(sample_info_by_day$ko_group, sample_info_by_day$run_id_short))     
+    print(table(sample_info_by_day$ko_gene, sample_info_by_day$run_id_short))     
   }
   
   sample_info$log_q75 = log(sample_info$q75)
-  
   
   # run DESeq2 for different day groups separately
   # For model system CBO:
   # day 9
   # day 32 (cannot do it, since there is only one WT sample)
+  # 
   # For model system PrS:
   # day 6
-  # do not include run_id in the model if there is only one run_id in certain day
+  # but need to divide the two batches
 
-  for (d_group in unique_timepoints_model_s){
+  sample_info$DE_id = as.character(sample_info$day)
+  if(model1 == "PrS"){ 
+    sample_info$DE_id = paste(sample_info$DE_id, sample_info$run_id_short, sep="_") 
+  }
+  
+  for (d_group in unique(sample_info$DE_id)){
 
-    dg_index = which(sample_info$day==d_group)
+    dg_index = which(sample_info$DE_id==d_group)
     cts_dat_m_dg = cts_dat_m[, dg_index]
     sample_info_dg = sample_info[dg_index, ]
     
-    stopifnot(all(sample_info_dg$day==d_group))
+    stopifnot(all(sample_info_dg$DE_id==d_group))
     
+    print("")
     print("-----------------------------------")
     print(paste0("Model system: ", model1))  
-    if (sum(sample_info_dg$ko_gene=="WT")<2){
-      print(sprintf("day group %s has only %d wild type samples", 
+    if (sum(sample_info_dg$ko_gene=="WT") < 2){
+      print(sprintf("DE group %s has only %d wild type samples", 
                     d_group, sum(sample_info_dg$ko_gene=="WT")))
       print(sprintf("do not run DESeq2 for it"))
       print("-----------------------------------")  
-      break
+      next
     }else{
-      print(sprintf("day group %s DESeq2 results:", d_group))
+      print(sprintf("DE group %s DESeq2 results:", d_group))
       print("-----------------------------------")  
     }    
     
+    q75_gene  = apply(cts_dat_m_dg, 1, quantile, prob = 0.75)
+    ngt0_gene = rowSums(cts_dat_m_dg > 0)
+    print("table(q75_gene > 0, ngt0_gene > 3)")
+    print(table(q75_gene > 0, ngt0_gene > 3))
+    
+    cts_dat_m_dg = cts_dat_m_dg[which(q75_gene > 0 & ngt0_gene > 3),]
     
     if (length(unique(sample_info_dg$run_id))==1){
       dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
-                                    ~ ko_group + log_q75)
+                                    ~ ko_gene + log_q75)
     }else{
       dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
-                                    ~ ko_group + run_id + log_q75)     
+                                    ~ ko_gene + run_id + log_q75)     
     }
   
     start.time <- Sys.time()
     dds = DESeq(dds)
     end.time <- Sys.time()
-      
+
     time.taken <- end.time - start.time
     print(time.taken)
     
@@ -445,14 +395,40 @@ for(model1 in unique_model_ss){
     g0 = ggplot(res_rd %>% subset(!is.na(padj)), aes(x=pvalue)) + 
       geom_histogram(color="darkblue", fill="lightblue", 
                      breaks = seq(0,1,by=0.01)) + 
-      ggtitle(paste0(model1, " day group ", d_group, " read depth"))
+      ggtitle(paste0(model1, " day ", d_group, " read depth"))
     print(g0)
   
+    ## Rerun the analysis without read-depth if it is not significant for 
+    ## most genes.
+    ## i.e., proportion of non-null in the distribution is smaller than 0.1
+
+    pi_1_rd = max(0, mean(res_rd$pvalue < 0.05) - 0.05)
+    pi_1_rd = max(pi_1_rd, 0, 1 - 2*mean(res_rd$pvalue > 0.5))
+    
+    print(sprintf("prop of non-null for rd: %.2e", pi_1_rd))
+    
+    if(pi_1_rd < 0.01 || (ncol(cts_dat_m_dg) <= 6 && pi_1_rd < 0.1 )){
+      include_rd = 0
+      if (length(unique(sample_info_dg$run_id))==1){
+        dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                      ~ ko_gene)
+      }else{
+        dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                      ~ ko_gene + run_id)     
+      }
+      dds = DESeq(dds)
+    }else{
+      include_rd = 1
+    }
+
     ## association with run_id
       
     if (length(unique(sample_info_dg$run_id))>1){
+      if(include_rd)
+        dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_gene + log_q75)
+      else
+        dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_gene)
       
-      dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_group + log_q75)
       res_lrt = results(dds_lrt)
     
       res_run_id = as.data.frame(res_lrt)
@@ -475,50 +451,35 @@ for(model1 in unique_model_ss){
     genos = setdiff(unique(sample_info_dg$ko_gene), "WT")
     genos
     
-    ko_grp  = c("PTC")
     res_geno_df = NULL
     
     for(geno in genos){
+      res_g1 = results(dds, contrast = c("ko_gene", geno, "WT"))
+      res_g1 = signif(data.frame(res_g1), 3)
+
+      n_DE = sum(res_g1$padj < 0.05 & abs(res_g1$log2FoldChange) > log2(1.5), 
+                 na.rm = TRUE)
+      print(paste0(model1, " day ", d_group, " under KO gene ", geno, ":"))
+      print(sprintf(" number of DE genes: %d", n_DE))
+
+      g1 = ggplot(res_g1 %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+        geom_histogram(color="darkblue", fill="lightblue", 
+                       breaks = seq(0,1,by=0.01)) + 
+        ggtitle(paste0(model1, " day ", d_group, " ", geno))
+      print(g1)
+
+      tag1 = sprintf("%s_%s_%s_", model1, d_group, geno)
+      colnames(res_g1) = paste0(tag1, colnames(res_g1))
       
-      res_geno = list()
-      
-      for(k_grp1 in ko_grp){
-        
-        res_g1 = results(dds, contrast = c("ko_group", 
-                                           paste0(geno, "_", k_grp1), "WT_WT"))
-        res_g1 = signif(data.frame(res_g1), 3)
-        res_geno[[k_grp1]] = res_g1
-        
-        g1 = ggplot(res_g1 %>% subset(!is.na(padj)), aes(x=pvalue)) + 
-          geom_histogram(color="darkblue", fill="lightblue", 
-                         breaks = seq(0,1,by=0.01)) + 
-          ggtitle(paste0(model1, " day group ", d_group, " ", geno, "_", k_grp1))
-        print(g1)
-  
-        tag1 = sprintf("%s_%s_%s_%s_", model1, d_group, geno, k_grp1)
-        colnames(res_g1) = paste0(tag1, colnames(res_g1))
-        
-        if(is.null(res_geno_df)){
-          res_geno_df = res_g1
-        }else if(!is.null(res_geno_df)){
-          stopifnot(all(rownames(res_geno_df) == rownames(res_g1)))
-          res_geno_df = cbind(res_geno_df, res_g1)
-        }
+      if(is.null(res_geno_df)){
+        res_geno_df = res_g1
+      }else if(!is.null(res_geno_df)){
+        stopifnot(all(rownames(res_geno_df) == rownames(res_g1)))
+        res_geno_df = cbind(res_geno_df, res_g1)
       }
-      
-      get_index <- function(x){
-        which(x$padj < 0.05 & abs(x$log2FoldChange) > log2(1.5))
-      }
-      
-      w_ptc = get_index(res_geno[["PTC"]])
-  
-      print(paste0(model1, " day group ", d_group, " under KO gene ", geno, ":"))
-      
-      print(paste0(model1, " number of DE genes from knock out strategy PTC: ", 
-                   as.character(length(w_ptc))))
-            
+
     }
-  
+    
     dim(res_geno_df)
     res_geno_df[1:2,]
     

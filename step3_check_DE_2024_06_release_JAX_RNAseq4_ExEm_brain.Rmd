@@ -1,0 +1,328 @@
+---
+title: "Check the results of differential expression analysis for 2024-06 release JAX_RNAseq4_ExEm_brain"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Besides checking the results of DE analysis, also save the sets of DE genes out, to prepare for next step of gene set enrichment analysis. 
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+path = "../../data/MorPhiC/June-2024/JAX_RNAseq4_ExEm_brain/"
+dat_path = paste0(path, "processed/release110-gencode44/Tables")
+```
+
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta = fread("data/June_2024/JAX_RNAseq4_ExEm_brain_meta_data.tsv", 
+             data.table = FALSE)
+dim(meta)
+meta[1:2,]
+names(meta)
+
+table(meta$model_organ, meta$ko_gene)
+table(meta$run_id, meta$ko_gene)
+table(meta$ko_strategy, meta$ko_gene)
+
+table(meta$ko_gene, meta$differentiated_timepoint_value)
+```
+
+## Read in gene count data and filter genes
+
+```{r fig.width = 4, fig.height=3}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+stopifnot(setequal(names(cts)[-1], meta$file_id))
+
+meta = meta[match(names(cts)[-1], meta$file_id),]
+table(names(cts)[-1] == meta$file_id)
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r fig.width = 4, fig.height=3}
+
+table(meta$model_organ, meta$differentiated_timepoint_value)
+
+model_s = meta$model_system
+table(model_s, useNA="ifany")
+table(meta$model_system, meta$model_organ, useNA="ifany")
+
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+# there are two levels for model_system
+# the result from apply(cts_dat, 1, tapply, model_s, min) is a matrix
+# do transpose to the results from apply(cts_dat, 1, tapply, model_s, min)
+gene_info = data.frame(Name = cts$Name, 
+                       t(apply(cts_dat, 1, tapply, model_s, min)), 
+                       t(apply(cts_dat, 1, tapply, model_s, median)), 
+                       t(apply(cts_dat, 1, tapply, model_s, get_q75)), 
+                       t(apply(cts_dat, 1, tapply, model_s, max)))
+
+dim(gene_info)
+gene_info[1:2, ]
+table(row.names(gene_info)==gene_info$Name)
+
+names(gene_info)[2:9] = paste0(rep(c("CBO_", "PrS_"), times=4), 
+                               rep(c("min", "median", "q75", "max"), each=2))
+dim(gene_info)
+gene_info[1:2,]
+
+summary(gene_info[,-1])
+
+table(gene_info$CBO_q75 > 0, gene_info$PrS_q75 > 0)
+
+w2kp = which(gene_info$CBO_q75 > 0 | gene_info$PrS_q75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+```
+
+## Read in gene annotation
+```{r fig.width = 4, fig.height=3}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+# all genes are contained in the annotation file 
+table(gene_info$Name %in% gene_anno$ensembl_gene_id)
+
+gene_info = merge(gene_anno, gene_info, by.x="ensembl_gene_id", by.y = "Name", 
+                  all.x = FALSE, all.y = TRUE)
+dim(gene_info)
+gene_info[1:2,]
+
+gene_info[which(!gene_info$ensembl_gene_id%in%gene_anno$ensembl_gene_id)]
+
+gene_info[gene_info$CBO_min > 5e4, c("CBO_min", "PrS_min", "hgnc_symbol")]
+gene_info[gene_info$PrS_min > 5e4, c("CBO_min", "PrS_min","hgnc_symbol")]
+
+gene_info$gene_symbol = gene_info$hgnc_symbol
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+wEns = which(gene_info$gene_symbol == "" | is.na(gene_info$gene_symbol))
+gene_info$gene_symbol[wEns] = gene_info$ensembl_gene_id[wEns]
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+```
+
+## Compare the number of DE genes (different ko strategies)
+
+This dataset has two model systems: CBO and PrS. DE analyses were run for three groups: CBO_9 (day 9), PrS_6_robson-016 (day 6, run id: robson-016), and PrS_6_robson-018 (day 6, run id: robson-018).
+
+```{r fig.width = 4, fig.height=3}
+
+release="2024_06_JAX_RNAseq4_ExEm_brain"
+model_daygroup_strings = c("CBO_9", "PrS_6_robson-016", "PrS_6_robson-018")  
+
+# define a function to extract the gene name from DESeq2 results
+# under the assumption that the desired part is the one before the 
+# last underscore
+extract_model_day_group <- function(x) {
+  parts <- unlist(str_split(x, "_"))
+  return(paste(parts[1:(length(parts) - 1)], collapse = "_"))
+}
+
+for (i in 1:length(model_daygroup_strings)){
+  
+  res = fread(paste0("results/", release, "/", release, 
+                     "_", model_daygroup_strings[i], "_DEseq2.tsv"), 
+              data.table = FALSE)
+  print(res[1:2,1:7])
+
+  items = names(res)[grep("_padj", names(res))]
+  items = unique(sapply(items, extract_model_day_group))
+  items
+
+  fc0 = log2(1.5)
+  p0  = 0.05
+
+  gene_symbols = str_extract(items, "[a-zA-Z0-9]+$")
+  gene_symbols
+
+  table(gene_symbols %in% gene_info$gene_symbol)
+
+  df = data.frame(KO = items, gene_symbol = gene_symbols, 
+                  nDE = NA, padj = NA, log2FoldChange = NA)
+
+  df$Model = str_extract(df$KO, "^[a-zA-Z0-9]+")
+
+  gene_ids = gene_info$ensembl_gene_id[match(gene_symbols, gene_info$gene_symbol)]
+
+  for(k in 1:length(items)){
+    it_k = items[k]
+    gene_id = gene_ids[k]
+    w_gene = which(res$gene_ID == gene_id)
+    stopifnot(length(w_gene) == 1)
+    
+    fc = paste0(it_k, "_log2FoldChange")
+    padj = paste0(it_k, "_padj")
+    df[k,"nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+    df[k,"padj"] = res[[padj]][w_gene]
+    df[k,"log2FoldChange"] = res[[fc]][w_gene]
+  }
+
+  print(df)
+  
+  if (i==2){
+    print("the gene OVOL1 does not show up")
+    print("because the padj is 0 and the y axis value is infinite")
+  }
+  
+  p5 <- ggplot(df, aes(x=log2FoldChange, y=-log10(padj), 
+                 label=gene_symbol)) + 
+        geom_point(size=2) + 
+        geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                        size = 3,  # Adjust text size
+                        box.padding = 0.5, 
+                        max.overlaps = 20, show.legend = FALSE) + 
+        #coord_cartesian(clip = "off") + 
+        #ylim(0, max(-log10(df$PTC_padj)) + 0.5) + 
+        ggtitle("DE results of the KO genes, PTC") + 
+        labs(x="log2 fold change", y="-log10(p-value)")  + 
+        geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+        geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                   linetype = "dashed")
+
+   g_combined <- ggarrange(p5, ncol = 1, nrow = 1)
+   print(annotate_figure(g_combined,
+                      top = text_grob(model_daygroup_strings[i], 
+                                      face = "bold", size = 16)))
+}
+
+```
+
+
+## Generate volcano plots
+
+In some DE group combinations, there are too many DE genes and they cannot all be labeled in the volcano plots.
+
+```{r fig.width = 6.5, fig.height=5}
+
+for (i in 1:length(model_daygroup_strings)){
+  
+  # create a list to store DE gene set for the gene set enrichment analysis
+  de_gene_sets = list() 
+  
+  print(model_daygroup_strings[i])
+  res = fread(paste0("results/", release, "/", release, 
+                     "_", model_daygroup_strings[i], "_DEseq2.tsv"), 
+              data.table = FALSE)
+  print(res[1:2,1:7])
+
+  items = names(res)[grep("_padj", names(res))]
+  items
+
+  for(it1 in items){
+    id1 = gsub("_padj", "", it1)
+    
+    res_k = res[,c(1, grep(id1, names(res)))]
+    names(res_k) = gsub(paste0(id1, "_"), "", names(res_k))
+
+    ww_up = which((res_k$log2FoldChange > log2(1.5)) & (res_k$padj < 0.05))
+    ww_down = which((res_k$log2FoldChange < -log2(1.5)) & (res_k$padj < 0.05))
+
+    de_gene_sets[[paste0(id1, "_up")]] = res_k[ww_up,]$gene_ID
+    de_gene_sets[[paste0(id1, "_down")]] = res_k[ww_down,]$gene_ID
+  
+    res_k$DE = "No"
+    res_k$DE[ww_up] <- "Up"
+    res_k$DE[ww_down] <- "Down"
+    
+    res_k$log2FoldChange[which(res_k$log2FoldChange > 3)] = 3
+    res_k$log2FoldChange[which(res_k$log2FoldChange < -3)] = -3
+  
+    col2use = c("blue", "grey", "red")
+    names(col2use) = c("Down", "No", "Up")
+    
+    res_k$delabel = NA
+    res_k$gene_symbol = gene_info$gene_symbol[match(res_k$gene_ID, 
+                                                    gene_info$ensembl_gene_id)]
+    w_de = which(res_k$DE != "No")
+    res_k$delabel[w_de] = res_k$gene_symbol[w_de]
+  
+    print(table(res_k$DE))
+    
+    print("--------------------------------------------------")
+    print(model_daygroup_strings[i])
+    print("--------------------------------------------------")
+    
+    g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
+                    col=DE, label=delabel)) + 
+         geom_point() + ggtitle(id1) + 
+         geom_text_repel(point.padding = 0.5, 
+                         min.segment.length = 0,
+                         size = 3,
+                         box.padding = 0.5,
+                         max.overlaps = 20, 
+                         show.legend = FALSE) + 
+         scale_color_manual(values=col2use)
+        
+    print(g2)
+  }
+
+  # save out the DE gene lists for gene set enrichment analysis
+  output_dir = "results/2024_06_JAX_RNAseq4_ExEm_brain_DE_gene_lists"
+    
+  if (!file.exists(output_dir)){
+    dir.create(output_dir)
+  }
+  
+  saveRDS(de_gene_sets, 
+          sprintf("%s/2024_06_JAX_RNAseq4_ExEm_brain_%s_DE_gene_list.rds", 
+                  output_dir, model_daygroup_strings[i]))
+}
+```
+
+
+```{r}
+gc()
+sessionInfo()
+```
+
