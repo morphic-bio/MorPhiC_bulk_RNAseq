@@ -42,7 +42,8 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-path = "../../data/MorPhiC/June-2024/JAX_RNAseq4_ExEm_brain/"
+#path = "../../data/MorPhiC/June-2024/JAX_RNAseq4_ExEm_brain/"
+path = "../../MorPhiC/data/June-2024/JAX_RNAseq4_ExEm_brain/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
 
@@ -60,7 +61,6 @@ table(table(meta$biomaterial_id))
 table(table(meta$lib_biomaterial_id))
 table(table(meta$differentiated_biomaterial_id))
 ```
-
 
 ## Read in gene count data and filter genes
 
@@ -86,6 +86,18 @@ xx = as.character(meta$differentiated_timepoint_value)
 xx = factor(xx, levels = as.character(unique_timepoints))
 meta$timepoint = xx
 ```
+
+## Read in gene annoation
+```{r}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+table(rownames(cts_dat) %in% gene_anno$ensembl_gene_id)
+# all ensembl gene IDs are contained in the annotation
+setdiff(rownames(cts_dat), gene_anno$ensembl_gene_id)
+```
+
 
 ### Discard genes whose expression is 0 in more than 75% of samples
 
@@ -150,7 +162,7 @@ ggplot(meta, aes(x=read_depth, y=q75, color=run_id_short, shape = model_system))
 
 # Check the effect of run id among WT
 
-```{r fig.width = 6, fig.height=4.5}
+```{r fig.width = 4.5, fig.height=3.2}
 sample2kp = which(meta$ko_gene == "WT")
 cts_dat_m = cts_dat[,sample2kp]
 meta_m    = meta[sample2kp,]
@@ -247,10 +259,16 @@ for(model1 in unique_model_ss){
   sample2kp = which(meta$model_system == model1)
   cts_dat_m = cts_dat[,sample2kp]
   meta_m    = meta[sample2kp,]
- 
-  table(meta_m$ko_strategy)
+  
+  # verify the consistency between ko_strategy from metadata column and 
+  # that from filenames
+  extracted_ko_strings = str_extract_all(meta_m$file_id, "PTC|WT")
+  print(table(sapply(extracted_ko_strings, length)))
+  print(table(meta_m$ko_strategy, unlist(extracted_ko_strings)))
+  
   stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
   
+
   q75 = apply(cts_dat_m, 1, quantile, probs=0.75)
 
   cts_dat_n = t(cts_dat_m[q75 > 0,])
@@ -278,6 +296,48 @@ for(model1 in unique_model_ss){
   
   shapes = c(1, 7, 8, 9, 10, 11, 15, 16, 17)
   
+  
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_gene, color=day)) +
+  geom_point(size=2.5, alpha=0.7) + scale_color_brewer(palette = "Dark2") +
+    scale_shape_manual(values = shapes[1:length(unique(PC_df$ko_gene))]) + 
+  xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+  ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+  ggtitle(paste0(model1, " ", only_ko_strategy, " for knockout genes")) + 
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  ) + 
+  theme_classic() + 
+  theme(
+    legend.margin = margin(0, 0, 0, 0), 
+    legend.box.just = "left", 
+    legend.direction = "vertical" 
+  )
+
+  print(gPC)
+
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=run_id_short, color=day)) +
+  geom_point(size=2.5, alpha=0.7) + 
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = shapes[1:length(unique(PC_df$run_id_short))]) + 
+  xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+  ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+  ggtitle(paste0(model1, " ", only_ko_strategy, " for knockout genes")) + 
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  ) +
+  theme_classic() + 
+  theme(
+    legend.margin = margin(0, 0, 0, 0), 
+    legend.box.just = "left", 
+    legend.direction = "vertical" 
+  )
+
+  print(gPC)
+  
+  
+  
   gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=run_id_short, color=ko_gene)) +
   geom_point(size=2.5, alpha=0.7) + 
   scale_color_brewer(palette = "Dark2") +
@@ -297,8 +357,70 @@ for(model1 in unique_model_ss){
 
   print(gPC)
 
+}
+```
+
+Use model system or model system + run_id to construct DE group.
+
+Run DESeq2 for different DE groups separately
+    
+      CBO, day 9 only
+      PrS, day 6, for two run_ids separately
+      
+For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
+
+In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
+The first version of the output files contains gene id, and for each knockout strategy:
+
+    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+    
+The second version of the output files contains gene id, 
+
+    chr, strand, position, gene name
+
+and for each knockout strategy:
+
+    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
+
+In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
+
+```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+release_name = "2024_06_JAX_RNAseq4_ExEm_brain"
+
+output_dir = file.path("results", release_name)
+raw_output_dir = file.path(output_dir, "raw")
+processed_output_dir = file.path(output_dir, "processed")
+
+if (!file.exists(raw_output_dir)){
+  dir.create(raw_output_dir, recursive = TRUE)
+}
+
+if (!file.exists(processed_output_dir)){
+  dir.create(processed_output_dir, recursive = TRUE)
+}
+
+
+for(model1 in unique_model_ss){
+  
+  print("")
+  print("==========================================")
+  print(model1)
+  print("==========================================")
+  print("")
+  
+  sample2kp = which(meta$model_system == model1)
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+ 
+  table(meta_m$ko_strategy)
+  stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
+  
   ## Generate sample information matrix
-  cols2kp = c("ko_strategy", "ko_gene", "run_id", "run_id_short", "timepoint", "q75")
+  cols2kp = c("model_system", "ko_strategy", "ko_gene", "run_id", "run_id_short", 
+              "timepoint", "q75")
   sample_info = meta_m[,cols2kp]
   colnames(sample_info)[which(colnames(sample_info)=="timepoint")] = "day"
   
@@ -324,8 +446,6 @@ for(model1 in unique_model_ss){
     print(table(sample_info_by_day$ko_gene, sample_info_by_day$run_id_short))     
   }
   
-  sample_info$log_q75 = log(sample_info$q75)
-  
   # run DESeq2 for different day groups separately
   # For model system CBO:
   # day 9
@@ -335,18 +455,29 @@ for(model1 in unique_model_ss){
   # day 6
   # but need to divide the two batches
 
-  sample_info$DE_id = as.character(sample_info$day)
+  sample_info$de_grp = paste0(sample_info$model_system, 
+                              "_day_", 
+                              as.character(sample_info$day))
+  
   if(model1 == "PrS"){ 
-    sample_info$DE_id = paste(sample_info$DE_id, sample_info$run_id_short, sep="_") 
+    sample_info$de_grp = paste0(sample_info$de_grp, "_", 
+                                sample_info$run_id)
   }
   
-  for (d_group in unique(sample_info$DE_id)){
+  unique_de_grps = unique(sample_info$de_grp)
+  sorted_de_grps = sort(unique_de_grps)
+  
+  if(model1 == "CBO"){ 
+      sorted_de_grps = rev(sorted_de_grps)
+  }
+  
+  for (d_group in sorted_de_grps){
 
-    dg_index = which(sample_info$DE_id==d_group)
+    dg_index = which(sample_info$de_grp==d_group)
     cts_dat_m_dg = cts_dat_m[, dg_index]
     sample_info_dg = sample_info[dg_index, ]
     
-    stopifnot(all(sample_info_dg$DE_id==d_group))
+    stopifnot(all(sample_info_dg$de_grp==d_group))
     
     print("")
     print("-----------------------------------")
@@ -362,12 +493,30 @@ for(model1 in unique_model_ss){
       print("-----------------------------------")  
     }    
     
-    q75_gene  = apply(cts_dat_m_dg, 1, quantile, prob = 0.75)
-    ngt0_gene = rowSums(cts_dat_m_dg > 0)
-    print("table(q75_gene > 0, ngt0_gene > 3)")
-    print(table(q75_gene > 0, ngt0_gene > 3))
     
-    cts_dat_m_dg = cts_dat_m_dg[which(q75_gene > 0 & ngt0_gene > 3),]
+    # do two steps of filtering
+    # first, filter based on q75 of each gene
+    # second, filter based on whether each gene is expressed in at least 4 cells
+    
+    dg_q75 = apply(cts_dat_m_dg, 1, quantile, probs=0.75)
+    cts_dat_m_dg = cts_dat_m_dg[dg_q75 > 0,]
+    
+    print(sprintf("After filtering by gene expression q75, the number of genes reduces from %d to %d", 
+                  length(dg_q75), nrow(cts_dat_m_dg)))
+
+    n_pos = rowSums(cts_dat_m_dg>0)
+    cts_dat_m_dg = cts_dat_m_dg[n_pos >= 4,]
+
+    if (length(n_pos)==nrow(cts_dat_m_dg)){
+      print("After filtering by nonzero expression in at least 4 samples, the number of genes does not change.")
+    }else{
+      print(sprintf("After filtering by nonzero expression in at least 4 samples, the number of genes reduces from %d to %d", 
+                    length(n_pos), nrow(cts_dat_m_dg)))    
+    }
+    
+    # update the q75 based on only genes that will be used in the DE analysis
+    sample_info_dg$q75 = apply(cts_dat_m_dg, 2, quantile, probs = 0.75)
+    sample_info_dg$log_q75 = log(sample_info_dg$q75)
     
     if (length(unique(sample_info_dg$run_id))==1){
       dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
@@ -395,15 +544,17 @@ for(model1 in unique_model_ss){
     g0 = ggplot(res_rd %>% subset(!is.na(padj)), aes(x=pvalue)) + 
       geom_histogram(color="darkblue", fill="lightblue", 
                      breaks = seq(0,1,by=0.01)) + 
-      ggtitle(paste0(model1, " day ", d_group, " read depth"))
+      ggtitle(paste0(d_group, " read depth"))
     print(g0)
   
     ## Rerun the analysis without read-depth if it is not significant for 
-    ## most genes.
-    ## i.e., proportion of non-null in the distribution is smaller than 0.1
+    ## most genes, and the number of samples is small
+    ## i.e., proportion of non-null in the distribution is smaller than 0.01
+    ## (this needs to be restricted to the genes with not NA adjusted pvalue)
+    ## or if smaller than 0.1 and the number of samples is not greater than 6
 
-    pi_1_rd = max(0, mean(res_rd$pvalue < 0.05) - 0.05)
-    pi_1_rd = max(pi_1_rd, 0, 1 - 2*mean(res_rd$pvalue > 0.5))
+    pi_1_rd = max(0, mean(res_rd$pvalue[!is.na(res_rd$padj)] < 0.05) - 0.05)
+    pi_1_rd = max(pi_1_rd, 0, 1 - 2*mean(res_rd$pvalue[!is.na(res_rd$padj)] > 0.5))
     
     print(sprintf("prop of non-null for rd: %.2e", pi_1_rd))
     
@@ -440,7 +591,7 @@ for(model1 in unique_model_ss){
       g0 = ggplot(res_run_id %>% subset(!is.na(padj)), aes(x=pvalue)) + 
         geom_histogram(color="darkblue", fill="lightblue", 
                        breaks = seq(0,1,by=0.01)) + 
-        ggtitle(paste0(model1, " day group ", d_group, " Run ID"))
+        ggtitle(paste0(d_group, " Run ID"))
       print(g0)
     
     }
@@ -451,56 +602,102 @@ for(model1 in unique_model_ss){
     genos = setdiff(unique(sample_info_dg$ko_gene), "WT")
     genos
     
-    res_geno_df = NULL
-    
     for(geno in genos){
+      
       res_g1 = results(dds, contrast = c("ko_gene", geno, "WT"))
       res_g1 = signif(data.frame(res_g1), 3)
 
-      n_DE = sum(res_g1$padj < 0.05 & abs(res_g1$log2FoldChange) > log2(1.5), 
+      # add a column to record the number of zeros per test
+      test_index = which(sample_info_dg$ko_gene%in%c(geno, "WT"))
+      
+      cts_dat_m_dg_test = cts_dat_m_dg[, test_index]
+      n_zero = rowSums(cts_dat_m_dg_test==0)
+      res_g1$n_zeros = n_zero    
+
+      # record the number of samples involved in the comparison
+      test_ko_gene_vec = sample_info_dg$ko_gene[test_index]
+      
+      df_size = rbind(df_size, 
+                      c(d_group, 
+                        paste0(geno, "_PTC"), 
+                        sum(test_ko_gene_vec!="WT"), 
+                        sum(test_ko_gene_vec=="WT")))   
+      
+      # prepare a processed version of output
+      res_g1_reduced = res_g1[, c("log2FoldChange", "pvalue", "padj", "n_zeros")]
+      res_g1_reduced$padj[which(res_g1_reduced$n_zeros>=4)] = NA
+      
+      if ((sum(test_ko_gene_vec!="WT")==1)|(sum(test_ko_gene_vec=="WT")==1)){
+        res_g1_reduced$padj = NA
+      }
+      
+      res_g1_reduced = res_g1_reduced[, c("log2FoldChange", "pvalue", "padj")]      
+  
+      n_DE = sum(res_g1_reduced$padj < 0.05 & abs(res_g1_reduced$log2FoldChange) > log2(1.5), 
                  na.rm = TRUE)
-      print(paste0(model1, " day ", d_group, " under KO gene ", geno, ":"))
+      print(paste0(d_group, " under KO gene ", geno, ":"))
       print(sprintf(" number of DE genes: %d", n_DE))
 
-      g1 = ggplot(res_g1 %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      g1 = ggplot(res_g1_reduced %>% subset(!is.na(padj)), aes(x=pvalue)) + 
         geom_histogram(color="darkblue", fill="lightblue", 
                        breaks = seq(0,1,by=0.01)) + 
-        ggtitle(paste0(model1, " day ", d_group, " ", geno))
+        ggtitle(paste0(d_group, " ", geno))
       print(g1)
 
-      tag1 = sprintf("%s_%s_%s_", model1, d_group, geno)
+      tag1 = sprintf("%s_PTC_", geno)
       colnames(res_g1) = paste0(tag1, colnames(res_g1))
+      colnames(res_g1_reduced) = paste0(tag1, colnames(res_g1_reduced))
       
-      if(is.null(res_geno_df)){
-        res_geno_df = res_g1
-      }else if(!is.null(res_geno_df)){
-        stopifnot(all(rownames(res_geno_df) == rownames(res_g1)))
-        res_geno_df = cbind(res_geno_df, res_g1)
-      }
+      
+      res_df = data.frame(gene_ID=rownames(res_g1), 
+                          res_g1)
+      dim(res_df)
+      res_df[1:2,]
+      
+      
+      res_reduced_gene_anno = gene_anno[match(rownames(res_g1_reduced), 
+                                              gene_anno$ensembl_gene_id), ]
+      stopifnot(all(rownames(res_g1_reduced)==res_reduced_gene_anno$ensembl_gene_id))     
+      
+      # set gene hgnc_symbol that equal "" to NA
+      hgnc_symbol_vec = res_reduced_gene_anno$hgnc_symbol
+      hgnc_symbol_vec[which(hgnc_symbol_vec=="")] = NA
+      
+      res_reduced_df = data.frame(gene_ID=rownames(res_g1_reduced), 
+                                  hgnc_symbol=hgnc_symbol_vec,
+                                  chr=res_reduced_gene_anno$chr, 
+                                  strand=res_reduced_gene_anno$strand, 
+                                  start=res_reduced_gene_anno$start, 
+                                  end=res_reduced_gene_anno$end, 
+                                  res_g1_reduced)
+      
+      print("hgnc_symbol empty string and NA tables:")
+      print(table(res_reduced_df$hgnc_symbol=="", useNA="ifany"))
+      print(table(is.na(res_reduced_df$hgnc_symbol)))
+        
+      dim(res_reduced_df)
+      res_reduced_df[1:2,]      
+      
+      fwrite(res_df, 
+             sprintf("%s/%s_%s_%s_DEseq2_raw.tsv", 
+                     raw_output_dir, release_name, d_group, geno), 
+             sep="\t")
+      fwrite(res_reduced_df, 
+             sprintf("%s/%s_%s_%s_DEseq2.tsv", 
+                     processed_output_dir, release_name, d_group, geno), 
+             sep="\t")      
 
     }
-    
-    dim(res_geno_df)
-    res_geno_df[1:2,]
-    
-    res_df = data.frame(gene_ID=rownames(res_geno_df), res_geno_df)
-    dim(res_df)
-    res_df[1:2,]
-
-    output_dir = "results/2024_06_JAX_RNAseq4_ExEm_brain"
-    
-    if (!file.exists(output_dir)){
-      dir.create(output_dir)
-    }
-  
-    fwrite(res_df, 
-           sprintf("%s/2024_06_JAX_RNAseq4_ExEm_brain_%s_%s_DEseq2.tsv", 
-                   output_dir, model1, d_group), 
-           sep="\t")
     
   }
   
 }
+
+
+colnames(df_size) = c("DE_group", "knockout_gene_strategy", "n_ko", "n_WT")
+fwrite(df_size, 
+       sprintf("%s/%s_DE_n_samples.tsv", output_dir, release_name), 
+       sep="\t")
 
 
 ```

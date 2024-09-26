@@ -42,7 +42,8 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-path = "../../data/MorPhiC/June-2024/JAX_RNAseq_Neuroectoderm/"
+#path = "../../data/MorPhiC/June-2024/JAX_RNAseq_Neuroectoderm/"
+path = "../../MorPhiC/data/June-2024/JAX_RNAseq_Neuroectoderm/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
 
@@ -151,6 +152,7 @@ gene_anno[1:2,]
 
 # all genes are contained in the annotation file 
 table(gene_info$Name %in% gene_anno$ensembl_gene_id)
+setdiff(gene_info$Name, gene_anno$ensembl_gene_id)
 
 gene_info = merge(gene_anno, gene_info, by.x="ensembl_gene_id", by.y = "Name", 
                   all.x = FALSE, all.y = TRUE)
@@ -174,62 +176,95 @@ table(is.na(gene_info$gene_symbol))
 
 ```
 
+## Prepare for reading in DE results
+```{r fig.width = 4, fig.height=3}
+
+release_name = "2024_06_JAX_RNAseq_Neuroectoderm"
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+extract_cores <- function(x){
+  x_split = str_split(x, "_")[[1]]
+  x_start = 6
+  x_end = length(x_split)-1
+  x_d_group = paste(x_split[x_start:(x_end-1)], collapse="_")
+  x_gene = x_split[x_end]
+  return(c(x_d_group, x_gene))
+}
+
+df_file_info = NULL
+
+for (x in all_result_files){
+  df_file_info = rbind(df_file_info, extract_cores(x))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("DE_group", "gene")
+df_file_info
+
+```
+
+
 ## Compare the number of DE genes (different ko strategies)
 
-For this dataset, there is only one model system, and for each day group and each knockout gene, there are three knockout strategies.
+For this dataset, there is only one model system, and for DE group (day) and each knockout gene, there are three knockout strategies.
 
-Do it separately by timepoint (day).
+Do it separately for each DE group (day).
 
 ```{r fig.width = 8, fig.height=9}
 
-day_group_strings = c("3_4", "5", "6", "7", "8", "9")
+df_file_info$items = paste(df_file_info$DE_group, 
+                           df_file_info$gene, sep="_")
+df_file_info$items
 
-# define a function to extract the model_daygroup_gene part of the result filenames
-# under the assumption that the desired part is the one before the 
-# second-to-last underscore
-extract_model_day_group <- function(x) {
-  parts <- unlist(str_split(x, "_"))
-  return(paste(parts[1:(length(parts) - 2)], collapse = "_"))
-}
+fc0 = log2(1.5)
+p0  = 0.05
 
-for (day_group in day_group_strings){
+gene_symbols = df_file_info$gene
+gene_symbols
+
+table(gene_symbols %in% gene_info$gene_symbol)
+
+genes_w_multi_ensembl = names(which(table(gene_info$gene_symbol)>1))
+genes_w_multi_ensembl
+
+sorted_de_grps = sort(unique(df_file_info$DE_group))
   
-  res = fread(paste0("results/2024_06_JAX_RNAseq_Neuroectoderm/",
-                     "2024_06_JAX_RNAseq_Neuroectoderm_CBO_", 
-                     day_group, "_DEseq2.tsv"), data.table = FALSE)
-  print(res[1:2,1:7])
-
-  items = names(res)[grep("_padj", names(res))]
-  items = unique(sapply(items, extract_model_day_group))
-  items
-
-  fc0 = log2(1.5)
-  p0  = 0.05
-
-  gene_symbols = str_extract(items, "[a-zA-Z0-9]+$")
-  gene_symbols
-
-  table(gene_symbols %in% gene_info$gene_symbol)
-
-  df = data.frame(KO = items, gene_symbol = gene_symbols, 
+for (d_group in sorted_de_grps){
+  
+  df_file_info_dg = df_file_info[which(df_file_info$DE_group==d_group), ]
+  
+  df = data.frame(KO = df_file_info_dg$items, 
+                  gene_symbol = df_file_info_dg$gene, 
                   CE_nDE = NA, KO_nDE = NA, PTC_nDE = NA, 
                   CE_padj = NA, CE_log2FoldChange = NA, 
                   KO_padj = NA, KO_log2FoldChange = NA, 
                   PTC_padj = NA, PTC_log2FoldChange = NA)
 
   df$Model = str_extract(df$KO, "^[a-zA-Z0-9]+")
-
-  gene_ids = gene_info$ensembl_gene_id[match(gene_symbols, gene_info$gene_symbol)]
-
-  for(k in 1:length(items)){
-    it_k = items[k]
+  
+  gene_ids = gene_info$ensembl_gene_id[match(df_file_info_dg$gene, gene_info$gene_symbol)]
+    
+  for (k in 1:nrow(df_file_info_dg)){
+      
+    res = fread(file.path(processed_output_dir,
+                          paste0(release_name, "_", df_file_info_dg$items[k], "_DEseq2.tsv")),
+                          data.table = FALSE)
+    print(res[1:2,1:15])
+    
     gene_id = gene_ids[k]
     w_gene = which(res$gene_ID == gene_id)
     stopifnot(length(w_gene) == 1)
+    stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
     
     for(ko1 in c("CE", "KO", "PTC")){
-      fc = paste0(it_k, "_", ko1, "_log2FoldChange")
-      padj = paste0(it_k, "_", ko1, "_padj")
+      
+      fc = paste0(df$gene_symbol[k], "_", ko1, "_log2FoldChange")
+      padj = paste0(df$gene_symbol[k], "_", ko1, "_padj")
       col_name = paste0(ko1, "_nDE")
       df[k,col_name] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
       
@@ -240,8 +275,9 @@ for (day_group in day_group_strings){
       df[k,col_name] = res[[padj]][w_gene]
       
     }
+    
   }
-
+  
   print(df)
 
   p1 <- ggplot(df, aes(x=(PTC_nDE), y=(CE_nDE), 
@@ -262,7 +298,7 @@ for (day_group in day_group_strings){
                  label=gene_symbol)) + 
         geom_point(size=2) + scale_shape_manual(values = c(7, 16)) + 
         geom_text_repel() + ggtitle("DE results of the KO genes, CE") + 
-        labs(x="log2 fold change", y="-log10(p-value)")  + 
+        labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
         geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
         geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
                    linetype = "dashed")
@@ -271,7 +307,7 @@ for (day_group in day_group_strings){
                  label=gene_symbol)) + 
         geom_point(size=2) + scale_shape_manual(values = c(7, 16)) + 
         geom_text_repel() + ggtitle("DE results of the KO genes, KO") + 
-        labs(x="log2 fold change", y="-log10(p-value)")  + 
+        labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
         geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
         geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
                    linetype = "dashed")
@@ -280,15 +316,16 @@ for (day_group in day_group_strings){
                  label=gene_symbol)) + 
         geom_point(size=2) + scale_shape_manual(values = c(7, 16)) + 
         geom_text_repel() + ggtitle("DE results of the KO genes, PTC") + 
-        labs(x="log2 fold change", y="-log10(p-value)")  + 
+        labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
         geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
         geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
                    linetype = "dashed")
 
  g_combined <- ggarrange(p1, p2, p3, p4, p5, ncol = 2, nrow = 3)
  print(annotate_figure(g_combined,
-                      top = text_grob(paste0("CBO, day group ", day_group), 
+                      top = text_grob(d_group, 
                                       face = "bold", size = 16)))
+  
   
 }
 
@@ -299,37 +336,43 @@ for (day_group in day_group_strings){
 
 ## Generate valcano plots
 
-In some (day group, knockout gene, knockout strategy) combinations, there are too many DE genes and they cannot all be labeled in the valcano plots.
+Also output the DE gene sets for the gene set enrichment analysis. 
+
+In some (day group, knockout gene, knockout strategy) combinations, there are too many DE genes and they cannot all be labeled in the volcano plots.
 
 ```{r fig.width = 6.5, fig.height=5}
 
-for (day_group in day_group_strings){
+df_file_info
+
+fc0
+p0
+
+for(k in 1:nrow(df_file_info)){
+  
+  it_k = df_file_info$items[k]
+  d_group = df_file_info$DE_group[k]
+  gene_name = df_file_info$gene[k]
   
   # create a list to store DE gene set for the gene set enrichment analysis
   de_gene_sets = list() 
   
-  print(day_group)
+  print(it_k)
   
-  res = fread(paste0("results/2024_06_JAX_RNAseq_Neuroectoderm/",
-                     "2024_06_JAX_RNAseq_Neuroectoderm_CBO_", 
-                     day_group, "_DEseq2.tsv"), data.table = FALSE)
-  print(res[1:2,1:7])
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", it_k, "_DEseq2.tsv")),
+              data.table = FALSE)
 
-  items = names(res)[grep("_padj", names(res))]
-  items
+  for (ko1 in c("CE", "KO", "PTC")){
 
-  for(it1 in items){
-    id1 = gsub("_padj", "", it1)
+    res_k = res[,c(1, grep(ko1, names(res)))]
+    names(res_k) = gsub(paste0(gene_name, "_", ko1, "_"), "", names(res_k))
+
+    ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+    ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+
+    de_gene_sets[[paste0(gene_name, "_", ko1, "_up")]] = res_k[ww_up,]$gene_ID
+    de_gene_sets[[paste0(gene_name, "_", ko1, "_down")]] = res_k[ww_down,]$gene_ID
     
-    res_k = res[,c(1, grep(id1, names(res)))]
-    names(res_k) = gsub(paste0(id1, "_"), "", names(res_k))
-    
-    ww_up = which((res_k$log2FoldChange > log2(1.5)) & (res_k$padj < 0.05))
-    ww_down = which((res_k$log2FoldChange < -log2(1.5)) & (res_k$padj < 0.05))
-
-    de_gene_sets[[paste0(id1, "_up")]] = res_k[ww_up,]$gene_ID
-    de_gene_sets[[paste0(id1, "_down")]] = res_k[ww_down,]$gene_ID
-  
     res_k$DE = "No"
     res_k$DE[ww_up] <- "Up"
     res_k$DE[ww_down] <- "Down"
@@ -348,38 +391,36 @@ for (day_group in day_group_strings){
   
     print(table(res_k$DE))
     
-    print("--------------------------------------------------")
-    print(paste0("CBO, day group ", day_group))
-    print("--------------------------------------------------")
-    
     g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
-                    col=DE, label=delabel)) + 
-         geom_point() + ggtitle(id1) + 
-         geom_text_repel(point.padding = 0.5,
-                         min.segment.length = 0, 
-                         size = 3,  # Adjust text size
-                         box.padding = 0.5,
-                         max.overlaps = 20, 
-                         show.legend = FALSE) + 
-         scale_color_manual(values=col2use)
-        
+                      col=DE, label=delabel)) + 
+           geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_", ko1)) + 
+           geom_text_repel(point.padding = 0.5,
+                           min.segment.length = 0, 
+                           size = 3,  # Adjust text size
+                           box.padding = 0.5,
+                           max.overlaps = 20, 
+                           show.legend = FALSE) + 
+           scale_color_manual(values=col2use)
+      
     print(g2)
-  }
 
+  }
+  
   # save out the DE gene lists for gene set enrichment analysis
-  output_dir = "results/2024_06_JAX_RNAseq_Neuroectoderm_DE_gene_lists"
+  DE_set_output_dir = sprintf("%s/DE_gene_lists", result_dir)
+                       
     
-  if (!file.exists(output_dir)){
-    dir.create(output_dir)
+  if (!file.exists(DE_set_output_dir)){
+    dir.create(DE_set_output_dir)
   }
   
   saveRDS(de_gene_sets, 
-          sprintf("%s/2024_06_JAX_RNAseq_Neuroectoderm_CBO_%s_DE_gene_list.rds", 
-                  output_dir, day_group))
-
+          sprintf("%s/%s_%s_DE_gene_list.rds", 
+                  DE_set_output_dir, release_name, it_k))
+  
 }
-```
 
+```
 
 ```{r}
 gc()
