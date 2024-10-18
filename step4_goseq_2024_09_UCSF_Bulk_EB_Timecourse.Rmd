@@ -1,0 +1,272 @@
+---
+title: "Check the over-representation of functional terms"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+params:
+  release_name: "2024_09_UCSF_Bulk_EB_Timecourse"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev="CairoPNG")
+```
+The code applies to 2024_09_UCSF_Bulk_EB_Timecourse dataset. 
+
+In each setting, based on the processed output file, take all genes with non-NA adjusted pvalues
+as genes to consider, and significant genes based on adjusted p-value cutoff 0.05 and 
+absolute log2foldchange cutoff log2(1.5).
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(RColorBrewer)
+library(goseq)
+library(fgsea)
+
+library(dplyr)
+library(data.table)
+theme_set(theme_classic())
+
+# BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene", force=TRUE)
+# BiocManager::install("org.Hs.eg.db")
+release_name = params$release_name
+release_name
+```
+
+
+## Prepare gene set information
+
+Gene set annotations (by gene symbols) were downloaded from MSigDB website. 
+
+```{r}
+gmtfile = list()
+gmtfile[["reactome"]] = "gene_annotation/c2.cp.reactome.v2023.2.Hs.symbols.gmt"
+gmtfile[["go_bp"]]    = "gene_annotation/c5.go.bp.v2023.2.Hs.symbols.gmt"
+
+pathways = list()
+for(k1 in names(gmtfile)){
+  pathways[[k1]] = gmtPathways(gmtfile[[k1]])
+}
+
+names(pathways)
+sapply(pathways, length)
+```
+
+
+Filter gene sets for size between 10 and 500.
+
+```{r}
+lapply(pathways, function(v){
+  quantile(sapply(v, length), probs = seq(0, 1, 0.1), na.rm = TRUE)
+})
+
+for(k1 in names(pathways)){
+  p1 = pathways[[k1]]
+  pathways[[k1]] = p1[sapply(p1, length) %in% 10:500]
+}
+
+sapply(pathways, length)
+```
+
+
+## Read in gene annotation 
+
+```{r fig.width = 3, fig.height=3}
+gene_info = fread("data/gencode_v44_primary_assembly_info.tsv", 
+                  data.table = FALSE)
+dim(gene_info)
+gene_info[1:2,]
+```
+
+## Prepare for reading in DE results
+```{r fig.width = 4, fig.height=3}
+
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+# extract core strings from DE result files
+
+extract_cores <- function(x, str_before, str_after){
+
+  pattern <- paste0(".*", str_before, "(.*?)", str_after, ".*")
+  middle_string <- sub(pattern, "\\1", x)
+  middle_substrings <- strsplit(middle_string, "_")[[1]]
+  x_d_group <- paste(middle_substrings[1:2], 
+                     collapse = "_")
+  x_comparison <- paste(middle_substrings[3:length(middle_substrings)], 
+                        collapse = "_")
+  
+  return(c(x_d_group, x_comparison))
+}
+
+df_file_info = NULL
+
+for (x in all_result_files){
+  df_file_info = rbind(df_file_info, 
+                       extract_cores(x, 
+                                    paste0(release_name, "_"), 
+                                    "_DEseq2.tsv"))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("model_type", "comparison")
+
+df_file_info$items = paste(df_file_info$model_type, 
+                           df_file_info$comparison, sep="_")
+df_file_info$items
+df_file_info
+
+compare_order = c("day_2_vs_day_0",
+                  "day_4_vs_day_2",
+                  "day_6_vs_day_4",
+                  "day_8_vs_day_6",
+                  "day_10_vs_day_8")
+
+df_file_info_ordered = df_file_info[match(compare_order, df_file_info$comparison),]
+df_file_info_ordered
+```
+
+## Read in DE results and conduct enrichment analysis
+
+### Regular DE results
+```{r warning = FALSE, message = FALSE}
+
+fc0 = log2(1.5)
+p0  = 0.05
+
+max_n2kp = 10
+goseq_res = NULL
+
+ko_start_col_index = 7
+
+for (i in 1:nrow(df_file_info_ordered)){
+  
+  it1 = df_file_info_ordered$items[i]
+  compare_name = df_file_info_ordered$comparison[i]
+    
+  res = fread(paste0("results/", release_name, "/processed/", release_name, 
+                     "_", it1, "_DEseq2.tsv"), 
+              data.table = FALSE)
+  res[1:2,]
+  
+  de_info_columns = colnames(res)[ko_start_col_index:ncol(res)]
+
+  print(paste0(it1))
+    
+  de_gene_sets = list()
+    
+  res_k = res[,c(1, grep(compare_name, names(res)))]
+  names(res_k) = gsub(paste0(compare_name, "_"), "", names(res_k))
+  
+  res_k = res_k[!is.na(res_k$padj),]
+
+  ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+  ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+
+  de_gene_sets[[paste0("up")]] = res_k[ww_up,]$gene_ID
+  de_gene_sets[[paste0("down")]] = res_k[ww_down,]$gene_ID
+
+  print(sapply(de_gene_sets, length))
+  
+  print(table(res_k$gene_ID %in% gene_info$ensembl_gene_id))
+
+  gene_info_k = gene_info[gene_info$ensembl_gene_id %in% res_k$gene_ID,]
+  dim(gene_info_k)
+  gene_info_k[1:2,]
+  
+  sum(is.na(gene_info_k$hgnc_symbol))
+  
+  t_symbol = table(gene_info_k$hgnc_symbol)
+  table(t_symbol)
+  t_symbol[t_symbol > 1]
+  
+  gene_info_k = gene_info_k[gene_info_k$hgnc_symbol %in% names(t_symbol)[t_symbol==1],]
+  dim(gene_info_k)
+     
+  for(j in 1:length(de_gene_sets)){
+    if(length(de_gene_sets[[j]]) < 10) { next }
+  
+    print(j)
+    set_j = names(de_gene_sets)[j]
+
+    genes = gene_info_k$ensembl_gene_id %in% de_gene_sets[[j]]
+    names(genes) = gene_info_k$hgnc_symbol
+    table(genes)
+  
+    pwf = nullp(genes, "hg38", "geneSymbol")
+
+    for(k1 in names(pathways)){
+      p1 = pathways[[k1]]
+      res1 = goseq(pwf, "hg38", "geneSymbol", 
+                   gene2cat=goseq:::reversemapping(p1))
+      res1$FDR  = p.adjust(res1$over_represented_pvalue, method="BH")
+    
+      nD = sum(res1$FDR < 0.05)
+    
+      if(nD > 0){
+        res1 = res1[order(res1$FDR),][1:min(nD, max_n2kp),]
+        res1$category = gsub("REACTOME_|GOBP_", "", res1$category)
+        res1$category = gsub("_", " ", res1$category)
+        res1$category = tolower(res1$category)
+        res1$category = substr(res1$category, start=1, stop=120)
+        set_j_fullname = paste0(it1, "_", set_j)
+        goseq_res[[set_j_fullname]][[k1]] = res1
+      }
+    }
+  }
+    
+
+
+}
+
+```
+
+## Save results out
+```{r warning = FALSE, message = FALSE}
+
+names(goseq_res)
+
+for(n1 in names(goseq_res)){
+  print(n1)
+  print(goseq_res[[n1]])
+}
+
+enrichment_output_dir = file.path(result_dir, "enrichment")
+
+if (!file.exists(enrichment_output_dir)){
+  dir.create(enrichment_output_dir, recursive = TRUE)
+}
+
+saveRDS(goseq_res, 
+        file.path(enrichment_output_dir, 
+                  sprintf("%s_enrichment.rds", release_name)))  
+
+```
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+

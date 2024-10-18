@@ -24,11 +24,9 @@ options(warn=1)
 
 Differential expression using the bulk RNAseq JAX_RNAseq_Neuroectoderm data from the June 2024 release.
 
-Run DESeq2 on day 3_4 group with day indicator
+There is only one model system in this dataset. 
 
-Run day 9 group separately
-
-leave day 14 out
+There are samples from multiple days.
 
 ## R libraries.
 
@@ -69,23 +67,55 @@ table(table(meta$lib_biomaterial_id))
 table(table(meta$differentiated_biomaterial_id))
 ```
 
-## Manually correct a typo in the metadata
+## Manually update timepoint information in the metadata
+
+(1) Manually correct a typo:
 
 For the row with column differentiated_biomaterial_id=="CBO-MOK20004-WT-Day3", it should have value 3 instead of the original 4 in the column differentiated_timepoint_value. 
 
 ```{r}
-print("Before correcting the error in timepoint:")
+print("Before correcting the error in timepoint for CBO-MOK20004-WT-Day3:")
 print("Table between ko_gene and differentiated_timepoint_value:")
 table(meta$ko_gene, meta$differentiated_timepoint_value)
 
 meta[which(meta$differentiated_biomaterial_id=="CBO-MOK20004-WT-Day3"), 
      "differentiated_timepoint_value"] = 3
 
-print("After correcting the error in timepoint:")
+print("After correcting the error in timepoint for CBO-MOK20004-WT-Day3:")
 print("Table between ko_gene and differentiated_timepoint_value:")
 table(meta$ko_gene, meta$differentiated_timepoint_value)
 ```
 
+(2) Manually update timepoint information for some originally day 5 samples in the metadata
+
+According to information from JAX, part of the samples from day 5 in fact should
+have a timepoint that is closer to day 6. This is the group of samples under day 5
+and from run_id 
+
+    20230522_23-scbct-052
+    
+For these samples, label them as day 6. 
+
+Since the other samples from day 5 only have one WT, in later DE analysis, ignore 
+these samples and do not run DE analysis for day 5. 
+
+```{r}
+
+table(meta$run_id, meta$differentiated_timepoint_value)
+
+index_day5_to_change = which((meta$run_id=="20230522_23-scbct-052") & 
+                               (meta$differentiated_timepoint_value==5))
+length(index_day5_to_change)
+meta[index_day5_to_change, c("run_id", "differentiated_timepoint_value")]
+
+meta$differentiated_timepoint_value[index_day5_to_change] = 6
+
+table(meta$run_id, meta$differentiated_timepoint_value)
+
+print("After correcting timepoint for some samples originally labeled as day 5:")
+print("Table between ko_gene and differentiated_timepoint_value:")
+table(meta$ko_gene, meta$differentiated_timepoint_value)
+```
 
 ## Read in gene count data and filter genes
 
@@ -110,7 +140,7 @@ xx = factor(xx, levels = as.character(unique_timepoints))
 meta$timepoint = xx
 ```
 
-## Read in gene annoation
+### Read in gene annoation
 ```{r}
 gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
 dim(gene_anno)
@@ -165,7 +195,9 @@ ggplot(meta, aes(x=read_depth, y=q75, color=ko_strategy)) +
   xlab("read depth (million)") + ylab("75 percentile of gene expression") + 
   labs(color = "KO type") + 
   scale_color_brewer(palette = "Set1")
+```
 
+```{r fig.width = 4.5, fig.height=3}
 meta$run_id_short = str_replace(meta$run_id, "^[^-]*-", "")
 
 ggplot(meta, aes(x=read_depth, y=q75, color=run_id_short)) +
@@ -176,7 +208,7 @@ ggplot(meta, aes(x=read_depth, y=q75, color=run_id_short)) +
   scale_color_brewer(palette = "Set1")
 ```
 
-# Check the effect of run id among WT
+## Check the effect of run id among WT
 
 ```{r fig.width = 6, fig.height=4.5}
 sample2kp = which(meta$ko_gene == "WT")
@@ -224,7 +256,7 @@ gPC = ggplot(PC_df, aes(x = PC1, y = PC2,
 
 print(gPC)
 
-table(PC_df$run_id_short, PC_df$differentiated_timepoint_value)
+table(PC_df$run_id_short, PC_df$timepoint)
 
 n_shapes = length(unique(PC_df$run_id_short))
 u_shapes = c(1, 7, 8, 9, 10, 11, 15, 16, 17)[1:n_shapes]
@@ -256,7 +288,7 @@ print(gPC_time)
 ```
 
 
-# Analyze samples of different model systems
+## Analyze samples of different model systems
 
 For the June 2024 release of JAX_RNAseq_Neuroectoderm, there is only one model system. 
 
@@ -277,6 +309,10 @@ ggplot(df1, aes(x = time, y = gene, fill = Freq)) +
             color = "black", size = 3) + 
   labs(x = "Time", y = "Gene")
 ```
+
+Explore the PC plots first, to decide running the models on what level of DE group. 
+
+Then run the DE analysis. 
 
 ```{r fig.width = 5, fig.height=4, message=FALSE, warning=FALSE}
 
@@ -410,15 +446,15 @@ Use day to construct DE groups.
 Run DESeq2 for different day groups separately
 
     day 3 + day 4, with a day indictor
-    day 5
+    day 5 (do not run for day 5, since after updating day label, the samples left only have one WT)
     day 6
     day 7
-    day 8 (not excluding RFX4 for now)
+    day 8 (exclude samples from run ID short scbct-028-run3)
     day 9 (do not include day 14 in this setting)
     
 For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
 
-In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
+In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + day + condition, model system + day + run_id, model system + day, etc.). 
 The first version of the output files contains gene id, and for each knockout strategy:
 
     baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
@@ -432,6 +468,8 @@ and for each knockout strategy:
     log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
 
 In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
+
+### Prepare output directories for DE results
 
 ```{r fig.width = 5, fig.height=4, message=FALSE, warning=FALSE}
 
@@ -450,7 +488,12 @@ if (!file.exists(raw_output_dir)){
 if (!file.exists(processed_output_dir)){
   dir.create(processed_output_dir, recursive = TRUE)
 }
+```
 
+
+### DE analysis for all genes
+
+```{r fig.width = 5, fig.height=4, message=FALSE, warning=FALSE}
 
 for(model1 in unique(meta$model_system)){
 
@@ -514,7 +557,8 @@ for(model1 in unique(meta$model_system)){
   
   sample_info$de_grp = paste0(sample_info$model_system, "_day_", sample_info$day_group)
 
-  unique_de_grps = setdiff(unique(sample_info$de_grp), paste0(model1, "_day_14"))
+  unique_de_grps = setdiff(unique(sample_info$de_grp), 
+                           c(paste0(model1, "_day_5"), paste0(model1, "_day_14")))
   sorted_de_grps = sort(unique_de_grps)
   
   for (d_group in sorted_de_grps){
@@ -527,6 +571,17 @@ for(model1 in unique(meta$model_system)){
     cts_dat_m_dg = cts_dat_m[, dg_index]
     sample_info_dg = sample_info[dg_index, ]
     
+    # additional step for DE group CBO_day_8, to exclude samples from run id short scbct-028-run3
+    if (d_group == "CBO_day_8"){
+      
+      kept_index = which(sample_info_dg$run_id_short!="scbct-028-run3")
+      cts_dat_m_dg = cts_dat_m_dg[, kept_index]
+      sample_info_dg = sample_info_dg[kept_index, ]
+      
+      stopifnot(all(sample_info_dg$run_id_short!="scbct-028-run3"))
+      
+    }
+      
     stopifnot(all(sample_info_dg$de_grp==d_group))
     
     # do two steps of filtering
@@ -684,8 +739,13 @@ for(model1 in unique(meta$model_system)){
         # record the number of samples involved in the comparison
         test_ko_group_vec = sample_info_dg$ko_group[test_index]
         
+        if (d_group=="CBO_day_8"){
+          d_group_for_size = paste0(d_group, "_excluding_20230424_23-scbct-028-run3")
+        }else{
+          d_group_for_size = d_group
+        }
         df_size = rbind(df_size, 
-                        c(d_group, 
+                        c(d_group_for_size, 
                           paste0(geno, "_", k_grp1), 
                           sum(test_ko_group_vec!="WT_WT"), 
                           sum(test_ko_group_vec=="WT_WT")))       
@@ -841,9 +901,19 @@ for(model1 in unique(meta$model_system)){
   }
   
 }
+```
 
+Save the size dataframe out
+```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
 
 colnames(df_size) = c("DE_group", "knockout_gene_strategy", "n_ko", "n_WT")
+df_size = as.data.frame(df_size)
+
+multi_rows = which(table(df_size$knockout_gene_strategy)>1)
+multi_rows
+
+df_size[which(df_size$knockout_gene_strategy%in%names(multi_rows)),]
+
 fwrite(df_size, 
        sprintf("%s/%s_DE_n_samples.tsv", output_dir, release_name), 
        sep="\t")

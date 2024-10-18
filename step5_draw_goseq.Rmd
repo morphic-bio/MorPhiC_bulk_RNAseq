@@ -1,6 +1,6 @@
 ---
 title: "Visualize goseq results"
-author: "Wei Sun"
+author: "Si Liu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -15,7 +15,7 @@ output:
     number_sections: false
   df_print: paged
 params:
-  release: "2023_12"
+  release_name: "2023_12_JAX_RNAseq_ExtraEmbryonic"
 ---
 
 ```{r setup, include=FALSE}
@@ -29,24 +29,38 @@ library(data.table)
 library(ggplot2)
 library(ggpubr)
 library(ggrepel)
+library(stringr)
 library(cowplot)
 
 library(tidyr)
 theme_set(theme_classic())
 
-release = params$release
-release
+release_name = params$release_name
+release_name
 
 ```
 
 ## Read in results
 
 ```{r}
-res = readRDS(sprintf("results/gene_set_enrichments_%s.rds", release))
+
+result_dir = file.path("results", release_name)
+enrichment_output_dir = file.path(result_dir, "enrichment")
+
+res = readRDS(file.path(enrichment_output_dir, 
+                        sprintf("%s_enrichment.rds", release_name)))
 names(res)
 
-PTC = grep("PTC", names(res))
-res = res[PTC]
+multi_strategy_datasets = c("2023_12_JAX_RNAseq_ExtraEmbryonic",
+                            "2024_05_JAX_RNAseq2_ExtraEmbryonic", 
+                            "2024_06_JAX_RNAseq_Neuroectoderm")
+  
+if (release_name%in%multi_strategy_datasets){
+  
+  PTC = grep("PTC", names(res))
+  res = res[PTC]
+
+}
 
 sapply(res, function(x){sapply(x,nrow)})
 
@@ -99,20 +113,32 @@ for(k in 1:length(df_list)){
   nm1 = names(df_list)[k]
   nm1 = gsub("_", " ", nm1)
   nm1 = gsub("PTC ", "", nm1)
-  nm1 = gsub("nor ", "", nm1)
-  nm1 = gsub("hyp ", "Hyperoxia ", nm1)
+  nm1 = gsub("nor ", "Normoxia ", nm1)
+  nm1 = gsub("hyp ", "Hypoxia ", nm1)
   nm1 = gsub("up", "up-regulated", nm1)
   nm1 = gsub("down", "down-regulated", nm1)
 
+  substrings = str_split(nm1, " ")[[1]]
+  nm1 = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
+               "\n", paste(substrings[length(substrings)], collapse = " "))
+
+  mycolors <- c("go_bp" = "#F8766D", "reactome" = "#00BFC4")
+  filtered_colors <- mycolors[unique(d1$type)]
+  
   g1 = ggplot(d1, aes(x = -log10(FDR), y = y, color=type)) +
     geom_point(size = 2.5) + 
     labs(x = "-log10(FDR)", y="", title = nm1) + 
     scale_y_continuous(breaks = 1:nrow(d1), labels = d1_label) + 
     theme(legend.position = "top") + 
+    scale_color_manual(values = filtered_colors) + 
     guides(color = guide_legend(title = NULL))
 
   h1 = 0.75*nrow(d1)/20 + 0.25
-  canvas <- ggdraw() + draw_plot(g1, x = 0, y = 1-h1, width = 1, height = h1) 
+  if (nrow(d1)<=2){
+    h1 = 0.75*(nrow(d1)+1)/20 + 0.25
+  }
+  
+  canvas <- ggdraw() + draw_plot(g1, x = 0, y = 1-h1, width = 1, height = h1)    
   print(canvas)
 }
 ```

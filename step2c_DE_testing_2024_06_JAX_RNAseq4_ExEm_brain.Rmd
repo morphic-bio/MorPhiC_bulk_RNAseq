@@ -22,6 +22,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Differential expression using the JAX_RNAseq4_ExEm_brain bulk RNAseq data from the June release.
 
+There are two model systems in this dataset. 
+
+There are samples from different days. 
+
+There is only one knockout strategy: PTC.
+
 ## R libraries.
 
 ```{r load_libraries, warning = FALSE, message = FALSE}
@@ -42,7 +48,6 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#path = "../../data/MorPhiC/June-2024/JAX_RNAseq4_ExEm_brain/"
 path = "../../MorPhiC/data/June-2024/JAX_RNAseq4_ExEm_brain/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
@@ -87,7 +92,7 @@ xx = factor(xx, levels = as.character(unique_timepoints))
 meta$timepoint = xx
 ```
 
-## Read in gene annoation
+### Read in gene annoation
 ```{r}
 gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
 dim(gene_anno)
@@ -146,7 +151,9 @@ ggplot(meta, aes(x=read_depth, y=q75, color=ko_strategy, shape = model_system)) 
   xlab("read depth (million)") + ylab("75 percentile of gene expression") + 
   labs(color = "KO type", shape = "Model") + 
   scale_color_brewer(palette = "Set1")
+```
 
+```{r fig.width = 4.5, fig.height=3}
 meta$run_id_short = str_replace(meta$run_id, "^[^-]*-", "")
 
 table(meta$model_system, meta$run_id_short)
@@ -160,7 +167,7 @@ ggplot(meta, aes(x=read_depth, y=q75, color=run_id_short, shape = model_system))
 
 ```
 
-# Check the effect of run id among WT
+## Check the effect of run id among WT
 
 ```{r fig.width = 4.5, fig.height=3.2}
 sample2kp = which(meta$ko_gene == "WT")
@@ -195,7 +202,7 @@ gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
   geom_point(size=2.5, alpha=0.7) + 
   #scale_color_brewer(palette = "Dark2") +
   scale_shape_manual(values = c(7, 16)) + 
-  labs(color="KO gene", shape ="KO strategy") + 
+  labs(color="Run id", shape ="Model") + 
   xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
   ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
   ggtitle("Wild type samples") + 
@@ -218,7 +225,7 @@ gPC_time = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
   geom_point(size=2.5, alpha=0.7) + 
   #scale_color_brewer(palette = "Dark2") +
   scale_shape_manual(values = c(7, 16)) + 
-  labs(color="KO gene", shape ="KO strategy") + 
+  labs(color="Day", shape ="Model") + 
   xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
   ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
   ggtitle("Wild type samples") + 
@@ -235,11 +242,11 @@ gPC_time = ggplot(PC_df, aes(x = PC1, y = PC2, shape=model_system,
 print(gPC_time)
 ```
 
-# Analyze samples of different model systems or batches
+## Analyze samples of different model systems or batches
 
-For the June 2024 release of JAX_RNAseq4_ExEm_brain, there are two model systems: CBO and PrS. However, there is a strong batch effect within PrS, and thus we will analyze the two batches separately.
+Explore the PC plots first, to decide running the models on what level of DE group. 
 
-There is only one gene knock out strategy: PTC. 
+Then run the DE analysis. 
 
 ```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
 table(meta$run_id, meta$model_system)
@@ -360,13 +367,15 @@ for(model1 in unique_model_ss){
 }
 ```
 
-Use model system or model system + run_id to construct DE group.
+Use model system + day or model system + day + run_id to construct DE group.
+
+Exclude CBO day 32, because it only has one WT sample. 
 
 Run DESeq2 for different DE groups separately
     
       CBO, day 9 only
       PrS, day 6, for two run_ids separately
-      
+
 For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
 
 In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
@@ -383,6 +392,8 @@ and for each knockout strategy:
     log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
 
 In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
+
+### Prepare output directories for DE results
 
 ```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
 
@@ -401,8 +412,11 @@ if (!file.exists(raw_output_dir)){
 if (!file.exists(processed_output_dir)){
   dir.create(processed_output_dir, recursive = TRUE)
 }
+```
 
+### DE analysis for all genes
 
+```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
 for(model1 in unique_model_ss){
   
   print("")
@@ -455,9 +469,11 @@ for(model1 in unique_model_ss){
   # day 6
   # but need to divide the two batches
 
-  sample_info$de_grp = paste0(sample_info$model_system, 
+  sample_info$model_day = paste0(sample_info$model_system, 
                               "_day_", 
                               as.character(sample_info$day))
+  
+  sample_info$de_grp = sample_info$model_day
   
   if(model1 == "PrS"){ 
     sample_info$de_grp = paste0(sample_info$de_grp, "_", 
@@ -559,7 +575,11 @@ for(model1 in unique_model_ss){
     print(sprintf("prop of non-null for rd: %.2e", pi_1_rd))
     
     if(pi_1_rd < 0.01 || (ncol(cts_dat_m_dg) <= 6 && pi_1_rd < 0.1 )){
+      
+      print("rerun DESeq2 without read depth")
+      
       include_rd = 0
+      
       if (length(unique(sample_info_dg$run_id))==1){
         dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
                                       ~ ko_gene)
@@ -567,7 +587,9 @@ for(model1 in unique_model_ss){
         dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
                                       ~ ko_gene + run_id)     
       }
+      
       dds = DESeq(dds)
+      
     }else{
       include_rd = 1
     }
@@ -678,13 +700,15 @@ for(model1 in unique_model_ss){
       dim(res_reduced_df)
       res_reduced_df[1:2,]      
       
+      setting_name = unique(sample_info_dg$model_day)
+      
       fwrite(res_df, 
              sprintf("%s/%s_%s_%s_DEseq2_raw.tsv", 
-                     raw_output_dir, release_name, d_group, geno), 
+                     raw_output_dir, release_name, setting_name, geno), 
              sep="\t")
       fwrite(res_reduced_df, 
              sprintf("%s/%s_%s_%s_DEseq2.tsv", 
-                     processed_output_dir, release_name, d_group, geno), 
+                     processed_output_dir, release_name, setting_name, geno), 
              sep="\t")      
 
     }
@@ -692,9 +716,19 @@ for(model1 in unique_model_ss){
   }
   
 }
+```
 
+Save the size dataframe out
+```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
 
 colnames(df_size) = c("DE_group", "knockout_gene_strategy", "n_ko", "n_WT")
+df_size = as.data.frame(df_size)
+
+multi_rows = which(table(df_size$knockout_gene_strategy)>1)
+multi_rows
+
+df_size[which(df_size$knockout_gene_strategy%in%names(multi_rows)),]
+
 fwrite(df_size, 
        sprintf("%s/%s_DE_n_samples.tsv", output_dir, release_name), 
        sep="\t")

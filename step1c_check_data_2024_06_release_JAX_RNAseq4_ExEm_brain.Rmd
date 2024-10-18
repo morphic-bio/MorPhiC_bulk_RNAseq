@@ -1,6 +1,6 @@
 ---
 title: "Check RNAseq data of 2024-06 release JAX_RNAseq4_ExEm_brain"
-author: "Wei Sun"
+author: "Si Liu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -234,7 +234,7 @@ meta = update_name(meta, "sequence_file.run_id", "run_id")
 
 ## Manually correct one biomaterial_id in meta data
 
-based on the conjecture that in the "Differentiated cell line" tab (which has been merged into meta data frame), the item in the first row of column "cell_line.biomaterial_core.biomaterial_id", being "MOK20013W-D02", should actually be "CBO-MOK20001P-B11" 
+based on the conjecture that in the "Differentiated cell line" tab (which has been merged into meta data frame), the item in the first row of column "cell_line.biomaterial_core.biomaterial_id", being "MOK20013W-D02", should actually be "MOK20001P-B11" 
 based on the corresponding content in the column "differentiated_cell_line.biomaterial_core.biomaterial_id". 
 
 ```{r}

@@ -1,0 +1,188 @@
+---
+title: "Check RNAseq data of 2024-09 release, UCSF_Bulk_EB_Timecourse"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Check the bulk RNAseq UCSF_Bulk_EB_Timecourse data from September 2024 release.
+
+This dataset does not involve knockout strategy. 
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(readxl)
+
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/September-2024/UCSF_Bulk_EB_Timecourse"
+dat_path = file.path(path, "processed/release110-gencode44/Tables")
+
+read_header <- function(file_name, sheet){
+  
+  meta_header = read_excel(file_name, sheet = sheet, 
+                         skip = 3, n_max = 1, col_names = FALSE)
+  meta_header = as.character(meta_header)
+  meta_header = gsub("cell_line.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("differentiated_cell_line.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("biomaterial_core.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("gene_expression_alteration_protocol.protocol_core.", 
+                     "", meta_header, fixed = TRUE)
+  meta_header = gsub(".text", "", meta_header, fixed = TRUE)
+  
+  meta_header = gsub("gene_expression_alteration_protocol.", "", 
+                     meta_header, fixed = TRUE)
+
+  meta_header
+}
+
+```
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta_file = "../../MorPhiC/data/September-2024/UCSF_Bulk_EB_Timecourse/metadata/UCSF_Bulk_MVP_Morphic_metadata_spreadsheet.xlsx"
+
+cl_header = read_header(meta_file, sheet = "Cell line ")
+cl_header
+
+cl = read_excel(meta_file, sheet = "Cell line ", skip = 5, col_names = FALSE)
+names(cl) = cl_header
+cl = as.data.frame(cl)
+dim(cl)
+cl
+
+dc_header = read_header(meta_file, sheet = "Differentiated cell line")
+dc_header
+
+dc = read_excel(meta_file, sheet = "Differentiated cell line", 
+                skip = 5, col_names = FALSE)
+names(dc) = dc_header
+dc = as.data.frame(dc)
+dim(dc)
+dc[1:2,]
+## drop columns 3-8 since they are columns with no content
+dc = dc[, -c(3:8)]
+dim(dc)
+dc[1:2,]
+
+table(dc$differentiated_timepoint_value, useNA="ifany")
+
+# Tab "Expression alteration strategy" is empty for this dataset
+
+```
+
+## Read in library preparation information
+```{r}
+lib_header = read_header(meta_file, sheet = "Library preparation")
+lib_header
+
+lib = read_excel(meta_file, sheet = "Library preparation", 
+                skip = 5, col_names = FALSE)
+dim(lib)
+names(lib) = lib_header
+lib = as.data.frame(lib)
+dim(lib)
+lib[1:2,]
+```
+
+## Read in sequence file information
+```{r}
+seq_header = read_header(meta_file, sheet = "Sequence file")
+seq_header
+
+seq = read_excel(meta_file, sheet = "Sequence file", 
+                skip = 5, col_names = FALSE)
+names(seq) = seq_header
+seq = as.data.frame(seq)
+seq$file_id = gsub("_R(1|2)_001.fastq.gz", "", 
+                   seq$sequence_file.file_core.file_name)
+dim(seq)
+seq[1:2,]
+
+names(seq)[which(names(seq)=="sequence_file.lane_index")] = "sequence_file.run_id"
+names(seq)
+  
+seq = unique(seq[,c("file_id", "library_preparation.biomaterial_id", 
+                    "sequencing_protocol.protocol_core.protocol_id", 
+                    "sequence_file.run_id")])
+dim(seq)
+seq[1:2,]
+
+table(seq$sequence_file.run_id)
+```
+
+## Merge tabs to make a flat metadata table
+```{r}
+
+meta = seq
+
+update_name <- function(df1, old_name, new_name){
+  ww1 = which(names(df1) == old_name)
+  stopifnot(length(ww1) == 1)
+  names(df1)[ww1] = new_name
+  df1
+}
+
+meta = update_name(meta, "library_preparation.biomaterial_id", 
+                   "lib_biomaterial_id")
+
+meta = update_name(meta, "sequencing_protocol.protocol_core.protocol_id", 
+                   "sequencing_protocol")
+
+meta = update_name(meta, "sequence_file.run_id", "run_id")
+
+meta[1:2, ]
+  
+fwrite(meta, file = "data/September_2024/UCSF_Bulk_EB_Timecourse_meta_data.tsv", sep="\t")
+```
+
+## Check count data
+
+### genesCounts.csv
+
+```{r fig.width = 5.5, fig.height=4}
+
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+setdiff(names(cts)[-1], meta$file_id)
+setdiff(meta$file_id, names(cts)[-1])
+```
+
+
+```{r}
+gc()
+sessionInfo()
+```
+
+
+

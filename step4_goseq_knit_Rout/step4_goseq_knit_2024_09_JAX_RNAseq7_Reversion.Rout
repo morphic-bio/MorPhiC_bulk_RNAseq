@@ -1,0 +1,527 @@
+> args = commandArgs(trailingOnly=TRUE)
+> args
+[1] "release_name='2024_09_JAX_RNAseq7_Reversion'"
+> 
+> if (length(args) != 1) {
++   message("One argument is expected.\n")
++   quit(save="no")
++ }else{
++   eval(parse(text=args[[1]]))
++ }
+> 
+> release_name
+[1] "2024_09_JAX_RNAseq7_Reversion"
+> 
+> Sys.setenv(RSTUDIO_PANDOC="/app/software/RStudio-Server/1.4.1717-foss-2021b-Java-11-R-4.1.2/bin/pandoc")
+> 
+> library(rmarkdown)
+> 
+> render_report = function(release_name){
++ 
++   output_filepath = paste0("step4_goseq/step4_goseq_", release_name, ".html")
++   
++   rmarkdown::render(
++     "step4_goseq.Rmd", 
++     params = list(release_name = release_name),
++     output_file = output_filepath
++   )
++ }
+> 
+> render_report(release_name)
+
+
+processing file: step4_goseq.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |...                                                                   |   5%
+   inline R code fragments
+
+  |                                                                              |.......                                                               |  10%
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |..........                                                            |  14%
+  ordinary text without R code
+
+  |                                                                              |.............                                                         |  19%
+label: load_libraries (with options) 
+List of 2
+ $ warning: logi FALSE
+ $ message: logi FALSE
+
+Loading required package: BiasedUrn
+Loading required package: geneLenDataBase
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'data.table'
+
+The following objects are masked from 'package:dplyr':
+
+    between, first, last
+
+  |                                                                              |.................                                                     |  24%
+  ordinary text without R code
+
+  |                                                                              |....................                                                  |  29%
+label: unnamed-chunk-1
+  |                                                                              |.......................                                               |  33%
+  ordinary text without R code
+
+  |                                                                              |...........................                                           |  38%
+label: unnamed-chunk-2
+  |                                                                              |..............................                                        |  43%
+  ordinary text without R code
+
+  |                                                                              |.................................                                     |  48%
+label: unnamed-chunk-3 (with options) 
+List of 2
+ $ fig.width : num 3
+ $ fig.height: num 3
+
+  |                                                                              |.....................................                                 |  52%
+  ordinary text without R code
+
+  |                                                                              |........................................                              |  57%
+label: unnamed-chunk-4 (with options) 
+List of 2
+ $ fig.width : num 4
+ $ fig.height: num 3
+
+  |                                                                              |...........................................                           |  62%
+  ordinary text without R code
+
+  |                                                                              |...............................................                       |  67%
+label: unnamed-chunk-5 (with options) 
+List of 2
+ $ warning: logi FALSE
+ $ message: logi FALSE
+
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Loading required package: AnnotationDbi
+Loading required package: stats4
+Loading required package: BiocGenerics
+
+Attaching package: 'BiocGenerics'
+
+The following objects are masked from 'package:dplyr':
+
+    combine, intersect, setdiff, union
+
+The following objects are masked from 'package:stats':
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from 'package:base':
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which.max, which.min
+
+Loading required package: Biobase
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+Loading required package: IRanges
+Loading required package: S4Vectors
+
+Attaching package: 'S4Vectors'
+
+The following objects are masked from 'package:data.table':
+
+    first, second
+
+The following objects are masked from 'package:dplyr':
+
+    first, rename
+
+The following object is masked from 'package:geneLenDataBase':
+
+    unfactor
+
+The following objects are masked from 'package:base':
+
+    expand.grid, I, unname
+
+
+Attaching package: 'IRanges'
+
+The following object is masked from 'package:data.table':
+
+    shift
+
+The following objects are masked from 'package:dplyr':
+
+    collapse, desc, slice
+
+
+Attaching package: 'AnnotationDbi'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Loading required package: GenomicFeatures
+Loading required package: GenomeInfoDb
+Loading required package: GenomicRanges
+Using manually entered categories.
+For 7161 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3784 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 7161 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3784 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6091 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3036 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6091 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3036 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6141 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3061 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6141 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3061 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6601 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3390 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6601 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3390 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6601 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3390 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6601 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3390 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6586 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3366 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 6586 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3366 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+  |                                                                              |..................................................                    |  71%
+  ordinary text without R code
+
+  |                                                                              |.....................................................                 |  76%
+label: unnamed-chunk-6 (with options) 
+List of 2
+ $ warning: logi FALSE
+ $ message: logi FALSE
+
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 7203 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3798 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 7203 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 3798 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 7947 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 4355 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Can't find hg38/geneSymbol length data in genLenDataBase...
+Found the annotation package, TxDb.Hsapiens.UCSC.hg38.knownGene
+Trying to get the gene lengths from it.
+Using manually entered categories.
+For 7947 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+Using manually entered categories.
+For 4355 genes, we could not find any categories. These genes will be excluded.
+To force their use, please run with use_genes_without_cat=TRUE (see documentation).
+This was the default behavior for version 1.15.1 and earlier.
+Calculating the p-values...
+  |                                                                              |.........................................................             |  81%
+  ordinary text without R code
+
+  |                                                                              |............................................................          |  86%
+label: unnamed-chunk-7 (with options) 
+List of 2
+ $ warning: logi FALSE
+ $ message: logi FALSE
+
+  |                                                                              |...............................................................       |  90%
+  ordinary text without R code
+
+  |                                                                              |...................................................................   |  95%
+label: unnamed-chunk-8
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
+
+
+output file: step4_goseq.knit.md
+
+/app/software/RStudio-Server/1.4.1717-foss-2021b-Java-11-R-4.1.2/bin/pandoc/pandoc +RTS -K512m -RTS step4_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step4_goseq/step4_goseq_2024_09_JAX_RNAseq7_Reversion.html --lua-filter /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --include-in-header /loc/scratch/65125359/RtmpgHKO7N/rmarkdown-str2c086caf94f0.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
+
+Output created: step4_goseq/step4_goseq_2024_09_JAX_RNAseq7_Reversion.html
+There were 30 warnings (use warnings() to see them)
+> 
+> 
+> 
+> sessionInfo()
+R version 4.1.2 (2021-11-01)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 18.04.6 LTS
+
+Matrix products: default
+BLAS/LAPACK: /app/software/FlexiBLAS/3.0.4-GCC-11.2.0/lib/libflexiblas.so.3.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] TxDb.Hsapiens.UCSC.hg38.knownGene_3.14.0
+ [2] GenomicFeatures_1.46.1                  
+ [3] GenomicRanges_1.46.1                    
+ [4] GenomeInfoDb_1.30.1                     
+ [5] org.Hs.eg.db_3.14.0                     
+ [6] AnnotationDbi_1.56.2                    
+ [7] IRanges_2.28.0                          
+ [8] S4Vectors_0.32.4                        
+ [9] Biobase_2.54.0                          
+[10] BiocGenerics_0.40.0                     
+[11] data.table_1.14.2                       
+[12] dplyr_1.0.7                             
+[13] fgsea_1.20.0                            
+[14] goseq_1.46.0                            
+[15] geneLenDataBase_1.30.0                  
+[16] BiasedUrn_1.07                          
+[17] RColorBrewer_1.1-2                      
+[18] stringr_1.4.0                           
+[19] ggpubr_0.4.0                            
+[20] ggrepel_0.9.1                           
+[21] ggplot2_3.5.1                           
+[22] rmarkdown_2.11                          
+
+loaded via a namespace (and not attached):
+  [1] colorspace_2.0-2            ggsignif_0.6.3             
+  [3] rjson_0.2.20                ellipsis_0.3.2             
+  [5] rio_0.5.27                  XVector_0.34.0             
+  [7] bit64_4.0.5                 fansi_0.5.0                
+  [9] xml2_1.3.2                  splines_4.1.2              
+ [11] cachem_1.0.6                knitr_1.36                 
+ [13] jsonlite_1.7.2              Cairo_1.5-12.2             
+ [15] Rsamtools_2.10.0            broom_0.7.10               
+ [17] GO.db_3.14.0                dbplyr_2.1.1               
+ [19] png_0.1-7                   compiler_4.1.2             
+ [21] httr_1.4.2                  backports_1.3.0            
+ [23] assertthat_0.2.1            Matrix_1.6-4               
+ [25] fastmap_1.1.0               cli_3.6.3                  
+ [27] htmltools_0.5.2             prettyunits_1.1.1          
+ [29] tools_4.1.2                 gtable_0.3.0               
+ [31] glue_1.4.2                  GenomeInfoDbData_1.2.7     
+ [33] rappdirs_0.3.3              fastmatch_1.1-3            
+ [35] Rcpp_1.0.7                  carData_3.0-4              
+ [37] cellranger_1.1.0            jquerylib_0.1.4            
+ [39] vctrs_0.6.5                 Biostrings_2.62.0          
+ [41] nlme_3.1-153                rtracklayer_1.54.0         
+ [43] xfun_0.27                   openxlsx_4.2.4             
+ [45] lifecycle_1.0.4             restfulr_0.0.13            
+ [47] rstatix_0.7.0               XML_3.99-0.8               
+ [49] zlibbioc_1.40.0             scales_1.3.0               
+ [51] hms_1.1.1                   MatrixGenerics_1.6.0       
+ [53] parallel_4.1.2              SummarizedExperiment_1.24.0
+ [55] yaml_2.2.1                  curl_4.3.2                 
+ [57] gridExtra_2.3               memoise_2.0.0              
+ [59] sass_0.4.0                  biomaRt_2.50.3             
+ [61] stringi_1.7.5               RSQLite_2.2.8              
+ [63] highr_0.9                   BiocIO_1.4.0               
+ [65] filelock_1.0.3              zip_2.2.0                  
+ [67] BiocParallel_1.28.3         rlang_1.1.4                
+ [69] pkgconfig_2.0.3             matrixStats_1.3.0          
+ [71] bitops_1.0-7                evaluate_0.14              
+ [73] lattice_0.20-45             purrr_0.3.4                
+ [75] GenomicAlignments_1.30.0    bit_4.0.4                  
+ [77] tidyselect_1.1.1            magrittr_2.0.1             
+ [79] R6_2.5.1                    generics_0.1.3             
+ [81] DelayedArray_0.20.0         DBI_1.1.1                  
+ [83] mgcv_1.8-38                 pillar_1.6.4               
+ [85] haven_2.4.3                 foreign_0.8-81             
+ [87] withr_3.0.0                 KEGGREST_1.34.0            
+ [89] abind_1.4-5                 RCurl_1.98-1.5             
+ [91] tibble_3.1.5                crayon_1.4.2               
+ [93] car_3.0-11                  utf8_1.2.2                 
+ [95] BiocFileCache_2.2.1         progress_1.2.2             
+ [97] grid_4.1.2                  readxl_1.3.1               
+ [99] blob_1.2.2                  forcats_0.5.1              
+[101] digest_0.6.28               tidyr_1.1.4                
+[103] munsell_0.5.0               bslib_0.3.1                
+> 
+> q(save = "no")
+> proc.time()
+   user  system elapsed 
+171.162   8.443 195.418 

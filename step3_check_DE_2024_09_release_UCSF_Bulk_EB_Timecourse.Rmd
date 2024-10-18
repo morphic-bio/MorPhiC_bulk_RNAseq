@@ -1,0 +1,311 @@
+---
+title: "Check the results of differential expression analysis for 2024-09 release UCSF_Bulk_EB_Timecourse"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/September-2024/UCSF_Bulk_EB_Timecourse/"
+dat_path = paste0(path, "processed/release110-gencode44/Tables")
+```
+
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta = fread("data/September_2024/UCSF_Bulk_EB_Timecourse_meta_data.tsv", 
+             data.table = FALSE)
+dim(meta)
+meta[1:2,]
+names(meta)
+
+meta$file_id
+```
+
+## Read in gene count data and filter genes
+
+```{r fig.width = 4, fig.height=3}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+stopifnot(setequal(names(cts)[-1], meta$file_id))
+
+meta = meta[match(names(cts)[-1], meta$file_id),]
+table(names(cts)[-1] == meta$file_id, useNA="ifany")
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r fig.width = 4, fig.height=3}
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+gene_info = data.frame(Name = cts$Name, 
+                       apply(cts_dat, 1, min), 
+                       apply(cts_dat, 1, median), 
+                       apply(cts_dat, 1, get_q75), 
+                       apply(cts_dat, 1, max))
+
+dim(gene_info)
+gene_info[1:2, ]
+table(row.names(gene_info)==gene_info$Name, useNA="ifany")
+
+names(gene_info)[2:5] = rep(c("min", "median", "q75", "max"), each=1)
+dim(gene_info)
+gene_info[1:2,]
+
+summary(gene_info[,-1])
+
+table(gene_info$q75 > 0)
+
+w2kp = which(gene_info$q75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+```
+
+## Read in gene annotation
+```{r fig.width = 4, fig.height=3}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+# all genes are contained in the annotation file 
+table(gene_info$Name %in% gene_anno$ensembl_gene_id)
+setdiff(gene_info$Name, gene_anno$ensembl_gene_id)
+
+gene_info = merge(gene_anno, gene_info, by.x="ensembl_gene_id", by.y = "Name", 
+                  all.x = FALSE, all.y = TRUE)
+dim(gene_info)
+gene_info[1:2,]
+
+gene_info[which(!gene_info$ensembl_gene_id%in%gene_anno$ensembl_gene_id)]
+
+gene_info[gene_info$min > 2e4, c("min", "hgnc_symbol")]
+
+
+gene_info$gene_symbol = gene_info$hgnc_symbol
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+wEns = which(gene_info$gene_symbol == "" | is.na(gene_info$gene_symbol))
+gene_info$gene_symbol[wEns] = gene_info$ensembl_gene_id[wEns]
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+```
+
+## Prepare for reading in DE results
+
+For the September 2024 release of UCSF_Bulk_EB_Timecourse, all samples are WT samples. 
+
+DE analysis was run between samples of consecutive days, excluding iPSC samples.
+
+The specific DE groups can be found in the file with naming in the format:
+
+    ${dataset_name}_DE_n_samples.tsv
+
+```{r fig.width = 4, fig.height=3}
+
+release_name = "2024_09_UCSF_Bulk_EB_Timecourse"
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+extract_cores <- function(x){
+  x_split = str_split(x, "_")[[1]]
+  x_start = 7
+  x_end = length(x_split)-1
+  x_d_group = paste(x_split[x_start:(x_end)], collapse="_")
+  x_days = paste(x_split[(x_start+2):(x_end)], collapse="_")
+  return(c(x_d_group, x_days))
+}
+
+df_file_info = NULL
+
+for (x in all_result_files){
+  df_file_info = rbind(df_file_info, extract_cores(x))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("DE_general_group", "days")
+df_file_info
+
+```
+
+## Number of DE genes
+
+Barchart for number of DE genes
+
+```{r fig.width =5, fig.height=3}
+
+fc0 = log2(1.5)
+p0  = 0.05
+
+df = data.frame(items = df_file_info$DE_general_group, 
+                days = df_file_info$days, 
+                nDE = NA)
+
+for (k in 1:nrow(df_file_info)){
+    
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", 
+                               df$items[k], 
+                               "_DEseq2.tsv")),
+                        data.table = FALSE)
+  print(res[1:2,])
+  fc = paste0(df$days[k], "_log2FoldChange")
+  padj = paste0(df$days[k], "_padj")
+  df[k,"nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+  
+}
+  
+df
+
+df$days = factor(df$days, 
+                 levels = c("day_2_vs_day_0",
+                            "day_4_vs_day_2",
+                            "day_6_vs_day_4",
+                            "day_8_vs_day_6",
+                            "day_10_vs_day_8"))
+
+p1 <- ggplot(df, aes(x=days, y=nDE, fill=days)) +
+      geom_bar(stat="identity")+theme_classic() + 
+      ylab("Number of DE genes")+
+      ggtitle("EB WT") + 
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank())
+
+print(p1)
+
+
+```
+
+
+## Generate volcano plots
+
+In some settings, there are too many DE genes and they cannot all be labeled in the volcano plots.
+
+```{r fig.width = 6.5, fig.height=5}
+df_file_info
+
+fc0
+p0
+
+compare_order = c("day_2_vs_day_0",
+                  "day_4_vs_day_2",
+                  "day_6_vs_day_4",
+                  "day_8_vs_day_6",
+                  "day_10_vs_day_8")
+
+df_file_info_orderd = df_file_info[match(compare_order, df_file_info$days),]
+df_file_info_orderd
+
+for(k in 1:nrow(df_file_info_orderd)){
+  
+  it_k = df_file_info_orderd$DE_general_group[k]
+  d_group = df_file_info_orderd$days[k]
+
+  print(it_k)
+  
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", 
+                               it_k, 
+                               "_DEseq2.tsv")),
+                        data.table = FALSE)  
+
+  res_k = res[,c(1, grep(d_group, names(res)))]
+  names(res_k) = gsub(paste0(d_group, "_"), "", names(res_k))
+
+  ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+  ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+    
+  res_k$DE = "No"
+  res_k$DE[ww_up] <- "Up"
+  res_k$DE[ww_down] <- "Down"
+    
+  res_k$log2FoldChange[which(res_k$log2FoldChange > 3)] = 3
+  res_k$log2FoldChange[which(res_k$log2FoldChange < -3)] = -3
+
+  col2use = c("blue", "grey", "red")
+  names(col2use) = c("Down", "No", "Up")
+    
+  res_k$delabel = NA
+  res_k$gene_symbol = gene_info$gene_symbol[match(res_k$gene_ID, 
+                                                  gene_info$ensembl_gene_id)]
+  w_de = which(res_k$DE != "No")
+  res_k$delabel[w_de] = res_k$gene_symbol[w_de]
+
+  print(table(res_k$DE))
+    
+  g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
+                    col=DE, label=delabel)) + 
+         geom_point() + ggtitle(paste0("EB WT\n", 
+                                       d_group)) + 
+         geom_text_repel(point.padding = 0.5,
+                         min.segment.length = 0, 
+                         size = 3,  # Adjust text size
+                         box.padding = 0.5,
+                         max.overlaps = 20, 
+                         show.legend = FALSE) + 
+         scale_color_manual(values=col2use)
+    
+  print(g2)
+  
+}
+```
+
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+

@@ -1,19 +1,32 @@
+args = commandArgs(trailingOnly=TRUE)
+args
 
-Sys.setenv(RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/MacOS/pandoc")
+if (length(args) != 1) {
+  message("One argument is expected.\n")
+  quit(save="no")
+}else{
+  eval(parse(text=args[[1]]))
+}
 
-render_report = function(release) {
+release_name
 
+Sys.setenv(RSTUDIO_PANDOC="/app/software/RStudio-Server/1.4.1717-foss-2021b-Java-11-R-4.1.2/bin/pandoc")
+
+library(rmarkdown)
+
+render_report = function(release_name){
+
+  output_filepath = paste0("step4_goseq/step4_goseq_", release_name, ".html")
+  
   rmarkdown::render(
     "step4_goseq.Rmd", 
-    params = list(release = release),
-    output_file = paste0("step4_goseq_", release, ".html")
+    params = list(release_name = release_name),
+    output_file = output_filepath
   )
 }
 
-rs = c("2023_12", "2024_05")
-for(r1 in rs){
-  render_report(r1)
-}
+render_report(release_name)
+
 
 
 sessionInfo()

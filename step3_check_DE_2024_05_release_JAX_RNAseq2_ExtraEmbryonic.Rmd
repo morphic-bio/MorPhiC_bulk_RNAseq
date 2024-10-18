@@ -1,0 +1,412 @@
+---
+title: "Check the results of differential expression analysis for 2024-05 release JAX_RNAseq2_ExtraEmbryonic"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+#dat_path = "~/research/data/MorPhiC/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
+dat_path = "../../MorPhiC/data/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
+dat_path = paste0(dat_path, "processed/release110-gencode44/Tables")
+```
+
+
+## Read in meta data
+```{r fig.width = 3, fig.height=3}
+meta = fread("data/May_2024/JAX_RNAseq2_ExtraEmbryonic_meta_data.tsv", 
+             data.table = FALSE)
+dim(meta)
+meta[1:2,]
+names(meta)
+
+table(meta$model_organ, meta$ko_gene)
+table(meta$run_id, meta$ko_gene)
+table(meta$ko_strategy, meta$ko_gene)
+```
+
+## Read in gene count data and filter genes
+
+```{r fig.width = 4, fig.height=3}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+stopifnot(setequal(names(cts)[-1], meta$file_id))
+
+meta = meta[match(names(cts)[-1], meta$file_id),]
+table(names(cts)[-1] == meta$file_id)
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r fig.width = 4, fig.height=3}
+model_s = meta$model_system
+table(model_s, useNA="ifany")
+
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+gene_info = data.frame(Name = cts$Name, 
+                       t(apply(cts_dat, 1, tapply, model_s, min)), 
+                       t(apply(cts_dat, 1, tapply, model_s, median)), 
+                       t(apply(cts_dat, 1, tapply, model_s, get_q75)), 
+                       t(apply(cts_dat, 1, tapply, model_s, max)))
+
+dim(gene_info)
+gene_info[1:2,]
+table(row.names(gene_info)==gene_info$Name, useNA="ifany")
+
+names(gene_info)[2:9] = paste0(rep(c("ExM_", "PrS_"), times=4), 
+                               rep(c("min", "median", "q75", "max"), each=2))
+dim(gene_info)
+gene_info[1:2,]
+
+summary(gene_info[,-1])
+
+table(gene_info$ExM_q75 > 0, gene_info$PrS_q75 > 0)
+
+w2kp = which(gene_info$ExM_q75 > 0 | gene_info$PrS_q75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+```
+
+## Read in gene annoation
+```{r fig.width = 4, fig.height=3}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+table(gene_info$Name %in% gene_anno$ensembl_gene_id)
+# all ensembl gene IDs are contained in the annotation
+setdiff(gene_info$Name, gene_anno$ensembl_gene_id)
+
+gene_info = merge(gene_anno, gene_info, by.x="ensembl_gene_id", by.y = "Name", 
+                  all.x = FALSE, all.y = TRUE)
+dim(gene_info)
+gene_info[1:2,]
+
+gene_info[gene_info$ExM_min > 2e4, c("ExM_min", "hgnc_symbol")]
+gene_info[gene_info$PrS_min > 2e4, c("PrS_min", "hgnc_symbol")]
+
+gene_info$gene_symbol = gene_info$hgnc_symbol
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+wEns = which(gene_info$gene_symbol == "" | is.na(gene_info$gene_symbol))
+gene_info$gene_symbol[wEns] = gene_info$ensembl_gene_id[wEns]
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+```
+
+## Prepare for reading in DE results
+
+There are two model systems, ExM and PrS.
+
+Under model system "Exm", use run id as DE group. 
+
+Under model system "PrS", all samples under this model system are treated as one DE group. 
+
+The specific DE groups can be found in the file with naming in the format:
+
+    ${dataset_name}_DE_n_samples.tsv
+
+```{r fig.width = 4, fig.height=3}
+release_name = "2024_05_JAX_RNAseq2_ExtraEmbryonic"
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+extract_cores <- function(x){
+  x_split = str_split(x, "_")[[1]]
+  x_start = 6
+  x_end = length(x_split)-1
+  x_d_group = paste(x_split[x_start:(x_end-1)], collapse="_")
+  x_gene = x_split[x_end]
+  return(c(x_d_group, x_gene))
+}
+
+df_file_info = NULL
+
+for (x in all_result_files){
+  df_file_info = rbind(df_file_info, extract_cores(x))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("DE_general_group", "gene")
+df_file_info
+
+```
+
+## Number of DE genes and properties of knockout gene
+
+
+### For DE between knockout and WT samples
+
+Make an exception for the case of gene "MEIS2" and ko strategy "KO", since this case only has one knockout sample, and the results are not reliable. 
+
+```{r fig.width = 8, fig.height=9}
+
+df_file_info$items = paste(df_file_info$DE_general_group, 
+                           df_file_info$gene, sep="_")
+df_file_info$items
+
+table(table(df_file_info$items))
+
+fc0 = log2(1.5)
+p0  = 0.05
+
+gene_symbols = df_file_info$gene
+gene_symbols
+
+table(gene_symbols %in% gene_info$gene_symbol)
+
+genes_w_multi_ensembl = names(which(table(gene_info$gene_symbol)>1))
+genes_w_multi_ensembl
+
+
+df = data.frame(KO = df_file_info$items, 
+                group = df_file_info$DE_general_group,
+                gene_symbol = df_file_info$gene, 
+                CE_nDE = NA, KO_nDE = NA, PTC_nDE = NA, 
+                CE_padj = NA, CE_log2FoldChange = NA, 
+                KO_padj = NA, KO_log2FoldChange = NA, 
+                PTC_padj = NA, PTC_log2FoldChange = NA)
+
+df$Model = str_extract(df$KO, "^[a-zA-Z0-9]+")
+
+gene_ids = gene_info$ensembl_gene_id[match(df_file_info$gene, gene_info$gene_symbol)]
+gene_ids
+
+for(k in 1:nrow(df_file_info)){
+
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", df_file_info$items[k], "_DEseq2.tsv")),
+                        data.table = FALSE)
+  print(res[1:2,])
+  
+  gene_id = gene_ids[k]
+  w_gene = which(res$gene_ID == gene_id)
+  stopifnot(length(w_gene) == 1)
+  stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
+  
+  for(ko1 in c("CE", "KO", "PTC")){
+    
+    if ((df$gene_symbol[k]=="MEIS2") & (ko1=="KO")){
+      
+      df[k, "KO_nDE"] = NA
+      df[k, "KO_log2FoldChange"] = NA    
+      df[k, "KO_padj"] = NA
+      
+    }else{
+    
+      fc = paste0(df$gene_symbol[k], "_", ko1, "_log2FoldChange")
+      padj = paste0(df$gene_symbol[k], "_", ko1, "_padj")
+      col_name = paste0(ko1, "_nDE")
+      df[k, col_name] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+      
+      col_name = paste0(ko1, "_log2FoldChange")
+      df[k,col_name] = res[[fc]][w_gene]
+      
+      col_name = paste0(ko1, "_padj")
+      df[k,col_name] = res[[padj]][w_gene]
+    }
+  }
+}
+
+df
+
+print("Gene MEIS2 is excluded from figures involving knockout strategy KO, ")
+print("due to that it has only 1 knockout sample in this setting.")
+
+p1 <- ggplot(df, aes(x=(PTC_nDE), y=(CE_nDE), 
+               label=gene_symbol, color=group)) + 
+      geom_point() + scale_color_brewer(palette = "Dark2")+
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      ggtitle("# of DE genes") + 
+      labs(x="PTC", y="CE") + 
+      geom_abline(intercept = 0, slope = 1, color = "orange", linetype = "dashed")
+
+p2 <- ggplot(df, aes(x=(PTC_nDE), y=(KO_nDE), 
+               label=gene_symbol, color=group)) + 
+      geom_point() + scale_color_brewer(palette = "Dark2")+
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      ggtitle("# of DE genes") + 
+      labs(x="PTC", y="KO") + 
+      geom_abline(intercept = 0, slope = 1, color = "orange", linetype = "dashed")
+
+p3 <- ggplot(df, aes(x=CE_log2FoldChange, y=-log10(CE_padj), 
+               label=gene_symbol, color=group)) + 
+      geom_point() + scale_color_brewer(palette = "Dark2")+
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      ggtitle("DE results of the KO genes, CE") + 
+      labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+  
+p4 <- ggplot(df, aes(x=KO_log2FoldChange, y=-log10(KO_padj), 
+               label=gene_symbol, color=group)) + 
+      geom_point() + scale_color_brewer(palette = "Dark2")+
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      ggtitle("DE results of the KO genes, KO") + 
+      labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+
+  
+p5 <- ggplot(df, aes(x=PTC_log2FoldChange, y=-log10(PTC_padj), 
+               label=gene_symbol, color=group)) + 
+      geom_point() + scale_color_brewer(palette = "Dark2")+
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      ggtitle("DE results of the KO genes, PTC") + 
+      labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+
+g_combined <- ggarrange(p1, p2, p3, p4, p5, ncol = 2, nrow = 3)
+print(g_combined)
+```
+
+
+## Generate volcano plots
+
+### For DE between knockout and WT samples
+
+When generating volcano plots, do not plot for the case of gene "MEIS2" and knockout strategy "KO", since this case only has one knockout sample. 
+
+```{r fig.width = 4, fig.height=3}
+
+df_file_info
+
+fc0
+p0
+
+for(k in 1:nrow(df_file_info)){
+  
+  it_k = df_file_info$items[k]
+  d_group = df_file_info$DE_general_group[k]
+  gene_name = df_file_info$gene[k]
+  
+  print(it_k)
+  
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", it_k, "_DEseq2.tsv")),
+              data.table = FALSE)
+  
+  for (ko1 in c("CE", "KO", "PTC")){
+
+    res_k = res[,c(1, grep(ko1, names(res)))]
+    names(res_k) = gsub(paste0(gene_name, "_", ko1, "_"), "", names(res_k))
+
+    ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+    ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+    
+    res_k$DE = "No"
+    res_k$DE[ww_up] <- "Up"
+    res_k$DE[ww_down] <- "Down"
+    
+    res_k$log2FoldChange[which(res_k$log2FoldChange > 3)] = 3
+    res_k$log2FoldChange[which(res_k$log2FoldChange < -3)] = -3
+  
+    col2use = c("blue", "grey", "red")
+    names(col2use) = c("Down", "No", "Up")
+    
+    res_k$delabel = NA
+    res_k$gene_symbol = gene_info$gene_symbol[match(res_k$gene_ID, 
+                                                    gene_info$ensembl_gene_id)]
+    w_de = which(res_k$DE != "No")
+    res_k$delabel[w_de] = res_k$gene_symbol[w_de]
+  
+    print(table(res_k$DE))
+    
+    if ((gene_name!="MEIS2")|(ko1!="KO")){
+      
+      g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
+                      col=DE, label=delabel)) + 
+           geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_", ko1)) + 
+           geom_text_repel(point.padding = 0.5,
+                           min.segment.length = 0, 
+                           size = 3,  # Adjust text size
+                           box.padding = 0.5,
+                           max.overlaps = 20, 
+                           show.legend = FALSE) + 
+           scale_color_manual(values=col2use)
+      
+      print(g2)
+    
+    }
+
+  }
+  
+}
+
+```
+
+
+```{r}
+gc()
+sessionInfo()
+```
+

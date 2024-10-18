@@ -1,0 +1,382 @@
+---
+title: "Check RNAseq data of 2023-12 release JAX_RNAseq_ExtraEmbryonic"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(readxl)
+
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/December-2023/JAX_RNAseq_ExtraEmbryonic/"
+dat_path = paste0(path, "processed/Tables")
+
+read_header <- function(file_name, sheet){
+  
+  meta_header = read_excel(file_name, sheet = sheet, 
+                         skip = 3, n_max = 1, col_names = FALSE)
+  meta_header = as.character(meta_header)
+  meta_header = gsub("cell_line.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("differentiated_cell_line.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("biomaterial_core.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("gene_expression_alteration_protocol.protocol_core.", 
+                     "", meta_header, fixed = TRUE)
+  meta_header = gsub(".text", "", meta_header, fixed = TRUE)
+  
+  meta_header = gsub("gene_expression_alteration_protocol.", "", 
+                     meta_header, fixed = TRUE)
+
+  meta_header
+}
+
+```
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta_file = paste0(path, "processed/JAX_RNAseq_ExtraEmbryonic_metadata.xlsx")
+
+new_half_meta_file = paste0(path, "processed/", 
+                            "DATASET1_MVP_Morphic-metadata-spreadsheet_JAX-ExE_correction FOSB.xlsx")
+
+cl_header = read_header(meta_file, sheet = "Cell line ")
+cl_header
+
+cl = read_excel(meta_file, sheet = "Cell line ", skip = 5, col_names = FALSE)
+names(cl) = cl_header
+cl = as.data.frame(cl)
+dim(cl)
+cl[1:2,]
+
+dc_header = read_header(meta_file, sheet = "Differentiated cell line")
+dc_header
+
+dc = read_excel(meta_file, sheet = "Differentiated cell line", 
+                skip = 5, col_names = FALSE)
+names(dc) = dc_header
+dc = as.data.frame(dc)
+dim(dc)
+dc[1:2,]
+
+## remove columns 3:8, differentiated_ncbi_taxon_id to 
+## differentiated_biosamples_accession
+dc = dc[,-(3:8)]
+dim(dc)
+dc[1:2,]
+
+eas_header = read_header(meta_file, sheet = "Expression alteration strategy")
+eas_header
+eas_header = c(eas_header, "altered_locus", "guide_sequence")
+
+eas = read_excel(meta_file, sheet = "Expression alteration strategy", 
+                skip = 5, col_names = FALSE)
+names(eas) = eas_header
+eas = as.data.frame(eas)
+dim(eas)
+eas[1:2,]
+```
+
+## Check cell lines
+
+<span style="color:red">Manually correct typos based on best guess. </span>
+
+There is one mismatch in terms of content in column
+
+    cell_line.biomaterial_core.biomaterial_id
+    
+between the "Cell line" tab and the "Differentiated cell line".
+
+The instance is named 
+
+    "MOK20010-WT"
+    
+in "Cell line" tab but 
+
+    "MOK20010P-WT"
+    
+in "Differentiated cell line" tab.
+
+Based on the naming pattern in other WT samples, the guess is this one most likely should be 
+
+    "MOK20010-WT"
+
+The typo in the name seems to have been carried over to column 
+
+    differentiated_cell_line.biomaterial_core.biomaterial_id
+    
+in both "Differentiated cell line" and "Library preparation" tabs. 
+
+Need to manually correct over there as well, by changing 
+
+    PrS-MOK20010P-WT 
+    
+to 
+
+    PrS-MOK20010-WT
+
+```{r}
+any(duplicated(cl$biomaterial_id))
+table(cl$protocol_id)
+table(cl$type)
+table(cl$derived_cell_line_accession)
+table(cl$zygosity)
+sort(table(cl$clone_id), decreasing = TRUE)
+
+table(dc$biomaterial_id %in% cl$biomaterial_id)
+table(cl$biomaterial_id %in% dc$biomaterial_id)
+setdiff(dc$biomaterial_id, cl$biomaterial_id)
+setdiff(cl$biomaterial_id, dc$biomaterial_id)
+
+# start manually correcting typo
+index_to_change = which(dc$biomaterial_id=="MOK20010P-WT")
+index_to_change
+dc$biomaterial_id[index_to_change] = "MOK20010-WT"
+
+index_to_change = which(dc$differentiated_biomaterial_id=="PrS-MOK20010P-WT")
+index_to_change
+dc$differentiated_biomaterial_id[index_to_change] = "PrS-MOK20010-WT"
+# end manually correcting typo
+
+table(dc$biomaterial_id %in% cl$biomaterial_id)
+table(cl$biomaterial_id %in% dc$biomaterial_id)
+setdiff(dc$biomaterial_id, cl$biomaterial_id)
+setdiff(cl$biomaterial_id, dc$biomaterial_id)
+
+table(table(dc$biomaterial_id))
+table(dc$differentiated_timepoint_value)
+table(dc$differentiated_terminally_differentiated)
+table(dc$differentiation_protocol.protocol_core.protocol_id, 
+      dc$model_organ)
+
+table(dc$differentiated_timepoint_value, 
+      dc$model_organ)
+```
+
+## Check Expression alteration strategy
+```{r}
+table(eas$protocol_id)
+table(eas$allele_specific)
+table(eas$protocol_id, eas$altered_gene_symbols, useNA="ifany")
+table(eas$protocol_id, eas$crispr.sgrna_target, useNA="ifany")
+```
+
+## Extract KO strategy information
+
+```{r}
+dc[["ko_strategy"]] = 
+  str_extract(dc$differentiated_biomaterial_description, 
+              "\\(KO\\)|\\(CE\\)|\\(PTC\\)")
+dc[["ko_strategy"]] = gsub("\\(|\\)", "", dc[["ko_strategy"]])
+
+dc[["ko_gene"]] = str_extract(dc$differentiated_biomaterial_description, 
+                                  "(?<=KOLF2.2 deleted ).\\S+")
+table(dc$ko_strategy, dc$ko_gene, useNA = 'ifany')
+
+table(dc$differentiated_biomaterial_description, 
+      dc$ko_strategy, useNA = 'ifany')
+```
+
+
+## Read in library preparation information
+<span style="color:red">Two sets of corrections to "Library preparation" tab in metadata spreadsheet. </span>
+
+1. According to the notes under previous section "Check cell lines", in column 
+
+
+    differentiated_cell_line.biomaterial_core.biomaterial_id
+    
+
+change
+
+    PrS-MOK20010P-WT 
+    
+to 
+
+    PrS-MOK20010-WT
+
+2. For 9 knockout samples under gene FOSB, there is a mismatch in the ordering of content in the column
+
+    library_preparation.biomaterial_core.biomaterial_id
+    
+this one is fixed by using the "Library preparation" tab in the new half done spreadsheet got from Juliana, but in the column
+
+    differentiated_cell_line.biomaterial_core.biomaterial_id
+    
+also need to change 
+
+    PrS-MOK20010P-WT 
+    
+to 
+
+    PrS-MOK20010-WT
+    
+```{r}
+lib_header = read_header(new_half_meta_file, sheet = "Library preparation")
+lib_header
+lib_header = c(lib_header, 
+               c("fragment_size", "input_amount", "input_unit", 
+                 "final_yield", "final_yield_unit", 
+                 "lib_concentration", "lib_concentration_unit",
+                 "PCR_cycle", "PCR_cycle_sample_index"))
+
+lib = read_excel(new_half_meta_file, sheet = "Library preparation", 
+                skip = 5, col_names = FALSE)
+dim(lib)
+names(lib) = lib_header
+lib = as.data.frame(lib)
+dim(lib)
+lib[1:2,]
+
+# start manually correcting typo
+index_to_change = which(lib$differentiated_biomaterial_id=="PrS-MOK20010P-WT")
+index_to_change
+lib$differentiated_biomaterial_id[index_to_change] = "PrS-MOK20010-WT"
+# end manually correcting typo
+
+seq_header = read_header(meta_file, sheet = "Sequence file")
+seq_header
+
+seq = read_excel(meta_file, sheet = "Sequence file", 
+                skip = 5, col_names = FALSE)
+names(seq) = seq_header
+seq = as.data.frame(seq)
+seq$file_id = gsub("_R(1|2)_001.fastq.gz", "", 
+                   seq$sequence_file.file_core.file_name)
+dim(seq)
+seq[1:2,]
+
+seq = unique(seq[,c("file_id", "library_preparation.biomaterial_id", 
+                    "sequencing_protocol.protocol_core.protocol_id", 
+                    "sequence_file.run_id")])
+dim(seq)
+seq[1:2,]
+length(unique(seq$library_preparation.biomaterial_id))
+
+table(seq$sequence_file.run_id)
+
+intersect(names(dc), names(lib))
+table(dc$differentiated_biomaterial_id%in%lib$differentiated_biomaterial_id, 
+      useNA="ifany")
+table(lib$differentiated_biomaterial_id%in%dc$differentiated_biomaterial_id, 
+      useNA="ifany")
+
+meta = merge(dc, lib)
+dim(meta)
+meta[1:2,]
+
+intersect(names(meta), names(seq))
+
+meta = merge(meta, seq)
+dim(meta)
+meta[1:2,]
+
+update_name <- function(df1, old_name, new_name){
+  ww1 = which(names(df1) == old_name)
+  stopifnot(length(ww1) == 1)
+  names(df1)[ww1] = new_name
+  df1
+}
+
+
+meta = update_name(meta, "library_preparation.biomaterial_id", 
+                   "lib_biomaterial_id")
+
+meta = update_name(meta, "differentiation_protocol.protocol_core.protocol_id", 
+                   "differentiation_protocol")
+
+meta = update_name(meta, "library_preparation_protocol.protocol_core.protocol_id", 
+                   "library_preparation_protocol")
+
+meta = update_name(meta, "dissociation_protocol.protocol_core.protocol_id", 
+                   "dissociation_protocol")
+
+meta = update_name(meta, "sequencing_protocol.protocol_core.protocol_id", 
+                   "sequencing_protocol")
+
+meta = update_name(meta, "sequence_file.run_id", "run_id")
+```
+
+```{r}
+intersect(names(meta), names(cl))
+
+table(meta$biomaterial_id %in% cl$biomaterial_id)
+table(cl$biomaterial_id %in% meta$biomaterial_id)
+setdiff(meta$biomaterial_id, cl$biomaterial_id)
+setdiff(cl$biomaterial_id, meta$biomaterial_id)
+
+meta = merge(meta, cl)
+dim(meta)
+meta[1:2,]
+
+table(meta$ko_strategy, useNA = "ifany")
+meta$ko_strategy[which(is.na(meta$ko_strategy))] = "WT"
+
+table(meta$ko_gene, useNA = "ifany")
+meta$ko_gene[which(is.na(meta$ko_gene))] = "WT"
+
+meta$model_system = NA
+meta$model_system = str_extract(meta$differentiated_biomaterial_id, "^[^-]+")
+table(meta$model_system, meta$model_organ)
+
+table(meta$model_system, meta$ko_gene)
+
+fwrite(meta, file = "data/December_2023/JAX_RNAseq_ExtraEmbryonic_meta_data.tsv", sep="\t")
+```
+
+## Check count data
+
+### genesCounts.csv
+
+```{r fig.width = 5.5, fig.height=4}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+setdiff(names(cts)[-1], meta$file_id)
+setdiff(meta$file_id, names(cts)[-1])
+```
+
+
+
+
+
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+
+
+

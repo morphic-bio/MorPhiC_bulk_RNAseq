@@ -1,0 +1,535 @@
+---
+title: "Check the results of differential expression analysis for 2024-09 release JAX_RNAseq6_Diverse"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/September-2024/JAX_RNAseq6_Diverse/"
+dat_path = paste0(path, "processed/release110-gencode44/Tables")
+```
+
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta = fread("data/September_2024/JAX_RNAseq6_Diverse_meta_data.tsv", 
+             data.table = FALSE)
+dim(meta)
+meta[1:2,]
+names(meta)
+
+table(meta$model_organ, meta$ko_gene)
+table(meta$run_id, meta$ko_gene)
+table(meta$ko_strategy, meta$ko_gene)
+
+table(meta$ko_gene, meta$differentiated_timepoint_value)
+```
+
+## Read in gene count data and filter genes
+
+```{r fig.width = 4, fig.height=3}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+stopifnot(setequal(names(cts)[-1], meta$file_id))
+
+meta = meta[match(names(cts)[-1], meta$file_id),]
+table(names(cts)[-1] == meta$file_id, useNA="ifany")
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r fig.width = 4, fig.height=3}
+
+model_s = meta$model_system
+table(model_s, useNA="ifany")
+
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+# there are two levels for model_system
+# the result from apply(cts_dat, 1, tapply, model_s, min) is a matrix
+# do transpose to the results from apply(cts_dat, 1, tapply, model_s, min)
+gene_info = data.frame(Name = cts$Name, 
+                       t(apply(cts_dat, 1, tapply, model_s, min)), 
+                       t(apply(cts_dat, 1, tapply, model_s, median)), 
+                       t(apply(cts_dat, 1, tapply, model_s, get_q75)), 
+                       t(apply(cts_dat, 1, tapply, model_s, max)))
+
+dim(gene_info)
+gene_info[1:2, ]
+table(row.names(gene_info)==gene_info$Name, useNA="ifany")
+
+names(gene_info)[2:9] = paste0(rep(c("CBO_", "PrS_"), times=4), 
+                               rep(c("min", "median", "q75", "max"), each=2))
+dim(gene_info)
+gene_info[1:2,]
+
+summary(gene_info[,-1])
+
+table(gene_info$CBO_q75 > 0, gene_info$PrS_q75 > 0)
+
+w2kp = which(gene_info$CBO_q75 > 0 | gene_info$PrS_q75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+```
+
+## Read in gene annotation
+```{r fig.width = 4, fig.height=3}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+# all genes are contained in the annotation file 
+table(gene_info$Name %in% gene_anno$ensembl_gene_id)
+setdiff(gene_info$Name, gene_anno$ensembl_gene_id)
+
+gene_info = merge(gene_anno, gene_info, by.x="ensembl_gene_id", by.y = "Name", 
+                  all.x = FALSE, all.y = TRUE)
+dim(gene_info)
+gene_info[1:2,]
+
+gene_info[which(!gene_info$ensembl_gene_id%in%gene_anno$ensembl_gene_id)]
+
+gene_info[gene_info$CBO_min > 2e4, c("CBO_min", "PrS_min", "hgnc_symbol")]
+gene_info[gene_info$PrS_min > 2e4, c("CBO_min", "PrS_min", "hgnc_symbol")]
+
+gene_info$gene_symbol = gene_info$hgnc_symbol
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+wEns = which(gene_info$gene_symbol == "" | is.na(gene_info$gene_symbol))
+gene_info$gene_symbol[wEns] = gene_info$ensembl_gene_id[wEns]
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+```
+
+## Prepare for reading in DE results
+
+This dataset has two model systems: CBO and PrS, and two conditions, nor and hyp. 
+
+DE analysis was run for different DE groups separately
+    
+    CBO_nor, day 9
+    PrS_hyp, day 6
+    PrS_nor, day 6, gene group (except gene group GHRL1-GCM1)
+                    GHRL1-GCM1_excluding_GCM1, GHRL1 vs WT
+                    GHRL1-GCM1_excluding_GHRL1, GCM1 vs WT
+    
+The specific DE groups (for example, run_id, knockout gene group, etc.) can be found in the file with naming in the format:
+
+    ${dataset_name}_DE_n_samples.tsv
+    
+There are also DE results between samples under normoxia and hypoxia conditions.
+
+```{r fig.width = 4, fig.height=3}
+
+release_name = "2024_09_JAX_RNAseq6_Diverse"
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+regular_DE_files = all_result_files[!grepl("hyp_vs_nor", all_result_files)]
+condition_DE_files = all_result_files[grepl("hyp_vs_nor", all_result_files)]
+
+extract_cores <- function(x){
+  x_split = str_split(x, "_")[[1]]
+  x_start = 6
+  x_end = length(x_split)-1
+  x_d_group = paste(x_split[x_start:(x_end-1)], collapse="_")
+  x_gene = x_split[x_end]
+  return(c(x_d_group, x_gene))
+}
+
+df_file_info = NULL
+
+for (x in regular_DE_files){
+  df_file_info = rbind(df_file_info, extract_cores(x))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("DE_general_group", "gene")
+df_file_info
+
+
+extract_cores_cond <- function(x){
+  x_split = str_split(x, "_")[[1]]
+  x_start = 6
+  x_end = length(x_split)-4
+  x_d_group = paste(x_split[x_start:(x_start+2)], collapse="_")
+  x_gene = x_split[x_end-1]
+  x_gene_strategy = paste(x_split[(x_end-1):x_end], collapse="_")
+  return(c(x_d_group, x_gene, x_gene_strategy))
+}
+
+df_file_info_cond = NULL
+
+for (x in condition_DE_files){
+  df_file_info_cond = rbind(df_file_info_cond, extract_cores_cond(x))
+}
+
+df_file_info_cond = as.data.frame(df_file_info_cond)
+colnames(df_file_info_cond) = c("DE_general_group", "gene", "gene_strategy")
+df_file_info_cond
+
+
+```
+
+## Number of DE genes and properties of knockout gene
+
+### For DE between knockout and WT samples
+
+Plot the knockout genes from different DE groups all together in one figure. 
+
+<span style="color:red">Gene GHRL1 cannot be found in the annotation file. </span>
+
+<span style="color:red">Likely it should be "GRHL1", just misspelled. </span>
+
+<span style="color:red">Manually change it in current plots. </span>
+
+```{r fig.width =9, fig.height=3}
+  
+df_file_info$items = paste(df_file_info$DE_general_group, 
+                           df_file_info$gene, sep="_")
+df_file_info$items
+
+fc0 = log2(1.5)
+p0  = 0.05
+
+## **** note that this is after creating the "item" column
+## **** leave the "item" column uncorrected in order to load result files
+## **** need to update it after the metadata file is also updated
+df_file_info$gene[which(df_file_info$gene=="GHRL1")] = "GRHL1"
+
+gene_symbols = df_file_info$gene
+gene_symbols
+
+table(gene_symbols %in% gene_info$gene_symbol)
+
+genes_w_multi_ensembl = names(which(table(gene_info$gene_symbol)>1))
+genes_w_multi_ensembl
+
+
+df = data.frame(KO = df_file_info$items, 
+                group = df_file_info$DE_general_group,
+                gene_symbol = df_file_info$gene, 
+                PTC_nDE = NA, 
+                PTC_padj = NA, 
+                PTC_log2FoldChange = NA)
+
+df$Model = str_extract(df$KO, "^[a-zA-Z0-9]+")
+  
+gene_ids = gene_info$ensembl_gene_id[match(df_file_info$gene, gene_info$gene_symbol)]
+gene_ids
+    
+for (k in 1:nrow(df_file_info)){
+    
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", df_file_info$items[k], "_DEseq2.tsv")),
+                        data.table = FALSE)
+  print(res[1:2,])
+  
+  gene_id = gene_ids[k]
+  w_gene = which(res$gene_ID == gene_id)
+  
+  stopifnot(length(w_gene) == 1)
+  stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
+  
+  ### *** manually set the gene name back to the misspelled one
+  ### *** in order to load results
+  if (df$gene_symbol[k]=="GRHL1"){
+    fc = paste0("GHRL1", "_PTC_log2FoldChange")
+    padj = paste0("GHRL1", "_PTC_padj")
+  }else{
+    fc = paste0(df$gene_symbol[k], "_PTC_log2FoldChange")
+    padj = paste0(df$gene_symbol[k], "_PTC_padj")    
+  }
+
+  df[k,"PTC_nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+  df[k,"PTC_log2FoldChange"] = res[[fc]][w_gene]
+  df[k,"PTC_padj"] = res[[padj]][w_gene]
+  
+}
+  
+df
+
+print("The two points on top left of the left subfigure correspond to gene EPAS1.")
+print("They have adjusted pvalue being 0.")
+
+p1 <- ggplot(df, aes(x=PTC_log2FoldChange, y=-log10(PTC_padj), 
+               label=gene_symbol, color=group)) + 
+      geom_point(size=2) + scale_color_brewer(palette = "Dark2")+ 
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      #coord_cartesian(clip = "off") + 
+      #ylim(0, max(-log10(df$PTC_padj)) + 0.5) + 
+      ggtitle("DE results of the KO genes, PTC") + 
+      labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+
+p2 <- ggplot(df, aes(x=PTC_log2FoldChange, y=PTC_nDE, 
+               label=gene_symbol, color=group)) + 
+      geom_point(size=2) + scale_color_brewer(palette = "Dark2")+ 
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      #coord_cartesian(clip = "off") + 
+      #ylim(0, max(-log10(df$PTC_padj)) + 0.5) + 
+      ggtitle("DE results of the KO genes, PTC") + 
+      labs(x="log2 fold change", y="number of DE genes")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+
+ggarrange(p1, p2, ncol = 2, nrow = 1)
+
+
+```
+
+### For DE between samples under different conditions
+Barchart for number of DE genes
+
+```{r fig.width =4, fig.height=3}
+
+df_file_info_cond$items = paste(df_file_info_cond$DE_general_group, 
+                                df_file_info_cond$gene_strategy, sep="_")
+df_file_info_cond$items
+
+fc0 = log2(1.5)
+p0  = 0.05
+
+df_cond = data.frame(gene_strategy = df_file_info_cond$gene_strategy, 
+                     nDE = NA)
+
+for (k in 1:nrow(df_file_info_cond)){
+    
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", 
+                               df_file_info_cond$items[k], 
+                               "_hyp_vs_nor_DEseq2.tsv")),
+                        data.table = FALSE)
+  print(res[1:2,])
+  fc = "hyp_vs_nor_log2FoldChange"
+  padj = "hyp_vs_nor_padj"
+  df_cond[k,"nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+  
+}
+  
+df_cond
+
+p1 <- ggplot(df_cond, aes(x=gene_strategy, y=nDE, fill=gene_strategy)) +
+      geom_bar(stat="identity")+theme_classic() + 
+      ylab("Number of DE genes")+
+      ggtitle("DE hyp vs nor") + 
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank())
+
+print(p1)
+
+
+```
+
+
+## Generate volcano plots
+
+In some settings, there are too many DE genes and they cannot all be labeled in the volcano plots.
+
+### For DE between knockout and WT samples
+
+<span style="color:red">Gene GHRL1 cannot be found in the annotation file. </span>
+
+<span style="color:red">Likely it should be "GRHL1", just misspelled. </span>
+
+<span style="color:red">Manually set it back the misspelled one to load result file. </span>
+```{r fig.width = 6.5, fig.height=5}
+
+df_file_info
+
+fc0
+p0
+
+for(k in 1:nrow(df_file_info)){
+  
+  it_k = df_file_info$items[k]
+  d_group = df_file_info$DE_general_group[k]
+  gene_name = df_file_info$gene[k]
+  
+  ### *** manually set the gene name back to the misspelled one
+  ### *** in order to load results
+  if (gene_name=="GRHL1"){
+    gene_name = "GHRL1"
+  }
+  
+  print(it_k)
+  
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", it_k, "_DEseq2.tsv")),
+              data.table = FALSE)
+
+  res_k = res[,c(1, grep("PTC", names(res)))]
+  
+  names(res_k) = gsub(paste0(gene_name, "_PTC_"), "", names(res_k))
+
+  ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+  ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+    
+  res_k$DE = "No"
+  res_k$DE[ww_up] <- "Up"
+  res_k$DE[ww_down] <- "Down"
+    
+  res_k$log2FoldChange[which(res_k$log2FoldChange > 3)] = 3
+  res_k$log2FoldChange[which(res_k$log2FoldChange < -3)] = -3
+
+  col2use = c("blue", "grey", "red")
+  names(col2use) = c("Down", "No", "Up")
+    
+  res_k$delabel = NA
+  res_k$gene_symbol = gene_info$gene_symbol[match(res_k$gene_ID, 
+                                                  gene_info$ensembl_gene_id)]
+  w_de = which(res_k$DE != "No")
+  res_k$delabel[w_de] = res_k$gene_symbol[w_de]
+
+  print(table(res_k$DE))
+    
+  g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
+                    col=DE, label=delabel)) + 
+         geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_PTC")) + 
+         geom_text_repel(point.padding = 0.5,
+                         min.segment.length = 0, 
+                         size = 3,  # Adjust text size
+                         box.padding = 0.5,
+                         max.overlaps = 20, 
+                         show.legend = FALSE) + 
+         scale_color_manual(values=col2use)
+    
+  print(g2)
+  
+}
+
+```
+
+### For DE between samples under different conditions
+
+```{r fig.width = 6.5, fig.height=5}
+df_file_info_cond
+
+fc0
+p0
+
+for(k in 1:nrow(df_file_info_cond)){
+  
+  it_k = df_file_info_cond$items[k]
+  d_group = df_file_info_cond$DE_general_group[k]
+  gene_strategy_name = df_file_info_cond$gene_strategy[k]
+  
+  print(it_k)
+  
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", 
+                               df_file_info_cond$items[k], 
+                               "_hyp_vs_nor_DEseq2.tsv")),
+                        data.table = FALSE)  
+
+  res_k = res[,c(1, grep("hyp_vs_nor", names(res)))]
+  names(res_k) = gsub("hyp_vs_nor_", "", names(res_k))
+
+  ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+  ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+    
+  res_k$DE = "No"
+  res_k$DE[ww_up] <- "Up"
+  res_k$DE[ww_down] <- "Down"
+    
+  res_k$log2FoldChange[which(res_k$log2FoldChange > 3)] = 3
+  res_k$log2FoldChange[which(res_k$log2FoldChange < -3)] = -3
+
+  col2use = c("blue", "grey", "red")
+  names(col2use) = c("Down", "No", "Up")
+    
+  res_k$delabel = NA
+  res_k$gene_symbol = gene_info$gene_symbol[match(res_k$gene_ID, 
+                                                  gene_info$ensembl_gene_id)]
+  w_de = which(res_k$DE != "No")
+  res_k$delabel[w_de] = res_k$gene_symbol[w_de]
+
+  print(table(res_k$DE))
+    
+  g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
+                    col=DE, label=delabel)) + 
+         geom_point() + ggtitle(paste0(d_group, " ", gene_strategy_name, 
+                                       "\nhyp v.s. nor")) + 
+         geom_text_repel(point.padding = 0.5,
+                         min.segment.length = 0, 
+                         size = 3,  # Adjust text size
+                         box.padding = 0.5,
+                         max.overlaps = 20, 
+                         show.legend = FALSE) + 
+         scale_color_manual(values=col2use)
+    
+  print(g2)
+  
+}
+```
+
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+

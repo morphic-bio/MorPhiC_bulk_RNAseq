@@ -1,6 +1,6 @@
 ---
 title: "Check the over-representation of functional terms"
-author: "Wei Sun"
+author: "Si Liu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -15,12 +15,20 @@ output:
     number_sections: false
   df_print: paged
 params:
-  release: "2023_12"
+  release_name: "2023_12_JAX_RNAseq_ExtraEmbryonic"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(dev="CairoPNG")
 ```
+The code for 2024_09_UCSF_Bulk_EB_Timecourse dataset is in a separate file. 
+
+This code file can be applied to all other datasets from 2023_12 release to 2024_09 release.
+
+In each setting, based on the processed output file, take all genes with non-NA adjusted pvalues
+as genes to consider, and significant genes based on adjusted p-value cutoff 0.05 and 
+absolute log2foldchange cutoff log2(1.5).
 
 ## R libraries.
 
@@ -37,59 +45,12 @@ library(dplyr)
 library(data.table)
 theme_set(theme_classic())
 
-release = params$release
-release
+# BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene", force=TRUE)
+# BiocManager::install("org.Hs.eg.db")
+release_name = params$release_name
+release_name
 ```
 
-
-## Read in DE results
-
-```{r fig.width = 3, fig.height=3}
-res = fread(sprintf("results/%s_DEseq2.tsv.gz", release), 
-            data.table = FALSE)
-dim(res)
-res[1:2,1:5]
-
-items = names(res)[grep("_padj", names(res))]
-items
-
-gene_sets = list()
-for(it1 in items){
-  id1 = gsub("_padj", "", it1)
-  
-  res_k = res[,c(1, grep(id1, names(res)))]
-  names(res_k) = gsub(paste0(id1, "_"), "", names(res_k))
-  
-  w_up = which(res_k$log2FoldChange > log2(1.5) & res_k$padj < 0.01)
-  w_down = which(res_k$log2FoldChange < -log2(1.5) & res_k$padj < 0.01)
-  
-  gene_sets[[paste0(id1, "_up")]] = res_k$gene_ID[w_up]
-  gene_sets[[paste0(id1, "_down")]] = res_k$gene_ID[w_down]
-}
-
-sapply(gene_sets, length)
-```
-
-## Read in gene annotation 
-```{r fig.width = 3, fig.height=3}
-gene_info = fread("data/gencode_v44_basic_gene_info.tsv", 
-                  data.table = FALSE)
-dim(gene_info)
-gene_info[1:2,]
-
-table(res$gene_ID %in% gene_info$ensembl_gene_id)
-
-gene_info = gene_info[gene_info$ensembl_gene_id %in% res$gene_ID,]
-dim(gene_info)
-gene_info[1:2,]
-
-t_symbol = table(gene_info$hgnc_symbol)
-table(t_symbol)
-t_symbol[t_symbol > 1]
-
-gene_info = gene_info[gene_info$hgnc_symbol %in% names(t_symbol)[t_symbol==1],]
-dim(gene_info)
-```
 
 ## Prepare gene set information
 
@@ -121,59 +82,324 @@ for(k1 in names(pathways)){
   p1 = pathways[[k1]]
   pathways[[k1]] = p1[sapply(p1, length) %in% 10:500]
 }
+
+sapply(pathways, length)
 ```
 
 
-## Conduct enrichment analysis
+## Read in gene annotation 
 
-```{r warning = FALSE, message = FALSE}
+```{r fig.width = 3, fig.height=3}
+gene_info = fread("data/gencode_v44_primary_assembly_info.tsv", 
+                  data.table = FALSE)
 dim(gene_info)
+gene_info[1:2,]
+```
+
+## Prepare for reading in DE results
+```{r fig.width = 4, fig.height=3}
+
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+# condition_DE_files is for datasets with hypoxia and normoxia condition comparison
+regular_DE_files = all_result_files[!grepl("hyp_vs_nor", all_result_files)]
+condition_DE_files = all_result_files[grepl("hyp_vs_nor", all_result_files)]
+
+
+# extract core strings from regular DE result files
+
+extract_cores <- function(x, str_before, str_after){
+
+  pattern <- paste0(".*", str_before, "(.*?)", str_after, ".*")
+  middle_string <- sub(pattern, "\\1", x)
+  middle_substrings <- strsplit(middle_string, "_")[[1]]
+  x_d_group <- paste(middle_substrings[1:(length(middle_substrings)-1)], 
+                     collapse = "_")
+  x_gene <- middle_substrings[length(middle_substrings)]
+  
+  return(c(x_d_group, x_gene))
+}
+
+df_file_info = NULL
+
+for (x in regular_DE_files){
+  df_file_info = rbind(df_file_info, 
+                       extract_cores(x, 
+                                    paste0(release_name, "_"), 
+                                    "_DEseq2.tsv"))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("DE_general_group", "gene")
+
+df_file_info$items = paste(df_file_info$DE_general_group, 
+                           df_file_info$gene, sep="_")
+df_file_info$items
+df_file_info
+
+
+# extract core strings from DE result files about hypoxia and normoxia conditions
+
+extract_cores_cond <- function(x, str_before, str_after){
+
+  pattern <- paste0(".*", str_before, "(.*?)", str_after, ".*")
+  middle_string <- sub(pattern, "\\1", x)
+  middle_substrings <- strsplit(middle_string, "_")[[1]]
+  x_d_group <- paste(middle_substrings[1:(length(middle_substrings)-3)], 
+                     collapse = "_")
+  x_compare <- paste(middle_substrings[(length(middle_substrings)-2):length(middle_substrings)], 
+                     collapse = "_")
+  
+  return(c(x_d_group, x_compare))
+}
+
+if (length(condition_DE_files)>0){
+  
+  df_file_info_cond = NULL
+  
+  for (x in condition_DE_files){
+    df_file_info_cond = rbind(df_file_info_cond, 
+                              extract_cores_cond(x, 
+                                                 paste0(release_name, "_"), 
+                                                 "_DEseq2.tsv"))
+  }
+  
+  df_file_info_cond = as.data.frame(df_file_info_cond)
+  colnames(df_file_info_cond) = c("DE_general_group", "comparison")
+  
+  df_file_info_cond$items = paste(df_file_info_cond$DE_general_group, 
+                             df_file_info_cond$comparison, sep="_")
+  print(df_file_info_cond$items)
+  print(df_file_info_cond)
+}
+
+# set an exception for UCSF data
+
+```
+
+## Read in DE results and conduct enrichment analysis
+
+### Regular DE results
+```{r warning = FALSE, message = FALSE}
+
+fc0 = log2(1.5)
+p0  = 0.05
 
 max_n2kp = 10
 goseq_res = NULL
 
-for(k in 1:length(gene_sets)){
-  if(length(gene_sets[[k]]) < 10) { next }
-  
-  print(k)
-  set_k = names(gene_sets)[k]
+ko_start_col_index = 7
 
-  genes = gene_info$ensembl_gene_id %in% gene_sets[[k]]
-  names(genes) = gene_info$hgnc_symbol
-  table(genes)
+for (i in 1:nrow(df_file_info)){
   
-  pwf = nullp(genes, "hg38", "geneSymbol")
+  it1 = df_file_info$items[i]
+  gene_name = df_file_info$gene[i]
+    
+  res = fread(paste0("results/", release_name, "/processed/", release_name, 
+                     "_", it1, "_DEseq2.tsv"), 
+              data.table = FALSE)
+  res[1:2,]
+  
+  de_info_columns = colnames(res)[ko_start_col_index:ncol(res)]
+  strategy_vec = sapply(de_info_columns, function(x)strsplit(x, "_")[[1]][2])
+  unique_strategies = unique(strategy_vec)
+  
+  for (ko1 in unique_strategies){
+    
+    print(paste0(it1, " ", ko1))
+    
+    de_gene_sets = list()
+      
+    res_k = res[,c(1, grep(ko1, names(res)))]
+    names(res_k) = gsub(paste0(gene_name, "_", ko1, "_"), "", names(res_k))
+    
+    res_k = res_k[!is.na(res_k$padj),]
 
-  for(k1 in names(pathways)){
-    p1 = pathways[[k1]]
-    res1 = goseq(pwf, "hg38", "geneSymbol", 
-                 gene2cat=goseq:::reversemapping(p1))
-    res1$FDR  = p.adjust(res1$over_represented_pvalue, method="BH")
+    ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+    ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+
+    de_gene_sets[[paste0(ko1, "_up")]] = res_k[ww_up,]$gene_ID
+    de_gene_sets[[paste0(ko1, "_down")]] = res_k[ww_down,]$gene_ID
+
+    print(sapply(de_gene_sets, length))
     
-    nD = sum(res1$FDR < 0.05)
+    print(table(res_k$gene_ID %in% gene_info$ensembl_gene_id))
+  
+    gene_info_k = gene_info[gene_info$ensembl_gene_id %in% res_k$gene_ID,]
+    dim(gene_info_k)
+    gene_info_k[1:2,]
     
-    if(nD > 0){
-      res1 = res1[order(res1$FDR),][1:min(nD, max_n2kp),]
-      res1$category = gsub("REACTOME_|GOBP_", "", res1$category)
-      res1$category = gsub("_", " ", res1$category)
-      res1$category = tolower(res1$category)
-      res1$category = substr(res1$category, start=1, stop=120)
-      goseq_res[[set_k]][[k1]] = res1
+    sum(is.na(gene_info_k$hgnc_symbol))
+    
+    t_symbol = table(gene_info_k$hgnc_symbol)
+    table(t_symbol)
+    t_symbol[t_symbol > 1]
+    
+    gene_info_k = gene_info_k[gene_info_k$hgnc_symbol %in% names(t_symbol)[t_symbol==1],]
+    dim(gene_info_k)
+     
+    for(j in 1:length(de_gene_sets)){
+      if(length(de_gene_sets[[j]]) < 10) { next }
+    
+      print(j)
+      set_j = names(de_gene_sets)[j]
+  
+      genes = gene_info_k$ensembl_gene_id %in% de_gene_sets[[j]]
+      names(genes) = gene_info_k$hgnc_symbol
+      table(genes)
+    
+      pwf = nullp(genes, "hg38", "geneSymbol")
+  
+      for(k1 in names(pathways)){
+        p1 = pathways[[k1]]
+        res1 = goseq(pwf, "hg38", "geneSymbol", 
+                     gene2cat=goseq:::reversemapping(p1))
+        res1$FDR  = p.adjust(res1$over_represented_pvalue, method="BH")
+      
+        nD = sum(res1$FDR < 0.05)
+      
+        if(nD > 0){
+          res1 = res1[order(res1$FDR),][1:min(nD, max_n2kp),]
+          res1$category = gsub("REACTOME_|GOBP_", "", res1$category)
+          res1$category = gsub("_", " ", res1$category)
+          res1$category = tolower(res1$category)
+          res1$category = substr(res1$category, start=1, stop=120)
+          set_j_fullname = paste0(it1, "_", set_j)
+          goseq_res[[set_j_fullname]][[k1]] = res1
+        }
+      }
     }
+    
   }
+
+}
+
+```
+### DE results about hypoxia vs normoxia conditions if available
+
+```{r warning = FALSE, message = FALSE}
+
+## Keep using the same 
+## goseq_res
+## object
+
+if (length(condition_DE_files)>0){
+    
+  fc0 = log2(1.5)
+  p0  = 0.05
+  
+  max_n2kp = 10
+  
+  ko_start_col_index = 7
+  
+  for (i in 1:nrow(df_file_info_cond)){
+    
+    it1 = df_file_info_cond$items[i]
+    compare_name = df_file_info_cond$comparison[i]
+    print(compare_name)
+    
+    res = fread(paste0("results/", release_name, "/processed/", release_name, 
+                       "_", it1, "_DEseq2.tsv"), 
+                data.table = FALSE)
+    res[1:2,]
+    
+    de_info_columns = colnames(res)[ko_start_col_index:ncol(res)]
+    
+    de_gene_sets = list()
+        
+    res_k = res[,c(1, grep(compare_name, names(res)))]
+    names(res_k) = gsub(paste0(compare_name, "_"), "", names(res_k))
+      
+    res_k = res_k[!is.na(res_k$padj),]
+  
+    ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
+    ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
+  
+    de_gene_sets[[paste0("up")]] = res_k[ww_up,]$gene_ID
+    de_gene_sets[[paste0("down")]] = res_k[ww_down,]$gene_ID
+  
+    print(sapply(de_gene_sets, length))
+    
+    print(table(res_k$gene_ID %in% gene_info$ensembl_gene_id))
+  
+    gene_info_k = gene_info[gene_info$ensembl_gene_id %in% res_k$gene_ID,]
+    dim(gene_info_k)
+    gene_info_k[1:2,]
+    
+    sum(is.na(gene_info_k$hgnc_symbol))
+    
+    t_symbol = table(gene_info_k$hgnc_symbol)
+    table(t_symbol)
+    t_symbol[t_symbol > 1]
+    
+    gene_info_k = gene_info_k[gene_info_k$hgnc_symbol %in% names(t_symbol)[t_symbol==1],]
+    dim(gene_info_k)
+       
+    for(j in 1:length(de_gene_sets)){
+      if(length(de_gene_sets[[j]]) < 10) { next }
+    
+      print(j)
+      set_j = names(de_gene_sets)[j]
+  
+      genes = gene_info_k$ensembl_gene_id %in% de_gene_sets[[j]]
+      names(genes) = gene_info_k$hgnc_symbol
+      table(genes)
+    
+      pwf = nullp(genes, "hg38", "geneSymbol")
+  
+      for(k1 in names(pathways)){
+        p1 = pathways[[k1]]
+        res1 = goseq(pwf, "hg38", "geneSymbol", 
+                     gene2cat=goseq:::reversemapping(p1))
+        res1$FDR  = p.adjust(res1$over_represented_pvalue, method="BH")
+      
+        nD = sum(res1$FDR < 0.05)
+      
+        if(nD > 0){
+          res1 = res1[order(res1$FDR),][1:min(nD, max_n2kp),]
+          res1$category = gsub("REACTOME_|GOBP_", "", res1$category)
+          res1$category = gsub("_", " ", res1$category)
+          res1$category = tolower(res1$category)
+          res1$category = substr(res1$category, start=1, stop=120)
+          set_j_fullname = paste0(it1, "_", set_j)
+          goseq_res[[set_j_fullname]][[k1]] = res1
+        }
+      }
+    }
+      
+  }
+
 }
 ```
 
 
-## Conduct enrichment analysis
+
+
+## Save results out
 ```{r warning = FALSE, message = FALSE}
+
+names(goseq_res)
+
 for(n1 in names(goseq_res)){
   print(n1)
   print(goseq_res[[n1]])
 }
 
-saveRDS(goseq_res, sprintf("results/gene_set_enrichments_%s.rds", 
-                           release))
+enrichment_output_dir = file.path(result_dir, "enrichment")
+
+if (!file.exists(enrichment_output_dir)){
+  dir.create(enrichment_output_dir, recursive = TRUE)
+}
+
+saveRDS(goseq_res, 
+        file.path(enrichment_output_dir, 
+                  sprintf("%s_enrichment.rds", release_name)))  
+
 ```
 
 

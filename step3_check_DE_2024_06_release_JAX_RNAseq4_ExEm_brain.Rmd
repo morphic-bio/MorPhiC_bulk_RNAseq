@@ -20,8 +20,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Besides checking the results of DE analysis, also save the sets of DE genes out, to prepare for next step of gene set enrichment analysis. 
-
 ## R libraries.
 
 ```{r load_libraries, warning = FALSE, message = FALSE}
@@ -57,11 +55,10 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(meta$model_organ, meta$ko_gene)
-table(meta$run_id, meta$ko_gene)
-table(meta$ko_strategy, meta$ko_gene)
-
-table(meta$ko_gene, meta$differentiated_timepoint_value)
+table(meta$biomaterial_id)
+table(table(meta$biomaterial_id))
+table(table(meta$lib_biomaterial_id))
+table(table(meta$differentiated_biomaterial_id))
 ```
 
 ## Read in gene count data and filter genes
@@ -84,11 +81,8 @@ rownames(cts_dat) = cts$Name
 
 ```{r fig.width = 4, fig.height=3}
 
-table(meta$model_organ, meta$differentiated_timepoint_value)
-
 model_s = meta$model_system
 table(model_s, useNA="ifany")
-table(meta$model_system, meta$model_organ, useNA="ifany")
 
 get_q75 <- function(x){quantile(x, probs = 0.75)}
 
@@ -156,12 +150,19 @@ table(is.na(gene_info$gene_symbol))
 
 ## Prepare for reading in DE results
 
-This dataset has two model systems: CBO and PrS. DE analyses were run for three DE groups: 
+This dataset has two model systems: CBO and PrS. 
+
+There is only one knockout strategy: PTC.
+
+DE analyses were run for two general (model system, day) levels: 
 
     CBO_day_9
-    PrS_day_6_20231214_23-robson-016
-    PrS_day_6_20231226_23-robson-018
-    
+    PrS_day_6
+
+The specific DE groups (for example, run_id, knockout gene group, etc.) can be found in the file with naming in the format:
+
+    ${dataset_name}_DE_n_samples.tsv
+
 ```{r fig.width = 4, fig.height=3}
 
 release_name = "2024_06_JAX_RNAseq4_ExEm_brain"
@@ -188,19 +189,20 @@ for (x in all_result_files){
 }
 
 df_file_info = as.data.frame(df_file_info)
-colnames(df_file_info) = c("DE_group", "gene")
+colnames(df_file_info) = c("DE_general_group", "gene")
 df_file_info
 
 ```
 
-## Compare the number of DE genes
+## Number of DE genes and properties of knockout gene
 
-Do it separately for each DE group.
+### For DE between knockout and WT samples
 
+Plot the knockout genes from different DE groups all together in one figure. 
 
-```{r fig.width =4, fig.height=3}
+```{r fig.width =9, fig.height=3}
 
-df_file_info$items = paste(df_file_info$DE_group, 
+df_file_info$items = paste(df_file_info$DE_general_group, 
                            df_file_info$gene, sep="_")
 df_file_info$items
 
@@ -215,72 +217,78 @@ table(gene_symbols %in% gene_info$gene_symbol)
 genes_w_multi_ensembl = names(which(table(gene_info$gene_symbol)>1))
 genes_w_multi_ensembl
 
-sorted_de_grps = sort(unique(df_file_info$DE_group))
-  
-for (d_group in sorted_de_grps){
-  
-  df_file_info_dg = df_file_info[which(df_file_info$DE_group==d_group), ]
-  
-  df = data.frame(KO = df_file_info_dg$items, 
-                  gene_symbol = df_file_info_dg$gene, 
-                  PTC_nDE = NA, 
-                  PTC_padj = NA, 
-                  PTC_log2FoldChange = NA)
 
-  df$Model = str_extract(df$KO, "^[a-zA-Z0-9]+")
-  
-  gene_ids = gene_info$ensembl_gene_id[match(df_file_info_dg$gene, gene_info$gene_symbol)]
-    
-  for (k in 1:nrow(df_file_info_dg)){
-      
-    res = fread(file.path(processed_output_dir,
-                          paste0(release_name, "_", df_file_info_dg$items[k], "_DEseq2.tsv")),
-                          data.table = FALSE)
-    print(res[1:2,])
-    
-    gene_id = gene_ids[k]
-    w_gene = which(res$gene_ID == gene_id)
-    stopifnot(length(w_gene) == 1)
-    stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
-    
-    fc = paste0(df$gene_symbol[k], "_PTC_log2FoldChange")
-    padj = paste0(df$gene_symbol[k], "_PTC_padj")
- 
-    df[k,"PTC_nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
-    df[k,"PTC_log2FoldChange"] = res[[fc]][w_gene]
-    df[k,"PTC_padj"] = res[[padj]][w_gene]
-    
-  }
-  
-  print(df)
-  
-  if (d_group=="PrS_day_6_20231214_23-robson-016"){
-    print("the gene OVOL1 does not show up")
-    print("because the padj is 0 and the y axis value is infinite")
-  }
-  
-  p5 <- ggplot(df, aes(x=PTC_log2FoldChange, y=-log10(PTC_padj), 
-                 label=gene_symbol)) + 
-        geom_point(size=2) + 
-        geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
-                        size = 3,  # Adjust text size
-                        box.padding = 0.5, 
-                        max.overlaps = 20, show.legend = FALSE) + 
-        #coord_cartesian(clip = "off") + 
-        #ylim(0, max(-log10(df$PTC_padj)) + 0.5) + 
-        ggtitle("DE results of the KO genes, PTC") + 
-        labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
-        geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
-        geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
-                   linetype = "dashed")
+df = data.frame(KO = df_file_info$items, 
+                group = df_file_info$DE_general_group,
+                gene_symbol = df_file_info$gene, 
+                PTC_nDE = NA, 
+                PTC_padj = NA, 
+                PTC_log2FoldChange = NA)
 
-   g_combined <- ggarrange(p5, ncol = 1, nrow = 1)
-   print(annotate_figure(g_combined,
-                      top = text_grob(d_group, 
-                                      face = "bold", size = 16)))  
+df$Model = str_extract(df$KO, "^[a-zA-Z0-9]+")
 
+gene_ids = gene_info$ensembl_gene_id[match(df_file_info$gene, gene_info$gene_symbol)]
+gene_ids
+    
+for (k in 1:nrow(df_file_info)){
+    
+  res = fread(file.path(processed_output_dir,
+                        paste0(release_name, "_", df_file_info$items[k], "_DEseq2.tsv")),
+                        data.table = FALSE)
+  print(res[1:2,])
+  
+  gene_id = gene_ids[k]
+  w_gene = which(res$gene_ID == gene_id)
+  
+  stopifnot(length(w_gene) == 1)
+  stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
+  
+  fc = paste0(df$gene_symbol[k], "_PTC_log2FoldChange")
+  padj = paste0(df$gene_symbol[k], "_PTC_padj")
+
+  df[k,"PTC_nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+  df[k,"PTC_log2FoldChange"] = res[[fc]][w_gene]
+  df[k,"PTC_padj"] = res[[padj]][w_gene]
+  
 }
+  
+df
+  
 
+print("the gene OVOL1 does not show up properly in the subfigure on the left")
+print("because the padj is 0 and the y axis value is infinite")
+
+p1 <- ggplot(df, aes(x=PTC_log2FoldChange, y=-log10(PTC_padj), 
+               label=gene_symbol, color=group)) + 
+      geom_point(size=2) + scale_color_brewer(palette = "Dark2")+ 
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      #coord_cartesian(clip = "off") + 
+      #ylim(0, max(-log10(df$PTC_padj)) + 0.5) + 
+      ggtitle("DE results of the KO genes, PTC") + 
+      labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+
+p2 <- ggplot(df, aes(x=PTC_log2FoldChange, y=PTC_nDE, 
+               label=gene_symbol, color=group)) + 
+      geom_point(size=2) + scale_color_brewer(palette = "Dark2")+ 
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      #coord_cartesian(clip = "off") + 
+      #ylim(0, max(-log10(df$PTC_padj)) + 0.5) + 
+      ggtitle("DE results of the KO genes, PTC") + 
+      labs(x="log2 fold change", y="number of DE genes")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
+
+ggarrange(p1, p2, ncol = 2, nrow = 1)
 
 
 ```
@@ -288,11 +296,9 @@ for (d_group in sorted_de_grps){
 
 ## Generate volcano plots
 
-Also output the DE gene sets for the gene set enrichment analysis. 
+In some settings, there are too many DE genes and they cannot all be labeled in the volcano plots.
 
-In some DE group combinations, there are too many DE genes and they cannot all be labeled in the volcano plots.
-
-
+### For DE between knockout and WT samples
 
 ```{r fig.width = 6.5, fig.height=5}
 
@@ -304,11 +310,8 @@ p0
 for(k in 1:nrow(df_file_info)){
   
   it_k = df_file_info$items[k]
-  d_group = df_file_info$DE_group[k]
+  d_group = df_file_info$DE_general_group[k]
   gene_name = df_file_info$gene[k]
-  
-  # create a list to store DE gene set for the gene set enrichment analysis
-  de_gene_sets = list() 
   
   print(it_k)
   
@@ -322,9 +325,6 @@ for(k in 1:nrow(df_file_info)){
 
   ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
   ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
-
-  de_gene_sets[[paste0(gene_name, "_PTC_up")]] = res_k[ww_up,]$gene_ID
-  de_gene_sets[[paste0(gene_name, "_PTC_down")]] = res_k[ww_down,]$gene_ID
     
   res_k$DE = "No"
   res_k$DE[ww_up] <- "Up"
@@ -356,18 +356,6 @@ for(k in 1:nrow(df_file_info)){
          scale_color_manual(values=col2use)
     
   print(g2)
-
-  # save out the DE gene lists for gene set enrichment analysis
-  DE_set_output_dir = sprintf("%s/DE_gene_lists", result_dir)
-                       
-    
-  if (!file.exists(DE_set_output_dir)){
-    dir.create(DE_set_output_dir)
-  }
-  
-  saveRDS(de_gene_sets, 
-          sprintf("%s/%s_%s_DE_gene_list.rds", 
-                  DE_set_output_dir, release_name, it_k))
   
 }
 
