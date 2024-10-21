@@ -11,7 +11,7 @@ Pseudo-bulk RNA-seq DE testing by DESeq2
 
 ## step3_check_DE
 
-Valcano plot, KO effect on the KO gene. 
+Volcano plot, KO effect on the KO gene. 
 
 
 ## step4 and 5
