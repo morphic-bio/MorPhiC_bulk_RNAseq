@@ -109,27 +109,52 @@ df1 = data.frame(release, gene, nGenes, nDE_05, nDE_01)
 ```
 
 ## Summerize DE results
-```{r fig.width = 9, fig.height = 5}
+```{r fig.width = 7, fig.height = 4}
 sort(table(df1$gene), decreasing = TRUE)[1:5]
 df1 = df1[order(df1$gene),]
 dim(df1)
-df1
+df1[1:2,]
 
-df1[df1$nDE_05 < 20,]
+de_g0 = df1[df1$nDE_05 < 20,]
 
 de_g1 = df1[df1$nDE_05 >= 20 & df1$nDE_05 < 2000,]
 de_g2 = df1[df1$nDE_05 >2000,]
 
-ggplot(de_g1, aes(x = log10(nDE_05), y = log10(nDE_01), color = release, 
+de_g0
+
+ggplot(de_g1, aes(x = nDE_05, y = nDE_01, color = release, 
                   label = gene)) +
   geom_point(size = 2) + 
   geom_text_repel(show.legend = FALSE) 
 
-ggplot(de_g2, aes(x = log10(nDE_05), y = log10(nDE_01), color = release, 
+ggplot(de_g2, aes(x = nDE_05, y = nDE_01, color = release, 
                   label = gene)) +
   geom_point(size = 2) + 
   geom_text_repel(show.legend = FALSE) 
 
+```
+
+## Barplot
+```{r fig.width = 6, fig.height = 4}
+
+ggplot(de_g1, aes(x = nDE_01, y = reorder(gene, nDE_01))) +
+  geom_bar(stat = "identity", fill = "skyblue1", color = "royalblue4", 
+           alpha = 0.7, width = 0.8) + 
+  labs(x = "# of DE genes", y="") 
+```
+
+```{r fig.width = 6, fig.height = 3}
+
+ggplot(de_g2, aes(x = nDE_01, y = reorder(gene, nDE_01))) +
+  geom_bar(stat = "identity", fill = "skyblue1", color = "royalblue4", 
+           alpha = 0.7, width = 0.8) + 
+  labs(x = "# of DE genes", y="") 
+
+```
+
+## Write out results
+```{r fig.width = 6, fig.height = 3}
+fwrite(df1, "results/summary_DE_results.tsv", sep = "\t")
 ```
 
 ```{r}
