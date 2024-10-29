@@ -1,0 +1,139 @@
+---
+title: "Summerize results"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(data.table)
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+library(stringr)
+library(cowplot)
+
+library(tidyr)
+theme_set(theme_classic())
+```
+
+## Read in DE results
+
+```{r}
+releases_all = list.files("results", pattern = "JAX")
+
+DE_gene_list = list()
+
+release = gene = nGenes = nDE_05 = nDE_01 = NULL
+
+for(r1 in releases_all){
+  fnms = list.files(file.path("results", r1, "processed"), full.names = TRUE)
+  
+  for(f1 in fnms){
+    d1 = fread(f1)
+    g1 = str_extract(f1, "(?<=_)[A-Za-z0-9]+(?=_DEseq2)")
+    col_nm = paste0(g1, "_PTC_padj")
+    
+    if(g1 == "nor"){
+      if(grepl("EPAS1_PTC_hyp_vs_nor", basename(f1))){
+        g1 = "EPAS1_hyp_vs_nor"
+        col_nm = "hyp_vs_nor_padj"
+      }else if(grepl("EPAS1_reverted_hyp_vs_nor", basename(f1))){
+        g1 = "EPAS1_reverted_hyp_vs_nor"
+        col_nm = "hyp_vs_nor_padj"
+      }else{
+        print(paste("skip", basename(f1)))
+        next
+      }
+    }else{
+      if(grepl("reverted_", basename(f1))){
+        g1 = paste0(g1, "_reverted")
+        col_nm = paste0(g1, "_padj")
+      }
+    }
+    
+    if(grepl("Diverse", basename(f1))){
+      g1 = paste0(g1, "_Diverse")
+    }
+    
+    if(grepl("EPAS1", g1) && (! grepl("hyp_vs_nor", g1))){
+      if(grepl("_hyp_", basename(f1))){
+        g1 = paste0(g1, "_hyp")
+      }else if(grepl("_nor_", basename(f1))){
+        g1 = paste0(g1, "_nor")
+      }else{
+        stop("unexpected. EPAS1 should have condition hyp or nor")
+      }
+    }
+    
+    if(grepl("Neuroectoderm_CBO_day_", basename(f1))){
+      g1 = paste0(g1, str_extract(basename(f1), "_day_\\d+"))
+    }
+    
+    stopifnot(col_nm %in% names(d1))
+    
+    release = c(release, r1)
+    gene   = c(gene, g1)
+    nGenes = c(nGenes, nrow(d1))
+    nDE_05 = c(nDE_05, sum(d1[[col_nm]] < 0.05, na.rm = TRUE))
+    
+    col2 = gsub("_padj", "_log2FoldChange", col_nm, fixed = TRUE)
+    stopifnot(col2 %in% names(d1))
+
+    nDE_01 = c(nDE_01, sum(d1[[col_nm]] < 0.01 & abs(d1[[col2]]) > 0.585, 
+                           na.rm = TRUE))
+    
+    DE_gene_list[[g1]] = 
+      d1$gene_ID[d1[[col_nm]] < 0.01 & abs(d1[[col2]]) > 0.585]
+  }
+}
+
+df1 = data.frame(release, gene, nGenes, nDE_05, nDE_01)
+```
+
+## Summerize DE results
+```{r fig.width = 9, fig.height = 5}
+sort(table(df1$gene), decreasing = TRUE)[1:5]
+df1 = df1[order(df1$gene),]
+dim(df1)
+df1
+
+df1[df1$nDE_05 < 20,]
+
+de_g1 = df1[df1$nDE_05 >= 20 & df1$nDE_05 < 2000,]
+de_g2 = df1[df1$nDE_05 >2000,]
+
+ggplot(de_g1, aes(x = log10(nDE_05), y = log10(nDE_01), color = release, 
+                  label = gene)) +
+  geom_point(size = 2) + 
+  geom_text_repel(show.legend = FALSE) 
+
+ggplot(de_g2, aes(x = log10(nDE_05), y = log10(nDE_01), color = release, 
+                  label = gene)) +
+  geom_point(size = 2) + 
+  geom_text_repel(show.legend = FALSE) 
+
+```
+
+```{r}
+gc()
+sessionInfo()
+```
+
