@@ -59,7 +59,7 @@ table(meta$model_organ, meta$ko_gene)
 table(meta$run_id, meta$ko_gene)
 table(meta$ko_strategy, meta$ko_gene)
 
-table(meta$ko_gene, meta$differentiated_timepoint_value)
+table(meta$ko_gene, meta$timepoint_value)
 ```
 
 ## Read in gene count data and filter genes
@@ -157,9 +157,9 @@ DE analysis was run for different DE groups separately
     
     CBO_nor, day 9
     PrS_hyp, day 6
-    PrS_nor, day 6, gene group (except gene group GHRL1-GCM1)
-                    GHRL1-GCM1_excluding_GCM1, GHRL1 vs WT
-                    GHRL1-GCM1_excluding_GHRL1, GCM1 vs WT
+    PrS_nor, day 6, gene group (except gene group GRHL1-GCM1)
+                    GRHL1-GCM1_excluding_GCM1, GRHL1 vs WT
+                    GRHL1-GCM1_excluding_GRHL1, GCM1 vs WT
     
 The specific DE groups (for example, run_id, knockout gene group, etc.) can be found in the file with naming in the format:
 
@@ -229,12 +229,6 @@ df_file_info_cond
 
 Plot the knockout genes from different DE groups all together in one figure. 
 
-<span style="color:red">Gene GHRL1 cannot be found in the annotation file. </span>
-
-<span style="color:red">Likely it should be "GRHL1", just misspelled. </span>
-
-<span style="color:red">Manually change it in current plots. </span>
-
 ```{r fig.width =9, fig.height=3}
   
 df_file_info$items = paste(df_file_info$DE_general_group, 
@@ -243,11 +237,6 @@ df_file_info$items
 
 fc0 = log2(1.5)
 p0  = 0.05
-
-## **** note that this is after creating the "item" column
-## **** leave the "item" column uncorrected in order to load result files
-## **** need to update it after the metadata file is also updated
-df_file_info$gene[which(df_file_info$gene=="GHRL1")] = "GRHL1"
 
 gene_symbols = df_file_info$gene
 gene_symbols
@@ -283,15 +272,8 @@ for (k in 1:nrow(df_file_info)){
   stopifnot(length(w_gene) == 1)
   stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
   
-  ### *** manually set the gene name back to the misspelled one
-  ### *** in order to load results
-  if (df$gene_symbol[k]=="GRHL1"){
-    fc = paste0("GHRL1", "_PTC_log2FoldChange")
-    padj = paste0("GHRL1", "_PTC_padj")
-  }else{
-    fc = paste0(df$gene_symbol[k], "_PTC_log2FoldChange")
-    padj = paste0(df$gene_symbol[k], "_PTC_padj")    
-  }
+  fc = paste0(df$gene_symbol[k], "_PTC_log2FoldChange")
+  padj = paste0(df$gene_symbol[k], "_PTC_padj")    
 
   df[k,"PTC_nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
   df[k,"PTC_log2FoldChange"] = res[[fc]][w_gene]
@@ -390,11 +372,6 @@ In some settings, there are too many DE genes and they cannot all be labeled in 
 
 ### For DE between knockout and WT samples
 
-<span style="color:red">Gene GHRL1 cannot be found in the annotation file. </span>
-
-<span style="color:red">Likely it should be "GRHL1", just misspelled. </span>
-
-<span style="color:red">Manually set it back the misspelled one to load result file. </span>
 ```{r fig.width = 6.5, fig.height=5}
 
 df_file_info
@@ -407,12 +384,6 @@ for(k in 1:nrow(df_file_info)){
   it_k = df_file_info$items[k]
   d_group = df_file_info$DE_general_group[k]
   gene_name = df_file_info$gene[k]
-  
-  ### *** manually set the gene name back to the misspelled one
-  ### *** in order to load results
-  if (gene_name=="GRHL1"){
-    gene_name = "GHRL1"
-  }
   
   print(it_k)
   
@@ -444,10 +415,16 @@ for(k in 1:nrow(df_file_info)){
   res_k$delabel[w_de] = res_k$gene_symbol[w_de]
 
   print(table(res_k$DE))
-    
+  
+   if (gene_name=="EPAS1"){
+    d_group_in_title = d_group
+  }else{
+    d_group_in_title = gsub("_nor", "", d_group)
+  } 
+  
   g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                     col=DE, label=delabel)) + 
-         geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_PTC")) + 
+         geom_point() + ggtitle(paste0(d_group_in_title, "\n", gene_name, "_PTC")) + 
          geom_text_repel(point.padding = 0.5,
                          min.segment.length = 0, 
                          size = 3,  # Adjust text size

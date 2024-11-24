@@ -65,16 +65,16 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(meta$biomaterial_id)
-table(table(meta$biomaterial_id))
-table(table(meta$lib_biomaterial_id))
-table(table(meta$differentiated_biomaterial_id))
+table(meta$clonal.label)
+table(table(meta$clonal.label))
+table(table(meta$library_preparation.label))
+table(table(meta$label))
 ```
 
 ### Extract condition information
 ```{r}
-meta$differentiated_biomaterial_id[1:6]
-cell_line_id = str_split(meta$differentiated_biomaterial_id, pattern = '-')
+meta$label[1:6]
+cell_line_id = str_split(meta$label, pattern = '-')
 table(sapply(cell_line_id, length))
 
 cell_line_id = lapply(cell_line_id, function(x) { length(x) <- 4; x})
@@ -85,6 +85,8 @@ meta$condition = cell_line_id[, 4]
 meta$condition[which(is.na(meta$condition))] = "nor"
 table(meta$condition, useNA="ifany")
 table(meta$model_organ, meta$condition, useNA="ifany")
+
+table(meta$run_id, useNA="ifany")
 table(meta$run_id, meta$condition, useNA="ifany")
 ```
 ## Read in gene count data
@@ -102,13 +104,13 @@ table(names(cts)[-1] == meta$file_id, useNA="ifany")
 cts_dat = data.matrix(cts[,-1])
 rownames(cts_dat) = cts$Name
 
-table(meta$model_organ, meta$differentiated_timepoint_value)
-table(meta$run_id, meta$differentiated_timepoint_value)
+table(meta$model_organ, meta$timepoint_value)
+table(meta$run_id, meta$timepoint_value)
 
-unique_timepoints = unique(meta$differentiated_timepoint_value)
+unique_timepoints = unique(meta$timepoint_value)
 unique_timepoints = sort(unique_timepoints)
 
-xx = as.character(meta$differentiated_timepoint_value)
+xx = as.character(meta$timepoint_value)
 xx = factor(xx, levels = as.character(unique_timepoints))
 meta$timepoint = xx
 ```
@@ -120,7 +122,7 @@ meta_m = meta[which(meta$ko_gene=="WT"), ]
 
 all_unique_ko_genes = sort(setdiff(unique(meta$ko_gene), "WT"))
 
-extracted_ko_string_list = str_extract_all(meta_m$biomaterial_description, 
+extracted_ko_string_list = str_extract_all(meta_m$clonal.description, 
                                            paste(all_unique_ko_genes, collapse="|"))
 extracted_ko_strings = sapply(extracted_ko_string_list, 
                               function(x)paste(x, collapse="-"))
@@ -141,7 +143,7 @@ meta$gene_group = df_ko_gene_group$gene_group[match(meta$ko_gene,
                                                     df_ko_gene_group$ko_gene)]
 w_gene_group_NA = which(is.na(meta$gene_group))
 for (ww in w_gene_group_NA){
-  xx = str_extract_all(meta$biomaterial_description[ww], 
+  xx = str_extract_all(meta$clonal.description[ww], 
                        paste(all_unique_ko_genes, collapse="|"))[[1]]
   meta$gene_group[ww] = paste(xx, collapse="-")
 }
@@ -440,7 +442,7 @@ for(cur_mc in unique_model_condition_ss){
   shapes = c(0, 1, 7, 8, 9, 10, 11, 15, 16, 17)
   
   
-  table(meta_m$biomaterial_description, meta_m$timepoint)
+  table(meta_m$clonal.description, meta_m$timepoint)
   
   gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_gene, color=run_id_short)) +
               geom_point(size=2.5, alpha=0.7) + 
@@ -487,30 +489,35 @@ for(cur_mc in unique_model_condition_ss){
 
 Run DE analysis for each (model system, condition, day) combination separately. 
 
-In addition, for PrS_nor, the batch effect between run_ids seem big. Among the run_ids, the data for 1 sample from 20240418_24-robson-007 seems close to the 2 from 20240429_24-robson-007, and these two runs can be combined together. However, the WT samples to pair with these 3 samples seem to be from run_id 20240508_24-robson-017. The samples from this run_id seem far away from the 3 samples for knockout gene GCM1. And among the 6 WT samples under run 20240508_24-robson-017, the difference between the WT samples for GHRL1-GCM1 and those for EPAS1 seem bigger than that between WT for EPAS1 and EPAS1 knockout samples. Currently, run DESeq2 separately on the level of gene group, with exception for GHRL1-GCM1, where DESeq2 is run separately by pairing GHRL1 with WT samples and pairing GCM1 with WT samples. 
+In addition, for PrS_nor, the batch effect between run_ids seem big. Among the run_ids, the data for 1 sample from 20240418_24-robson-007 seems close to the 2 from 20240429_24-robson-007, and these two runs can be combined together. However, the WT samples to pair with these 3 samples seem to be from run_id 20240508_24-robson-017. The samples from this run_id seem far away from the 3 samples for knockout gene GCM1. And among the 6 WT samples under run 20240508_24-robson-017, the difference between the WT samples for GRHL1-GCM1 and those for EPAS1 seem bigger than that between WT for EPAS1 and EPAS1 knockout samples. Currently, run DESeq2 separately on the level of gene group, with exception for GRHL1-GCM1, where DESeq2 is run separately by pairing GRHL1 with WT samples and pairing GCM1 with WT samples. 
 
 Run DESeq2 for different DE groups separately
     
     CBO_nor, day 9
     PrS_hyp, day 6
-    PrS_nor, day 6, gene group (except gene group GHRL1-GCM1)
-                    GHRL1-GCM1_excluding_GCM1, GHRL1 vs WT
-                    GHRL1-GCM1_excluding_GHRL1, GCM1 vs WT
+    PrS_nor, day 6, gene group (except gene group GRHL1-GCM1)
+                    GRHL1-GCM1_excluding_GCM1, GRHL1 vs WT
+                    GRHL1-GCM1_excluding_GRHL1, GCM1 vs WT
 
 For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
 
 In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
-The first version of the output files contains gene id, and for each knockout strategy:
 
-    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+The first version of the output files contains 
     
-The second version of the output files contains gene id, 
-
-    chr, strand, position, gene name
+    gene id, gene symbol
 
 and for each knockout strategy:
 
-    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
+    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+    
+The second version of the output files contains  
+
+    gene id, gene symbol, chr, strand, position
+
+and for each knockout strategy:
+
+    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4).
 
 In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
 
@@ -632,7 +639,7 @@ for(model1 in unique_model_ss){
     
     stopifnot(all(sample_info_dg$de_grp==d_group))
     
-    if (d_group=="PrS_day_6_nor_GHRL1-GCM1"){
+    if (d_group=="PrS_day_6_nor_GRHL1-GCM1"){
       d_group=paste0(d_group, "_excluding_GCM1")
     }
     
@@ -866,7 +873,7 @@ for(model1 in unique_model_ss){
 # leave the step of saving size data frame out to be after the next step
 ```
 
-### Second, DE analysis for GCM1 only, use WT samples for gene group GHRL1-GCM1
+### Second, DE analysis for GCM1 only, use WT samples for gene group GRHL1-GCM1
 ```{r fig.width = 4.8, fig.height=3.2, message=FALSE, warning=FALSE}
 
 
@@ -878,8 +885,8 @@ for(model1 in c("PrS")){
   print("==========================================")
   print("")
   
-  # only use GCM1 knockout samples and WT samples for gene group GHRL1-GCM1
-  sample2kp = which((meta$gene_group == "GHRL1-GCM1")&(meta$ko_gene!="GHRL1")) 
+  # only use GCM1 knockout samples and WT samples for gene group GRHL1-GCM1
+  sample2kp = which((meta$gene_group == "GRHL1-GCM1")&(meta$ko_gene!="GRHL1")) 
 
   cts_dat_m = cts_dat[,sample2kp]
   meta_m    = meta[sample2kp,]
@@ -909,7 +916,7 @@ for(model1 in c("PrS")){
                               sample_info$condition, "_",
                               sample_info$gene_group)
   sample_info$de_grp = paste0(sample_info$de_grp, 
-                              "_excluding_GHRL1")
+                              "_excluding_GRHL1")
 
   unique_de_grps = unique(sample_info$de_grp)
   sorted_de_grps = sort(unique_de_grps)
@@ -1158,8 +1165,9 @@ for (cur_ko_group in relevant_ko_groups){
   
   print(table(meta_cond$condition, meta_cond$run_id_short))
   
-  cols2kp = c("model_system", "timepoint", "biomaterial_id", "condition")
+  cols2kp = c("model_system", "timepoint", "clonal.label", "condition")
   sample_info_cond = meta_cond[,cols2kp]
+  colnames(sample_info_cond)[which(colnames(sample_info_cond)=="clonal.label")] = "clonal_label"
   
   dim(sample_info_cond)
   sample_info_cond[1:2,]
@@ -1193,7 +1201,7 @@ for (cur_ko_group in relevant_ko_groups){
                                   ~ condition + log_q75)
   }else{
     dds = DESeqDataSetFromMatrix(cts_dat_cond, colData=sample_info_cond, 
-                                  ~ biomaterial_id + log_q75 + condition)     
+                                  ~ clonal_label + log_q75 + condition)     
   }
   
   start.time <- Sys.time()
@@ -1235,7 +1243,7 @@ for (cur_ko_group in relevant_ko_groups){
                                     ~ condition)
     }else{
       dds = DESeqDataSetFromMatrix(cts_dat_cond, colData=sample_info_cond, 
-                                    ~ biomaterial_id + condition)  
+                                    ~ clonal_label + condition)  
     }
     dds = DESeq(dds)
   }

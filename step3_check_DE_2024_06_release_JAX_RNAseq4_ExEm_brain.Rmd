@@ -40,7 +40,6 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#path = "../../data/MorPhiC/June-2024/JAX_RNAseq4_ExEm_brain/"
 path = "../../MorPhiC/data/June-2024/JAX_RNAseq4_ExEm_brain/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
@@ -55,10 +54,10 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(meta$biomaterial_id)
-table(table(meta$biomaterial_id))
-table(table(meta$lib_biomaterial_id))
-table(table(meta$differentiated_biomaterial_id))
+table(meta$clonal.label)
+table(table(meta$clonal.label))
+table(table(meta$library_preparation.label))
+table(table(meta$label))
 ```
 
 ## Read in gene count data and filter genes
@@ -343,7 +342,13 @@ for(k in 1:nrow(df_file_info)){
   res_k$delabel[w_de] = res_k$gene_symbol[w_de]
 
   print(table(res_k$DE))
-    
+
+  if (gene_name=="EPAS1"){
+    d_group_in_title = d_group
+  }else{
+    d_group_in_title = gsub("_nor", "", d_group)
+  }
+  
   g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                     col=DE, label=delabel)) + 
          geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_PTC")) + 

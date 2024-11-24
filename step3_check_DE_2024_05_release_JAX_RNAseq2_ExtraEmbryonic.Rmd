@@ -40,7 +40,6 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#dat_path = "~/research/data/MorPhiC/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
 dat_path = "../../MorPhiC/data/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
 dat_path = paste0(dat_path, "processed/release110-gencode44/Tables")
 ```
@@ -380,12 +379,18 @@ for(k in 1:nrow(df_file_info)){
     res_k$delabel[w_de] = res_k$gene_symbol[w_de]
   
     print(table(res_k$DE))
+  
+    if (gene_name=="EPAS1"){
+      d_group_in_title = d_group
+    }else{
+      d_group_in_title = gsub("_nor", "", d_group)
+    }
     
     if ((gene_name!="MEIS2")|(ko1!="KO")){
       
       g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                       col=DE, label=delabel)) + 
-           geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_", ko1)) + 
+           geom_point() + ggtitle(paste0(d_group_in_title, "\n", gene_name, "_", ko1)) + 
            geom_text_repel(point.padding = 0.5,
                            min.segment.length = 0, 
                            size = 3,  # Adjust text size

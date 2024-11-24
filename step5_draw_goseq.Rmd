@@ -53,12 +53,14 @@ names(res)
 
 multi_strategy_datasets = c("2023_12_JAX_RNAseq_ExtraEmbryonic",
                             "2024_05_JAX_RNAseq2_ExtraEmbryonic", 
-                            "2024_06_JAX_RNAseq_Neuroectoderm")
+                            "2024_06_JAX_RNAseq_Neuroectoderm", 
+                            "2024_09_JAX_RNAseq6_Diverse", 
+                            "2024_09_JAX_RNAseq7_Reversion")
   
 if (release_name%in%multi_strategy_datasets){
   
-  PTC = grep("PTC", names(res))
-  res = res[PTC]
+  to_plot = grep("PTC|reverted|WT_WT_hyp_vs_nor", names(res))
+  res = res[to_plot]
 
 }
 
@@ -117,11 +119,20 @@ for(k in 1:length(df_list)){
   nm1 = gsub("hyp ", "Hypoxia ", nm1)
   nm1 = gsub("up", "up-regulated", nm1)
   nm1 = gsub("down", "down-regulated", nm1)
-
-  substrings = str_split(nm1, " ")[[1]]
-  nm1 = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
-               "\n", paste(substrings[length(substrings)], collapse = " "))
-
+  
+  if (grepl("Hypoxia vs Normoxia", nm1)){
+    nm1_substrings = strsplit(nm1, " Hypoxia vs Normoxia ")[[1]]
+    nm1 = paste0(nm1_substrings[1], 
+                 "\nHypoxia vs Normoxia\n", 
+                 nm1_substrings[2])
+  }else{
+    nm1 = gsub("Normoxia ", "", nm1)
+    nm1 = sub("reverted ", "", nm1) # only replace the first occurrence of "reverted "
+    substrings = str_split(nm1, " ")[[1]]
+    nm1 = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
+                 "\n", paste(substrings[length(substrings)], collapse = " "))
+  }
+  
   mycolors <- c("go_bp" = "#F8766D", "reactome" = "#00BFC4")
   filtered_colors <- mycolors[unique(d1$type)]
   

@@ -63,10 +63,10 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(meta$biomaterial_id)
-table(table(meta$biomaterial_id))
-table(table(meta$lib_biomaterial_id))
-table(table(meta$differentiated_biomaterial_id))
+table(meta$clonal.label)
+table(table(meta$clonal.label))
+table(table(meta$library_preparation.label))
+table(table(meta$label))
 ```
 
 ## Read in gene count data and filter genes
@@ -84,13 +84,13 @@ table(names(cts)[-1] == meta$file_id)
 cts_dat = data.matrix(cts[,-1])
 rownames(cts_dat) = cts$Name
 
-table(meta$model_organ, meta$differentiated_timepoint_value)
-table(meta$run_id, meta$differentiated_timepoint_value)
+table(meta$model_organ, meta$timepoint_value)
+table(meta$run_id, meta$timepoint_value)
 
-unique_timepoints = unique(meta$differentiated_timepoint_value)
+unique_timepoints = unique(meta$timepoint_value)
 unique_timepoints = sort(unique_timepoints)
 
-xx = as.character(meta$differentiated_timepoint_value)
+xx = as.character(meta$timepoint_value)
 xx = factor(xx, levels = as.character(unique_timepoints))
 meta$timepoint = xx
 ```
@@ -102,7 +102,7 @@ meta_m = meta[which(meta$ko_gene=="WT"), ]
 
 all_unique_ko_genes = sort(setdiff(unique(meta$ko_gene), "WT"))
 
-extracted_ko_string_list = str_extract_all(meta_m$biomaterial_description, 
+extracted_ko_string_list = str_extract_all(meta_m$clonal.description, 
                                            paste(all_unique_ko_genes, collapse="|"))
 extracted_ko_strings = sapply(extracted_ko_string_list, 
                               function(x)paste(x, collapse="-"))
@@ -122,7 +122,7 @@ meta$gene_group = df_ko_gene_group$gene_group[match(meta$ko_gene,
                                                     df_ko_gene_group$ko_gene)]
 w_gene_group_NA = which(is.na(meta$gene_group))
 for (ww in w_gene_group_NA){
-  xx = str_extract_all(meta$biomaterial_description[ww], 
+  xx = str_extract_all(meta$clonal.description[ww], 
                        paste(all_unique_ko_genes, collapse="|"))[[1]]
   meta$gene_group[ww] = paste(xx, collapse="-")
 }
@@ -419,7 +419,7 @@ for(model1 in unique_model_ss){
 
   print(gPC)
   
-  table(meta_m$biomaterial_description, meta_m$timepoint)
+  table(meta_m$clonal.description, meta_m$timepoint)
   
   gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_gene, color=run_id_short)) +
               geom_point(size=2.5, alpha=0.7) + 
@@ -476,17 +476,22 @@ Run DESeq2 for different DE groups separately
 For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
 
 In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
-The first version of the output files contains gene id, and for each knockout strategy:
 
-    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+The first version of the output files contains 
     
-The second version of the output files contains gene id, 
-
-    chr, strand, position, gene name
+    gene id, gene symbol
 
 and for each knockout strategy:
 
-    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
+    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+    
+The second version of the output files contains  
+
+    gene id, gene symbol, chr, strand, position
+
+and for each knockout strategy:
+
+    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4).
 
 In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
 

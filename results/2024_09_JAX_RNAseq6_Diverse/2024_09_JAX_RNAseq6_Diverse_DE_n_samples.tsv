@@ -2,6 +2,6 @@ DE_group	knockout_gene_strategy	n_ko	n_WT
 CBO_day_9	PAX6_PTC	3	3
 PrS_day_6_hyp_EPAS1	EPAS1_PTC	3	3
 PrS_day_6_nor_EPAS1	EPAS1_PTC	3	3
-PrS_day_6_nor_GHRL1-GCM1_excluding_GCM1	GHRL1_PTC	3	3
+PrS_day_6_nor_GRHL1-GCM1_excluding_GCM1	GRHL1_PTC	3	3
 PrS_day_6_nor_PPARG	PPARG_PTC	3	3
-PrS_day_6_nor_GHRL1-GCM1_excluding_GHRL1	GCM1_PTC	3	3
+PrS_day_6_nor_GRHL1-GCM1_excluding_GRHL1	GCM1_PTC	3	3

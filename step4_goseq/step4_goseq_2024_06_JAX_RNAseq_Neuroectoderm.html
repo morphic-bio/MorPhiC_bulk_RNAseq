@@ -11,7 +11,7 @@
 
 <meta name="author" content="Si Liu, Wei Sun" />
 
-<meta name="date" content="2024-10-17" />
+<meta name="date" content="2024-11-22" />
 
 <title>Check the over-representation of functional terms</title>
 
@@ -346,13 +346,12 @@ div.tocify {
 
 <h1 class="title toc-ignore">Check the over-representation of functional terms</h1>
 <h4 class="author">Si Liu, Wei Sun</h4>
-<h4 class="date">2024-10-17</h4>
+<h4 class="date">2024-11-22</h4>
 
 </div>
 
 
-<p>The code for 2024_09_UCSF_Bulk_EB_Timecourse dataset is in a separate file.</p>
-<p>This code file can be applied to all other datasets from 2023_12 release to 2024_09 release.</p>
+<p>This code file can be applied to all datasets from 2023_12 release to 2024_09 release.</p>
 <p>In each setting, based on the processed output file, take all genes with non-NA adjusted pvalues as genes to consider, and significant genes based on adjusted p-value cutoff 0.05 and absolute log2foldchange cutoff log2(1.5).</p>
 <div id="r-libraries." class="section level2">
 <h2>R libraries.</h2>
@@ -518,9 +517,7 @@ div.tocify {
 <span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>                             df_file_info_cond<span class="sc">$</span>comparison, <span class="at">sep=</span><span class="st">&quot;_&quot;</span>)</span>
 <span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(df_file_info_cond<span class="sc">$</span>items)</span>
 <span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(df_file_info_cond)</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a><span class="co"># set an exception for UCSF data</span></span></code></pre></div>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="read-in-de-results-and-conduct-enrichment-analysis" class="section level2">
 <h2>Read in DE results and conduct enrichment analysis</h2>
@@ -1058,8 +1055,8 @@ div.tocify {
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">sprintf</span>(<span class="st">&quot;%s_enrichment.rds&quot;</span>, release_name)))  </span></code></pre></div>
 <div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
 <pre><code>##            used  (Mb) gc trigger  (Mb) max used  (Mb)
-## Ncells  8882755 474.4   16043901 856.9 16043901 856.9
-## Vcells 20322196 155.1   62373303 475.9 62373303 475.9</code></pre>
+## Ncells  8882753 474.4   16043890 856.9 16043890 856.9
+## Vcells 20322132 155.1   63836043 487.1 63836043 487.1</code></pre>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>## R version 4.1.2 (2021-11-01)
 ## Platform: x86_64-pc-linux-gnu (64-bit)

@@ -48,7 +48,7 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#path = "~/research/data/MorPhiC/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
+
 path = "../../MorPhiC/data/May-2024/JAX_RNAseq2_ExtraEmbryonic/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
@@ -62,11 +62,10 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(table(meta$biomaterial_id))
-table(table(meta$lib_biomaterial_id))
-table(table(meta$differentiated_biomaterial_id))
+table(table(meta$clonal.label))
+table(table(meta$library_preparation.label))
+table(table(meta$label))
 ```
-
 
 ## Read in gene count data and filter genes
 
@@ -83,8 +82,8 @@ table(names(cts)[-1] == meta$file_id)
 cts_dat = data.matrix(cts[,-1])
 rownames(cts_dat) = cts$Name
 
-table(meta$differentiated_timepoint_value, useNA="ifany")
-meta$timepoint = as.character(meta$differentiated_timepoint_value)
+table(meta$timepoint_value, useNA="ifany")
+meta$timepoint = as.character(meta$timepoint_value)
 ```
 
 ### Read in gene annotation
@@ -363,13 +362,17 @@ For the output files, create two versions, one with direct information, one with
 
 In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + day + condition, model system + day + run_id, model system + day, etc.). 
 
-The first version of the output files contains gene id, and for each knockout strategy:
+The first version of the output files contains 
+    
+    gene id, gene symbol
+
+and for each knockout strategy:
 
     baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
     
-The second version of the output files contains gene id, 
+The second version of the output files contains 
 
-    chr, position, gene name
+    gene id, gene symbol, chr, strand, position
 
 and for each knockout strategy:
 

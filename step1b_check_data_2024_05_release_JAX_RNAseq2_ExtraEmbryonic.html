@@ -9,11 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Wei Sun" />
+<meta name="author" content="Si Liu, Wei Sun" />
 
-<meta name="date" content="2024-10-16" />
+<meta name="date" content="2024-11-20" />
 
-<title>Check RNAseq data of 2024-05 release</title>
+<title>Check RNAseq data of 2024-05 release JAX_RNAseq2_ExtraEmbryonic</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1659,9 +1659,10 @@ border-radius: 0px;
 
 
 
-<h1 class="title toc-ignore">Check RNAseq data of 2024-05 release</h1>
-<h4 class="author">Wei Sun</h4>
-<h4 class="date">2024-10-16</h4>
+<h1 class="title toc-ignore">Check RNAseq data of 2024-05 release
+JAX_RNAseq2_ExtraEmbryonic</h1>
+<h4 class="author">Si Liu, Wei Sun</h4>
+<h4 class="date">2024-11-20</h4>
 
 </div>
 
@@ -1687,182 +1688,25 @@ border-radius: 0px;
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>path <span class="ot">=</span> <span class="st">&quot;../../MorPhiC/data/May-2024/JAX_RNAseq2_ExtraEmbryonic/&quot;</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>dat_path <span class="ot">=</span> <span class="fu">paste0</span>(path, <span class="st">&quot;processed/release110-gencode44/Tables&quot;</span>)</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>read_header <span class="ot">&lt;-</span> <span class="cf">function</span>(file_name, sheet){</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">read_excel</span>(file_name, <span class="at">sheet =</span> sheet, </span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                         <span class="at">skip =</span> <span class="dv">3</span>, <span class="at">n_max =</span> <span class="dv">1</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">as.character</span>(meta_header)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;cell_line.&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;differentiated_cell_line.&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;biomaterial_core.&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;gene_expression_alteration_protocol.protocol_core.&quot;</span>, </span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                     <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;.text&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;gene_expression_alteration_protocol.&quot;</span>, <span class="st">&quot;&quot;</span>, </span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>                     meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  meta_header</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>metadata_path <span class="ot">=</span> <span class="st">&quot;data/metadata_spreadsheets&quot;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>read_header <span class="ot">&lt;-</span> <span class="cf">function</span>(file_name, sheet){</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">read_excel</span>(file_name, <span class="at">sheet =</span> sheet, </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                         <span class="at">skip =</span> <span class="dv">3</span>, <span class="at">n_max =</span> <span class="dv">1</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">as.character</span>(meta_header)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;_cell_line&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;differentiated_product.&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  meta_header <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;.text&quot;</span>, <span class="st">&quot;&quot;</span>, meta_header, <span class="at">fixed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  meta_header</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="read-in-meta-data" class="section level2">
 <h2>Read in meta data</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>meta_file <span class="ot">=</span> <span class="fu">paste0</span>(path, <span class="st">&quot;metadata/JAX_RNAseq2_ExtraEmbryonic_metadata.xlsx&quot;</span>)</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>meta_file <span class="ot">=</span> <span class="fu">paste0</span>(metadata_path, <span class="st">&quot;/v7_JAX_RNAseq2_Prod.xlsx&quot;</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cl_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Cell line &quot;</span>)</span></code></pre></div>
-<pre><code>## New names:
-## • `` -&gt; `...1`
-## • `` -&gt; `...2`
-## • `` -&gt; `...3`
-## • `` -&gt; `...4`
-## • `` -&gt; `...5`
-## • `` -&gt; `...6`
-## • `` -&gt; `...7`</code></pre>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cl_header</span></code></pre></div>
-<pre><code>## [1] &quot;biomaterial_id&quot;              &quot;biomaterial_description&quot;    
-## [3] &quot;derived_cell_line_accession&quot; &quot;clone_id&quot;                   
-## [5] &quot;protocol_id&quot;                 &quot;zygosity&quot;                   
-## [7] &quot;type&quot;</code></pre>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Cell line &quot;</span>, <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## New names:
-## • `` -&gt; `...1`
-## • `` -&gt; `...2`
-## • `` -&gt; `...3`
-## • `` -&gt; `...4`
-## • `` -&gt; `...5`
-## • `` -&gt; `...6`
-## • `` -&gt; `...7`</code></pre>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cl) <span class="ot">=</span> cl_header</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">=</span> <span class="fu">as.data.frame</span>(cl)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(cl)</span></code></pre></div>
-<pre><code>## [1] 82  7</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cl[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   biomaterial_id                                      biomaterial_description
-## 1  MOK20014W-E03 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO)
-## 2  MOK20014W-F04 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO)
-##   derived_cell_line_accession clone_id protocol_id zygosity type
-## 1                    KOLF2.2J      E03    JAXPE001      N.A iPSC
-## 2                    KOLF2.2J      F04    JAXPE001      N.A iPSC</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dc_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Differentiated cell line&quot;</span>)</span></code></pre></div>
-<pre><code>## New names:
-## • `` -&gt; `...1`
-## • `` -&gt; `...2`
-## • `` -&gt; `...3`
-## • `` -&gt; `...4`
-## • `` -&gt; `...5`
-## • `` -&gt; `...6`
-## • `` -&gt; `...7`
-## • `` -&gt; `...8`
-## • `` -&gt; `...9`
-## • `` -&gt; `...10`
-## • `` -&gt; `...11`
-## • `` -&gt; `...12`
-## • `` -&gt; `...13`
-## • `` -&gt; `...14`</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dc_header</span></code></pre></div>
-<pre><code>##  [1] &quot;differentiated_biomaterial_id&quot;                     
-##  [2] &quot;differentiated_biomaterial_description&quot;            
-##  [3] &quot;differentiated_ncbi_taxon_id&quot;                      
-##  [4] &quot;differentiated_insdc_experiment_accession&quot;         
-##  [5] &quot;differentiated_genus_species&quot;                      
-##  [6] &quot;differentiated_genus_species.ontology&quot;             
-##  [7] &quot;differentiated_genus_species.ontology_label&quot;       
-##  [8] &quot;differentiated_biosamples_accession&quot;               
-##  [9] &quot;biomaterial_id&quot;                                    
-## [10] &quot;differentiation_protocol.protocol_core.protocol_id&quot;
-## [11] &quot;differentiated_timepoint_value&quot;                    
-## [12] &quot;differentiated_timepoint_unit&quot;                     
-## [13] &quot;differentiated_terminally_differentiated&quot;          
-## [14] &quot;model_organ&quot;</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dc <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Differentiated cell line&quot;</span>, </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<pre><code>## New names:
-## • `` -&gt; `...1`
-## • `` -&gt; `...2`
-## • `` -&gt; `...3`
-## • `` -&gt; `...4`
-## • `` -&gt; `...5`
-## • `` -&gt; `...6`
-## • `` -&gt; `...7`
-## • `` -&gt; `...8`
-## • `` -&gt; `...9`
-## • `` -&gt; `...10`
-## • `` -&gt; `...11`
-## • `` -&gt; `...12`
-## • `` -&gt; `...13`
-## • `` -&gt; `...14`</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dc) <span class="ot">=</span> dc_header</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>dc <span class="ot">=</span> <span class="fu">as.data.frame</span>(dc)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(dc)</span></code></pre></div>
-<pre><code>## [1] 82 14</code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dc[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   differentiated_biomaterial_id
-## 1             ExM-MOK20014W-E03
-## 2             ExM-MOK20014W-F04
-##                                                            differentiated_biomaterial_description
-## 1 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme
-## 2 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme
-##   differentiated_ncbi_taxon_id differentiated_insdc_experiment_accession
-## 1                           NA                                        NA
-## 2                           NA                                        NA
-##   differentiated_genus_species differentiated_genus_species.ontology
-## 1                           NA                                    NA
-## 2                           NA                                    NA
-##   differentiated_genus_species.ontology_label
-## 1                                          NA
-## 2                                          NA
-##   differentiated_biosamples_accession biomaterial_id
-## 1                                  NA  MOK20014W-E03
-## 2                                  NA  MOK20014W-F04
-##   differentiation_protocol.protocol_core.protocol_id
-## 1                                           JAXPD002
-## 2                                           JAXPD002
-##   differentiated_timepoint_value differentiated_timepoint_unit
-## 1                              6                          days
-## 2                              6                          days
-##   differentiated_terminally_differentiated                       model_organ
-## 1                                      Yes extra-embryonic mesenchymal cells
-## 2                                      Yes extra-embryonic mesenchymal cells</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="do">## remove columns 3:8, differentiated_ncbi_taxon_id to </span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="do">## differentiated_biosamples_accession</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>dc <span class="ot">=</span> dc[,<span class="sc">-</span>(<span class="dv">3</span><span class="sc">:</span><span class="dv">8</span>)]</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(dc)</span></code></pre></div>
-<pre><code>## [1] 82  8</code></pre>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>dc[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   differentiated_biomaterial_id
-## 1             ExM-MOK20014W-E03
-## 2             ExM-MOK20014W-F04
-##                                                            differentiated_biomaterial_description
-## 1 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme
-## 2 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme
-##   biomaterial_id differentiation_protocol.protocol_core.protocol_id
-## 1  MOK20014W-E03                                           JAXPD002
-## 2  MOK20014W-F04                                           JAXPD002
-##   differentiated_timepoint_value differentiated_timepoint_unit
-## 1                              6                          days
-## 2                              6                          days
-##   differentiated_terminally_differentiated                       model_organ
-## 1                                      Yes extra-embryonic mesenchymal cells
-## 2                                      Yes extra-embryonic mesenchymal cells</code></pre>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>eas_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Expression alteration strategy&quot;</span>)</span></code></pre></div>
-<pre><code>## New names:
-## • `` -&gt; `...1`
-## • `` -&gt; `...2`
-## • `` -&gt; `...3`
-## • `` -&gt; `...4`
-## • `` -&gt; `...5`
-## • `` -&gt; `...6`
-## • `` -&gt; `...7`
-## • `` -&gt; `...8`</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>eas_header</span></code></pre></div>
-<pre><code>## [1] &quot;protocol_id&quot;              &quot;allele_specific&quot;         
-## [3] &quot;altered_gene_symbols&quot;     &quot;altered_gene_ids&quot;        
-## [5] &quot;targeted_genomic_region&quot;  &quot;expected_alteration_type&quot;
-## [7] &quot;crispr.sgrna_target&quot;      &quot;method&quot;</code></pre>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>eas_header <span class="ot">=</span> <span class="fu">c</span>(eas_header, <span class="st">&quot;altered_locus&quot;</span>, <span class="st">&quot;guide_sequence&quot;</span>)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>eas <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Expression alteration strategy&quot;</span>, </span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>cl_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Clonal cell line&quot;</span>)</span></code></pre></div>
 <pre><code>## New names:
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`
@@ -1874,42 +1718,186 @@ border-radius: 0px;
 ## • `` -&gt; `...8`
 ## • `` -&gt; `...9`
 ## • `` -&gt; `...10`</code></pre>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(eas) <span class="ot">=</span> eas_header</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>eas <span class="ot">=</span> <span class="fu">as.data.frame</span>(eas)</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(eas)</span></code></pre></div>
-<pre><code>## [1] 21 10</code></pre>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>eas[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   protocol_id allele_specific altered_gene_symbols altered_gene_ids
-## 1    JAXPE001              no                MEIS1        HGNC:7000
-## 2    JAXPE002              no                MEIS1        HGNC:7000
-##   targeted_genomic_region expected_alteration_type crispr.sgrna_target method
-## 1      Full coding region                Silencing  Full coding length CRISPR
-## 2                    Exon                Silencing       Critical exon CRISPR
-##            altered_locus                            guide_sequence
-## 1 chr2:66437727-66464411 CGTCGTACTGCATGACAAAC;CTGCTTAACTGTCTGTCACC
-## 2 chr2:66511380-66513205 GCTAACATATTCCTCTATAT;GACAAAGGATGAATTTAGAC</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cl_header</span></code></pre></div>
+<pre><code>##  [1] &quot;clonal.label&quot;                        
+##  [2] &quot;clonal.description&quot;                  
+##  [3] &quot;clonal.parental_name&quot;                
+##  [4] &quot;clonal.clone_id&quot;                     
+##  [5] &quot;clonal.type&quot;                         
+##  [6] &quot;clonal.zygosity&quot;                     
+##  [7] &quot;clonal.cell_line_generation_protocol&quot;
+##  [8] &quot;clonal.treatment_condition&quot;          
+##  [9] &quot;clonal.wt_control_status&quot;            
+## [10] &quot;expression_alteration.label&quot;</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Clonal cell line&quot;</span>, <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## New names:
+## • `` -&gt; `...1`
+## • `` -&gt; `...2`
+## • `` -&gt; `...3`
+## • `` -&gt; `...4`
+## • `` -&gt; `...5`
+## • `` -&gt; `...6`
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`
+## • `` -&gt; `...10`</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cl) <span class="ot">=</span> cl_header</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>cl <span class="ot">=</span> <span class="fu">as.data.frame</span>(cl)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(cl)</span></code></pre></div>
+<pre><code>## [1] 82 10</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cl[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##    clonal.label                                           clonal.description
+## 1 MOK20014W-E03 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO)
+## 2 MOK20014W-F04 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO)
+##   clonal.parental_name clonal.clone_id clonal.type clonal.zygosity
+## 1             KOLF2.2J             E03        iPSC  Not applicable
+## 2             KOLF2.2J             F04        iPSC  Not applicable
+##   clonal.cell_line_generation_protocol clonal.treatment_condition
+## 1                       Not applicable             Not applicable
+## 2                       Not applicable             Not applicable
+##   clonal.wt_control_status  expression_alteration.label
+## 1                       KO JAX_MEIS1_Full_coding_length
+## 2                       KO JAX_MEIS1_Full_coding_length</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dc_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Differentiated product&quot;</span>)</span></code></pre></div>
+<pre><code>## New names:
+## • `` -&gt; `...1`
+## • `` -&gt; `...2`
+## • `` -&gt; `...3`
+## • `` -&gt; `...4`
+## • `` -&gt; `...5`
+## • `` -&gt; `...6`
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`
+## • `` -&gt; `...10`</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dc_header</span></code></pre></div>
+<pre><code>##  [1] &quot;label&quot;                              &quot;description&quot;                       
+##  [3] &quot;clonal.label&quot;                       &quot;differentiated_product_protocol_id&quot;
+##  [5] &quot;model_system&quot;                       &quot;timepoint_value&quot;                   
+##  [7] &quot;timepoint_unit&quot;                     &quot;final_timepoint&quot;                   
+##  [9] &quot;treatment_condition&quot;                &quot;wt_control_status&quot;</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dc <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Differentiated product&quot;</span>, </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## New names:
+## • `` -&gt; `...1`
+## • `` -&gt; `...2`
+## • `` -&gt; `...3`
+## • `` -&gt; `...4`
+## • `` -&gt; `...5`
+## • `` -&gt; `...6`
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`
+## • `` -&gt; `...10`</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dc) <span class="ot">=</span> dc_header</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>dc <span class="ot">=</span> <span class="fu">as.data.frame</span>(dc)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(dc)</span></code></pre></div>
+<pre><code>## [1] 82 10</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dc[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##               label
+## 1 ExM-MOK20014W-E03
+## 2 ExM-MOK20014W-F04
+##                                                                                       description
+## 1 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme
+## 2 KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme
+##    clonal.label differentiated_product_protocol_id
+## 1 MOK20014W-E03                           JAXPD002
+## 2 MOK20014W-F04                           JAXPD002
+##                        model_system timepoint_value timepoint_unit
+## 1 extra-embryonic mesenchymal cells               6           days
+## 2 extra-embryonic mesenchymal cells               6           days
+##   final_timepoint treatment_condition wt_control_status
+## 1             Yes      Not applicable                KO
+## 2             Yes      Not applicable                KO</code></pre>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>eas_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Expression alteration&quot;</span>)</span></code></pre></div>
+<pre><code>## New names:
+## • `` -&gt; `...1`
+## • `` -&gt; `...2`
+## • `` -&gt; `...3`
+## • `` -&gt; `...4`
+## • `` -&gt; `...5`
+## • `` -&gt; `...6`
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`
+## • `` -&gt; `...10`
+## • `` -&gt; `...11`</code></pre>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>eas_header</span></code></pre></div>
+<pre><code>##  [1] &quot;expression_alteration.label&quot;                         
+##  [2] &quot;expression_alteration.parent_protocol_id&quot;            
+##  [3] &quot;expression_alteration.method&quot;                        
+##  [4] &quot;expression_alteration.genes.allele_specific&quot;         
+##  [5] &quot;expression_alteration.genes.altered_gene_symbol&quot;     
+##  [6] &quot;expression_alteration.genes.target_gene_hgnc_id&quot;     
+##  [7] &quot;expression_alteration.genes.targeted_genomic_region&quot; 
+##  [8] &quot;expression_alteration.genes.expected_alteration_type&quot;
+##  [9] &quot;expression_alteration.genes.editing_strategy&quot;        
+## [10] &quot;expression_alteration.genes.altered_locus&quot;           
+## [11] &quot;expression_alteration.genes.guide_sequence&quot;</code></pre>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>eas <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Expression alteration&quot;</span>, </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## New names:
+## • `` -&gt; `...1`
+## • `` -&gt; `...2`
+## • `` -&gt; `...3`
+## • `` -&gt; `...4`
+## • `` -&gt; `...5`
+## • `` -&gt; `...6`
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`
+## • `` -&gt; `...10`
+## • `` -&gt; `...11`</code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(eas) <span class="ot">=</span> eas_header</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>eas <span class="ot">=</span> <span class="fu">as.data.frame</span>(eas)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(eas)</span></code></pre></div>
+<pre><code>## [1] 21 11</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>eas[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##    expression_alteration.label expression_alteration.parent_protocol_id
+## 1 JAX_MEIS1_Full_coding_length                                 JAXPE001
+## 2      JAX_MEIS1_Critical_exon                                 JAXPE002
+##   expression_alteration.method expression_alteration.genes.allele_specific
+## 1           CRISPR/Cas9 method                                          no
+## 2           CRISPR/Cas9 method                                          no
+##   expression_alteration.genes.altered_gene_symbol
+## 1                                           MEIS1
+## 2                                           MEIS1
+##   expression_alteration.genes.target_gene_hgnc_id
+## 1                                       HGNC:7000
+## 2                                       HGNC:7000
+##   expression_alteration.genes.targeted_genomic_region
+## 1                                  Full coding region
+## 2                                                Exon
+##   expression_alteration.genes.expected_alteration_type
+## 1                                       Gene silencing
+## 2                                       Gene silencing
+##   expression_alteration.genes.editing_strategy
+## 1                           Full coding length
+## 2                                Critical exon
+##   expression_alteration.genes.altered_locus
+## 1                    chr2:66437727-66464411
+## 2                    chr2:66511380-66513205
+##   expression_alteration.genes.guide_sequence
+## 1  CGTCGTACTGCATGACAAAC;CTGCTTAACTGTCTGTCACC
+## 2  GCTAACATATTCCTCTATAT;GACAAAGGATGAATTTAGAC</code></pre>
 </div>
 <div id="check-cell-lines" class="section level2">
 <h2>Check cell lines</h2>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(cl<span class="sc">$</span>biomaterial_id))</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(cl<span class="sc">$</span>clonal.label))</span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>protocol_id)</span></code></pre></div>
-<pre><code>## 
-## JAXPE001 JAXPE002 JAXPE003      N.A 
-##       19       21       21       21</code></pre>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>type)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>clonal.type)</span></code></pre></div>
 <pre><code>## 
 ## iPSC 
 ##   82</code></pre>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>derived_cell_line_accession)</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>clonal.parental_name)</span></code></pre></div>
 <pre><code>## 
 ## KOLF2.2J 
 ##       82</code></pre>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>zygosity)</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>clonal.zygosity)</span></code></pre></div>
 <pre><code>## 
-## N.A 
-##  82</code></pre>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">table</span>(cl<span class="sc">$</span>clone_id), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+## Not applicable 
+##             82</code></pre>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">table</span>(cl<span class="sc">$</span>clonal.clone_id), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## 
 ## WT1 WT2 WT3 A01 A06 A11 C07 C11 D01 D09 F08 G09 H05 H08 A02 A03 A05 A10 A12 B01 
 ##   7   7   7   2   2   2   2   2   2   2   2   2   2   2   1   1   1   1   1   1 
@@ -1917,32 +1905,38 @@ border-radius: 0px;
 ##   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1 
 ## E11 F04 F07 F09 F10 F12 G01 G05 G07 G10 G11 H03 H06 
 ##   1   1   1   1   1   1   1   1   1   1   1   1   1</code></pre>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>biomaterial_id <span class="sc">%in%</span> cl<span class="sc">$</span>biomaterial_id)</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>clonal.label <span class="sc">%in%</span> cl<span class="sc">$</span>clonal.label)</span></code></pre></div>
 <pre><code>## 
 ## TRUE 
 ##   82</code></pre>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>biomaterial_id <span class="sc">%in%</span> dc<span class="sc">$</span>biomaterial_id)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>clonal.label <span class="sc">%in%</span> dc<span class="sc">$</span>clonal.label)</span></code></pre></div>
 <pre><code>## 
 ## TRUE 
 ##   82</code></pre>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(dc<span class="sc">$</span>biomaterial_id, cl<span class="sc">$</span>biomaterial_id)</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(dc<span class="sc">$</span>clonal.label, cl<span class="sc">$</span>clonal.label)</span></code></pre></div>
 <pre><code>## character(0)</code></pre>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(cl<span class="sc">$</span>biomaterial_id, dc<span class="sc">$</span>biomaterial_id)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(cl<span class="sc">$</span>clonal.label, dc<span class="sc">$</span>clonal.label)</span></code></pre></div>
 <pre><code>## character(0)</code></pre>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">table</span>(dc<span class="sc">$</span>biomaterial_id))</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(dc<span class="sc">$</span>label))</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">table</span>(dc<span class="sc">$</span>clonal.label))</span></code></pre></div>
 <pre><code>## 
 ##  1 
 ## 82</code></pre>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>differentiated_timepoint_value)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>timepoint_value)</span></code></pre></div>
 <pre><code>## 
 ##  6 
 ## 82</code></pre>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>differentiated_terminally_differentiated)</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>timepoint_unit)</span></code></pre></div>
+<pre><code>## 
+## days 
+##   82</code></pre>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>final_timepoint)</span></code></pre></div>
 <pre><code>## 
 ## Yes 
 ##  82</code></pre>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>differentiation_protocol.protocol_core.protocol_id, </span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>      dc<span class="sc">$</span>model_organ)</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>differentiated_product_protocol_id, </span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>      dc<span class="sc">$</span>model_system)</span></code></pre></div>
 <pre><code>##           
 ##            extra-embryonic mesenchymal cells
 ##   JAXPD001                                 0
@@ -1951,68 +1945,182 @@ border-radius: 0px;
 ##            extra-embryonic primitive syncytial cells
 ##   JAXPD001                                        48
 ##   JAXPD002                                         0</code></pre>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>timepoint_value, </span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>      dc<span class="sc">$</span>model_system)</span></code></pre></div>
+<pre><code>##    
+##     extra-embryonic mesenchymal cells extra-embryonic primitive syncytial cells
+##   6                                34                                        48</code></pre>
 </div>
 <div id="check-expression-alteration-strategy" class="section level2">
 <h2>Check Expression alteration strategy</h2>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>protocol_id)</span></code></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(eas<span class="sc">$</span>expression_alteration.label))</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(eas<span class="sc">$</span>expression_alteration.label, cl<span class="sc">$</span>expression_alteration.label)</span></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(cl<span class="sc">$</span>expression_alteration.label, eas<span class="sc">$</span>expression_alteration.label)</span></code></pre></div>
+<pre><code>## [1] &quot;Not applicable&quot;</code></pre>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.parent_protocol_id)</span></code></pre></div>
 <pre><code>## 
 ## JAXPE001 JAXPE002 JAXPE003 
 ##        7        7        7</code></pre>
-<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>allele_specific)</span></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.method)</span></code></pre></div>
+<pre><code>## 
+## CRISPR/Cas9 method 
+##                 21</code></pre>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.genes.allele_specific)</span></code></pre></div>
 <pre><code>## 
 ## no 
 ## 21</code></pre>
-<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>protocol_id, eas<span class="sc">$</span>altered_gene_symbols)</span></code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.parent_protocol_id, </span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>      eas<span class="sc">$</span>expression_alteration.genes.altered_gene_symbol, <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
 <pre><code>##           
 ##            BHLHE40 MEF2C MEIS1 MEIS2 MXD1 NCOA3 RUNX1
 ##   JAXPE001       1     1     1     1    1     1     1
 ##   JAXPE002       1     1     1     1    1     1     1
 ##   JAXPE003       1     1     1     1    1     1     1</code></pre>
-<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>protocol_id, eas<span class="sc">$</span>crispr.sgrna_target)</span></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.parent_protocol_id, </span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>      eas<span class="sc">$</span>expression_alteration.genes.targeted_genomic_region, <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
 <pre><code>##           
-##            Critical exon Full coding length Termination codon
-##   JAXPE001             0                  7                 0
-##   JAXPE002             7                  0                 0
-##   JAXPE003             0                  0                 7</code></pre>
+##            Exon Full coding region
+##   JAXPE001    0                  7
+##   JAXPE002    7                  0
+##   JAXPE003    7                  0</code></pre>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.genes.targeted_genomic_region, </span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>      eas<span class="sc">$</span>expression_alteration.genes.editing_strategy, <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<pre><code>##                     
+##                      Critical exon Full coding length Termination codon
+##   Exon                           7                  0                 7
+##   Full coding region             0                  7                 0</code></pre>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(eas<span class="sc">$</span>expression_alteration.genes.editing_strategy, </span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>      eas<span class="sc">$</span>expression_alteration.genes.expected_alteration_type, <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<pre><code>##                     
+##                      Gene silencing
+##   Critical exon                   7
+##   Full coding length              7
+##   Termination codon               7</code></pre>
 </div>
 <div id="extract-ko-strategy-information" class="section level2">
 <h2>Extract KO strategy information</h2>
-<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>dc[[<span class="st">&quot;ko_strategy&quot;</span>]] <span class="ot">=</span> </span>
-<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_extract</span>(dc<span class="sc">$</span>differentiated_biomaterial_description, </span>
-<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;</span><span class="sc">\\</span><span class="st">(KO</span><span class="sc">\\</span><span class="st">)|</span><span class="sc">\\</span><span class="st">(CE</span><span class="sc">\\</span><span class="st">)|</span><span class="sc">\\</span><span class="st">(PTC</span><span class="sc">\\</span><span class="st">)&quot;</span>)</span>
-<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>dc[[<span class="st">&quot;ko_strategy&quot;</span>]] <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">(|</span><span class="sc">\\</span><span class="st">)&quot;</span>, <span class="st">&quot;&quot;</span>, dc[[<span class="st">&quot;ko_strategy&quot;</span>]])</span>
-<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a>dc[[<span class="st">&quot;ko_gene&quot;</span>]] <span class="ot">=</span> <span class="fu">str_extract</span>(dc<span class="sc">$</span>differentiated_biomaterial_description, </span>
-<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">&quot;(?&lt;=KOLF2.2 deleted ).</span><span class="sc">\\</span><span class="st">S+&quot;</span>)</span>
-<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>ko_strategy, dc<span class="sc">$</span>ko_gene, <span class="at">useNA =</span> <span class="st">&#39;ifany&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>dc[[<span class="st">&quot;ko_strategy&quot;</span>]] <span class="ot">=</span> </span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_extract</span>(dc<span class="sc">$</span>description, </span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">&quot;</span><span class="sc">\\</span><span class="st">(KO</span><span class="sc">\\</span><span class="st">)|</span><span class="sc">\\</span><span class="st">(CE</span><span class="sc">\\</span><span class="st">)|</span><span class="sc">\\</span><span class="st">(PTC</span><span class="sc">\\</span><span class="st">)&quot;</span>)</span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>dc[[<span class="st">&quot;ko_strategy&quot;</span>]] <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;</span><span class="sc">\\</span><span class="st">(|</span><span class="sc">\\</span><span class="st">)&quot;</span>, <span class="st">&quot;&quot;</span>, dc[[<span class="st">&quot;ko_strategy&quot;</span>]])</span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>dc[[<span class="st">&quot;ko_gene&quot;</span>]] <span class="ot">=</span> <span class="fu">str_extract</span>(dc<span class="sc">$</span>description, </span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>                                  <span class="st">&quot;(?&lt;=KOLF2.2 deleted ).</span><span class="sc">\\</span><span class="st">S+&quot;</span>)</span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>ko_strategy, dc<span class="sc">$</span>ko_gene, <span class="at">useNA =</span> <span class="st">&#39;ifany&#39;</span>)</span></code></pre></div>
 <pre><code>##       
 ##        BHLHE40 MEF2C MEIS1 MEIS2 MXD1 NCOA3 RUNX1 &lt;NA&gt;
 ##   CE         3     3     3     3    3     3     3    0
 ##   KO         3     3     3     1    3     3     3    0
 ##   PTC        3     3     3     3    3     3     3    0
 ##   &lt;NA&gt;       0     0     0     0    0     0     0   21</code></pre>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>description, </span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>      dc<span class="sc">$</span>ko_strategy, <span class="at">useNA =</span> <span class="st">&#39;ifany&#39;</span>)</span></code></pre></div>
+<pre><code>##                                                                                                             
+##                                                                                                              CE
+##   KOLF2.2 deleted BHLHE40 by deletion of critical exon (CE) derived primitive syncytium                       3
+##   KOLF2.2 deleted BHLHE40 by deletion of full coding region (KO) derived primitive syncytium                  0
+##   KOLF2.2 deleted BHLHE40 by insertion of premature termination codon (PTC) derived primitive syncytium       0
+##   KOLF2.2 deleted MEF2C by deletion of critical exon (CE) derived extra-embryonic mesenchyme                  3
+##   KOLF2.2 deleted MEF2C by deletion of full coding region (KO) derived extra-embryonic mesenchyme             0
+##   KOLF2.2 deleted MEF2C by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme  0
+##   KOLF2.2 deleted MEIS1 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                  3
+##   KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme             0
+##   KOLF2.2 deleted MEIS1 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme  0
+##   KOLF2.2 deleted MEIS2 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                  3
+##   KOLF2.2 deleted MEIS2 by deletion of full coding region (KO) derived extra-embryonic mesenchyme             0
+##   KOLF2.2 deleted MEIS2 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme  0
+##   KOLF2.2 deleted MXD1 by deletion of critical exon (CE) derived primitive syncytium                          3
+##   KOLF2.2 deleted MXD1 by deletion of full coding region (KO) derived primitive syncytium                     0
+##   KOLF2.2 deleted MXD1 by insertion of premature termination codon (PTC) derived primitive syncytium          0
+##   KOLF2.2 deleted NCOA3 by deletion of critical exon (CE) derived primitive syncytium                         3
+##   KOLF2.2 deleted NCOA3 by deletion of full coding region (KO) derived primitive syncytium                    0
+##   KOLF2.2 deleted NCOA3 by insertion of premature termination codon (PTC) derived primitive syncytium         0
+##   KOLF2.2 deleted RUNX1 by deletion of critical exon (CE) derived primitive syncytium                         3
+##   KOLF2.2 deleted RUNX1 by deletion of full coding region (KO) derived primitive syncytium                    0
+##   KOLF2.2 deleted RUNX1 by insertion of premature termination codon (PTC) derived primitive syncytium         0
+##   KOLF2.2 derived extra-embryonic mesenchyme                                                                  0
+##   KOLF2.2 derived primitive syncytium                                                                         0
+##                                                                                                             
+##                                                                                                              KO
+##   KOLF2.2 deleted BHLHE40 by deletion of critical exon (CE) derived primitive syncytium                       0
+##   KOLF2.2 deleted BHLHE40 by deletion of full coding region (KO) derived primitive syncytium                  3
+##   KOLF2.2 deleted BHLHE40 by insertion of premature termination codon (PTC) derived primitive syncytium       0
+##   KOLF2.2 deleted MEF2C by deletion of critical exon (CE) derived extra-embryonic mesenchyme                  0
+##   KOLF2.2 deleted MEF2C by deletion of full coding region (KO) derived extra-embryonic mesenchyme             3
+##   KOLF2.2 deleted MEF2C by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme  0
+##   KOLF2.2 deleted MEIS1 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                  0
+##   KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme             3
+##   KOLF2.2 deleted MEIS1 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme  0
+##   KOLF2.2 deleted MEIS2 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                  0
+##   KOLF2.2 deleted MEIS2 by deletion of full coding region (KO) derived extra-embryonic mesenchyme             1
+##   KOLF2.2 deleted MEIS2 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme  0
+##   KOLF2.2 deleted MXD1 by deletion of critical exon (CE) derived primitive syncytium                          0
+##   KOLF2.2 deleted MXD1 by deletion of full coding region (KO) derived primitive syncytium                     3
+##   KOLF2.2 deleted MXD1 by insertion of premature termination codon (PTC) derived primitive syncytium          0
+##   KOLF2.2 deleted NCOA3 by deletion of critical exon (CE) derived primitive syncytium                         0
+##   KOLF2.2 deleted NCOA3 by deletion of full coding region (KO) derived primitive syncytium                    3
+##   KOLF2.2 deleted NCOA3 by insertion of premature termination codon (PTC) derived primitive syncytium         0
+##   KOLF2.2 deleted RUNX1 by deletion of critical exon (CE) derived primitive syncytium                         0
+##   KOLF2.2 deleted RUNX1 by deletion of full coding region (KO) derived primitive syncytium                    3
+##   KOLF2.2 deleted RUNX1 by insertion of premature termination codon (PTC) derived primitive syncytium         0
+##   KOLF2.2 derived extra-embryonic mesenchyme                                                                  0
+##   KOLF2.2 derived primitive syncytium                                                                         0
+##                                                                                                             
+##                                                                                                              PTC
+##   KOLF2.2 deleted BHLHE40 by deletion of critical exon (CE) derived primitive syncytium                        0
+##   KOLF2.2 deleted BHLHE40 by deletion of full coding region (KO) derived primitive syncytium                   0
+##   KOLF2.2 deleted BHLHE40 by insertion of premature termination codon (PTC) derived primitive syncytium        3
+##   KOLF2.2 deleted MEF2C by deletion of critical exon (CE) derived extra-embryonic mesenchyme                   0
+##   KOLF2.2 deleted MEF2C by deletion of full coding region (KO) derived extra-embryonic mesenchyme              0
+##   KOLF2.2 deleted MEF2C by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme   3
+##   KOLF2.2 deleted MEIS1 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                   0
+##   KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme              0
+##   KOLF2.2 deleted MEIS1 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme   3
+##   KOLF2.2 deleted MEIS2 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                   0
+##   KOLF2.2 deleted MEIS2 by deletion of full coding region (KO) derived extra-embryonic mesenchyme              0
+##   KOLF2.2 deleted MEIS2 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme   3
+##   KOLF2.2 deleted MXD1 by deletion of critical exon (CE) derived primitive syncytium                           0
+##   KOLF2.2 deleted MXD1 by deletion of full coding region (KO) derived primitive syncytium                      0
+##   KOLF2.2 deleted MXD1 by insertion of premature termination codon (PTC) derived primitive syncytium           3
+##   KOLF2.2 deleted NCOA3 by deletion of critical exon (CE) derived primitive syncytium                          0
+##   KOLF2.2 deleted NCOA3 by deletion of full coding region (KO) derived primitive syncytium                     0
+##   KOLF2.2 deleted NCOA3 by insertion of premature termination codon (PTC) derived primitive syncytium          3
+##   KOLF2.2 deleted RUNX1 by deletion of critical exon (CE) derived primitive syncytium                          0
+##   KOLF2.2 deleted RUNX1 by deletion of full coding region (KO) derived primitive syncytium                     0
+##   KOLF2.2 deleted RUNX1 by insertion of premature termination codon (PTC) derived primitive syncytium          3
+##   KOLF2.2 derived extra-embryonic mesenchyme                                                                   0
+##   KOLF2.2 derived primitive syncytium                                                                          0
+##                                                                                                             
+##                                                                                                              &lt;NA&gt;
+##   KOLF2.2 deleted BHLHE40 by deletion of critical exon (CE) derived primitive syncytium                         0
+##   KOLF2.2 deleted BHLHE40 by deletion of full coding region (KO) derived primitive syncytium                    0
+##   KOLF2.2 deleted BHLHE40 by insertion of premature termination codon (PTC) derived primitive syncytium         0
+##   KOLF2.2 deleted MEF2C by deletion of critical exon (CE) derived extra-embryonic mesenchyme                    0
+##   KOLF2.2 deleted MEF2C by deletion of full coding region (KO) derived extra-embryonic mesenchyme               0
+##   KOLF2.2 deleted MEF2C by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme    0
+##   KOLF2.2 deleted MEIS1 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                    0
+##   KOLF2.2 deleted MEIS1 by deletion of full coding region (KO) derived extra-embryonic mesenchyme               0
+##   KOLF2.2 deleted MEIS1 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme    0
+##   KOLF2.2 deleted MEIS2 by deletion of critical exon (CE) derived extra-embryonic mesenchyme                    0
+##   KOLF2.2 deleted MEIS2 by deletion of full coding region (KO) derived extra-embryonic mesenchyme               0
+##   KOLF2.2 deleted MEIS2 by insertion of premature termination codon (PTC) derived extra-embryonic mesenchyme    0
+##   KOLF2.2 deleted MXD1 by deletion of critical exon (CE) derived primitive syncytium                            0
+##   KOLF2.2 deleted MXD1 by deletion of full coding region (KO) derived primitive syncytium                       0
+##   KOLF2.2 deleted MXD1 by insertion of premature termination codon (PTC) derived primitive syncytium            0
+##   KOLF2.2 deleted NCOA3 by deletion of critical exon (CE) derived primitive syncytium                           0
+##   KOLF2.2 deleted NCOA3 by deletion of full coding region (KO) derived primitive syncytium                      0
+##   KOLF2.2 deleted NCOA3 by insertion of premature termination codon (PTC) derived primitive syncytium           0
+##   KOLF2.2 deleted RUNX1 by deletion of critical exon (CE) derived primitive syncytium                           0
+##   KOLF2.2 deleted RUNX1 by deletion of full coding region (KO) derived primitive syncytium                      0
+##   KOLF2.2 deleted RUNX1 by insertion of premature termination codon (PTC) derived primitive syncytium           0
+##   KOLF2.2 derived extra-embryonic mesenchyme                                                                    9
+##   KOLF2.2 derived primitive syncytium                                                                          12</code></pre>
 </div>
 <div id="read-in-library-preparation-information" class="section level2">
 <h2>Read in library preparation information</h2>
-<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>lib_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Library preparation&quot;</span>)</span></code></pre></div>
-<pre><code>## New names:
-## • `` -&gt; `...1`
-## • `` -&gt; `...2`
-## • `` -&gt; `...3`
-## • `` -&gt; `...4`</code></pre>
-<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>lib_header</span></code></pre></div>
-<pre><code>## [1] &quot;library_preparation.biomaterial_id&quot;                    
-## [2] &quot;library_preparation_protocol.protocol_core.protocol_id&quot;
-## [3] &quot;dissociation_protocol.protocol_core.protocol_id&quot;       
-## [4] &quot;differentiated_biomaterial_id&quot;</code></pre>
-<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>lib_header <span class="ot">=</span> <span class="fu">c</span>(lib_header, </span>
-<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>               <span class="fu">c</span>(<span class="st">&quot;fragment_size&quot;</span>, <span class="st">&quot;input_amount&quot;</span>, <span class="st">&quot;input_unit&quot;</span>, </span>
-<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>                 <span class="st">&quot;final_yield&quot;</span>, <span class="st">&quot;final_yield_unit&quot;</span>, </span>
-<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>                 <span class="st">&quot;lib_concentration&quot;</span>, <span class="st">&quot;lib_concentration_unit&quot;</span>,</span>
-<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>                 <span class="st">&quot;PCR_cycle&quot;</span>, <span class="st">&quot;PCR_cycle_sample_index&quot;</span>))</span>
-<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>lib <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Library preparation&quot;</span>, </span>
-<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>lib_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Library preparation&quot;</span>)</span></code></pre></div>
 <pre><code>## New names:
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`
@@ -2027,29 +2135,74 @@ border-radius: 0px;
 ## • `` -&gt; `...11`
 ## • `` -&gt; `...12`
 ## • `` -&gt; `...13`</code></pre>
-<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(lib)</span></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>lib_header</span></code></pre></div>
+<pre><code>##  [1] &quot;library_preparation.label&quot;                          
+##  [2] &quot;library_preparation.description&quot;                    
+##  [3] &quot;library_preparation.library_preparation_protocol_id&quot;
+##  [4] &quot;library_preparation.average_fragment_size&quot;          
+##  [5] &quot;library_preparation.input_amount_value&quot;             
+##  [6] &quot;library_preparation.input_amount_unit&quot;              
+##  [7] &quot;library_preparation.concentration_value&quot;            
+##  [8] &quot;library_preparation.concentration_unit&quot;             
+##  [9] &quot;library_preparation.total_yield_value&quot;              
+## [10] &quot;library_preparation.total_yield_unit&quot;               
+## [11] &quot;library_preparation.cdna_pcr_cycles&quot;                
+## [12] &quot;library_preparation.pcr_cycles_for_indexing&quot;        
+## [13] &quot;label&quot;</code></pre>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>lib <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Library preparation&quot;</span>, </span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## New names:
+## • `` -&gt; `...1`
+## • `` -&gt; `...2`
+## • `` -&gt; `...3`
+## • `` -&gt; `...4`
+## • `` -&gt; `...5`
+## • `` -&gt; `...6`
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`
+## • `` -&gt; `...10`
+## • `` -&gt; `...11`
+## • `` -&gt; `...12`
+## • `` -&gt; `...13`</code></pre>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(lib)</span></code></pre></div>
 <pre><code>## [1] 82 13</code></pre>
-<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(lib) <span class="ot">=</span> lib_header</span>
-<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>lib <span class="ot">=</span> <span class="fu">as.data.frame</span>(lib)</span>
-<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(lib)</span></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(lib) <span class="ot">=</span> lib_header</span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>lib <span class="ot">=</span> <span class="fu">as.data.frame</span>(lib)</span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(lib)</span></code></pre></div>
 <pre><code>## [1] 82 13</code></pre>
-<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>lib[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   library_preparation.biomaterial_id
-## 1                         GT23-12159
-## 2                         GT23-12160
-##   library_preparation_protocol.protocol_core.protocol_id
-## 1                                               JAXPL001
-## 2                                               JAXPL001
-##   dissociation_protocol.protocol_core.protocol_id differentiated_biomaterial_id
-## 1                                             N.A             ExM-MOK20014W-E03
-## 2                                             N.A             ExM-MOK20014W-F04
-##   fragment_size input_amount input_unit final_yield final_yield_unit
-## 1           426          300        ngs        64.4              ngs
-## 2           428          300        ngs       150.4              ngs
-##   lib_concentration lib_concentration_unit PCR_cycle PCR_cycle_sample_index
-## 1              28.7                     nM        10                     NA
-## 2              38.6                     nM        10                     NA</code></pre>
-<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>seq_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Sequence file&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>lib[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##   library_preparation.label library_preparation.description
+## 1                GT23-12159                              NA
+## 2                GT23-12160                              NA
+##   library_preparation.library_preparation_protocol_id
+## 1                                            JAXPL001
+## 2                                            JAXPL001
+##   library_preparation.average_fragment_size
+## 1                                       426
+## 2                                       428
+##   library_preparation.input_amount_value library_preparation.input_amount_unit
+## 1                                    300                                    ng
+## 2                                    300                                    ng
+##   library_preparation.concentration_value
+## 1                                    28.7
+## 2                                    38.6
+##   library_preparation.concentration_unit library_preparation.total_yield_value
+## 1                                     nM                                  64.4
+## 2                                     nM                                 150.4
+##   library_preparation.total_yield_unit library_preparation.cdna_pcr_cycles
+## 1                                   ng                                  10
+## 2                                   ng                                  10
+##   library_preparation.pcr_cycles_for_indexing             label
+## 1                               Not available ExM-MOK20014W-E03
+## 2                               Not available ExM-MOK20014W-F04</code></pre>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(lib<span class="sc">$</span>label))</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(dc<span class="sc">$</span>label, lib<span class="sc">$</span>label)</span></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(lib<span class="sc">$</span>label, dc<span class="sc">$</span>label)</span></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>seq_header <span class="ot">=</span> <span class="fu">read_header</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Sequence file&quot;</span>)</span></code></pre></div>
 <pre><code>## New names:
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`
@@ -2058,16 +2211,13 @@ border-radius: 0px;
 ## • `` -&gt; `...5`
 ## • `` -&gt; `...6`
 ## • `` -&gt; `...7`</code></pre>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>seq_header</span></code></pre></div>
-<pre><code>## [1] &quot;sequence_file.file_core.file_name&quot;            
-## [2] &quot;sequence_file.file_core.content_description&quot;  
-## [3] &quot;library_preparation.biomaterial_id&quot;           
-## [4] &quot;sequencing_protocol.protocol_core.protocol_id&quot;
-## [5] &quot;sequence_file.read_index&quot;                     
-## [6] &quot;sequence_file.lane_index&quot;                     
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>seq_header</span></code></pre></div>
+<pre><code>## [1] &quot;sequence_file.label&quot;       &quot;sequence_file.extension&quot;  
+## [3] &quot;sequence_file.lane_index&quot;  &quot;sequence_file.read_index&quot; 
+## [5] &quot;sequence_file.read_length&quot; &quot;library_preparation.label&quot;
 ## [7] &quot;sequence_file.run_id&quot;</code></pre>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Sequence file&quot;</span>, </span>
-<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> <span class="fu">read_excel</span>(meta_file, <span class="at">sheet =</span> <span class="st">&quot;Sequence file&quot;</span>, </span>
+<span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">skip =</span> <span class="dv">5</span>, <span class="at">col_names =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <pre><code>## New names:
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`
@@ -2075,48 +2225,43 @@ border-radius: 0px;
 ## • `` -&gt; `...4`
 ## • `` -&gt; `...5`
 ## • `` -&gt; `...6`
-## • `` -&gt; `...7`</code></pre>
-<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(seq) <span class="ot">=</span> seq_header</span>
-<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> <span class="fu">as.data.frame</span>(seq)</span>
-<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>seq<span class="sc">$</span>file_id <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;_R(1|2)_001.fastq.gz&quot;</span>, <span class="st">&quot;&quot;</span>, </span>
-<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>                   seq<span class="sc">$</span>sequence_file.file_core.file_name)</span>
-<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(seq)</span></code></pre></div>
-<pre><code>## [1] 176   8</code></pre>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>seq[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##                                    sequence_file.file_core.file_name
+## • `` -&gt; `...7`
+## • `` -&gt; `...8`
+## • `` -&gt; `...9`</code></pre>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> seq[, <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>]</span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(seq) <span class="ot">=</span> seq_header</span>
+<span id="cb112-3"><a href="#cb112-3" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> <span class="fu">as.data.frame</span>(seq)</span>
+<span id="cb112-4"><a href="#cb112-4" aria-hidden="true" tabindex="-1"></a>seq<span class="sc">$</span>file_id <span class="ot">=</span> <span class="fu">gsub</span>(<span class="st">&quot;_R(1|2)_001.fastq.gz&quot;</span>, <span class="st">&quot;&quot;</span>, </span>
+<span id="cb112-5"><a href="#cb112-5" aria-hidden="true" tabindex="-1"></a>                   seq<span class="sc">$</span>sequence_file.label)</span>
+<span id="cb112-6"><a href="#cb112-6" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(seq)</span></code></pre></div>
+<pre><code>## [1] 164   8</code></pre>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a>seq[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##                                                  sequence_file.label
 ## 1 MEIS1_KO_E03_GT23-12159_CCATTCGA-CGGACAAC_S26_L001_R1_001.fastq.gz
 ## 2 MEIS1_KO_F04_GT23-12160_ACACTAAG-ATATGGAT_S11_L001_R1_001.fastq.gz
-##   sequence_file.file_core.content_description
-## 1                                          NA
-## 2                                          NA
-##   library_preparation.biomaterial_id
-## 1                         GT23-12159
-## 2                         GT23-12160
-##   sequencing_protocol.protocol_core.protocol_id sequence_file.read_index
-## 1                                      JAXPS001                    read1
-## 2                                      JAXPS001                    read1
-##   sequence_file.lane_index   sequence_file.run_id
-## 1                       NA 20231004_23-robson-011
-## 2                       NA 20231004_23-robson-011
+##   sequence_file.extension sequence_file.lane_index sequence_file.read_index
+## 1                fastq.gz                       NA                    read1
+## 2                fastq.gz                       NA                    read1
+##   sequence_file.read_length library_preparation.label   sequence_file.run_id
+## 1                        NA                GT23-12159 20231004_23-robson-011
+## 2                        NA                GT23-12160 20231004_23-robson-011
 ##                                              file_id
 ## 1 MEIS1_KO_E03_GT23-12159_CCATTCGA-CGGACAAC_S26_L001
 ## 2 MEIS1_KO_F04_GT23-12160_ACACTAAG-ATATGGAT_S11_L001</code></pre>
-<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> <span class="fu">unique</span>(seq[,<span class="fu">c</span>(<span class="st">&quot;file_id&quot;</span>, <span class="st">&quot;library_preparation.biomaterial_id&quot;</span>, </span>
-<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;sequencing_protocol.protocol_core.protocol_id&quot;</span>, </span>
-<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;sequence_file.run_id&quot;</span>)])</span>
-<span id="cb96-4"><a href="#cb96-4" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(seq)</span></code></pre></div>
-<pre><code>## [1] 83  4</code></pre>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>seq[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##                                              file_id
-## 1 MEIS1_KO_E03_GT23-12159_CCATTCGA-CGGACAAC_S26_L001
-## 2 MEIS1_KO_F04_GT23-12160_ACACTAAG-ATATGGAT_S11_L001
-##   library_preparation.biomaterial_id
-## 1                         GT23-12159
-## 2                         GT23-12160
-##   sequencing_protocol.protocol_core.protocol_id   sequence_file.run_id
-## 1                                      JAXPS001 20231004_23-robson-011
-## 2                                      JAXPS001 20231004_23-robson-011</code></pre>
-<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(seq<span class="sc">$</span>sequence_file.run_id)</span></code></pre></div>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a>seq <span class="ot">=</span> <span class="fu">unique</span>(seq[,<span class="fu">c</span>(<span class="st">&quot;file_id&quot;</span>, <span class="st">&quot;library_preparation.label&quot;</span>, </span>
+<span id="cb116-2"><a href="#cb116-2" aria-hidden="true" tabindex="-1"></a>                    <span class="st">&quot;sequence_file.run_id&quot;</span>)])</span>
+<span id="cb116-3"><a href="#cb116-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(seq)</span></code></pre></div>
+<pre><code>## [1] 82  3</code></pre>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a>seq[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##                                              file_id library_preparation.label
+## 1 MEIS1_KO_E03_GT23-12159_CCATTCGA-CGGACAAC_S26_L001                GT23-12159
+## 2 MEIS1_KO_F04_GT23-12160_ACACTAAG-ATATGGAT_S11_L001                GT23-12160
+##     sequence_file.run_id
+## 1 20231004_23-robson-011
+## 2 20231004_23-robson-011</code></pre>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(seq<span class="sc">$</span>library_preparation.label))</span></code></pre></div>
+<pre><code>## [1] 82</code></pre>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(seq<span class="sc">$</span>sequence_file.run_id)</span></code></pre></div>
 <pre><code>## 
 ## 20230809_23-robson-007-run2      20231004_23-robson-011 
 ##                          12                          22 
@@ -2124,157 +2269,210 @@ border-radius: 0px;
 ##                          24                          12 
 ##      20240307_24-robson-005 
 ##                          12</code></pre>
-<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(<span class="fu">names</span>(dc), <span class="fu">names</span>(lib))</span></code></pre></div>
-<pre><code>## [1] &quot;differentiated_biomaterial_id&quot;</code></pre>
-<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">merge</span>(dc, lib)</span>
-<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(meta)</span></code></pre></div>
-<pre><code>## [1] 82 22</code></pre>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>meta[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   differentiated_biomaterial_id     differentiated_biomaterial_description
-## 1              ExM-MOK20014-WT1 KOLF2.2 derived extra-embryonic mesenchyme
-## 2              ExM-MOK20014-WT2 KOLF2.2 derived extra-embryonic mesenchyme
-##   biomaterial_id differentiation_protocol.protocol_core.protocol_id
-## 1   MOK20014-WT1                                           JAXPD002
-## 2   MOK20014-WT2                                           JAXPD002
-##   differentiated_timepoint_value differentiated_timepoint_unit
-## 1                              6                          days
-## 2                              6                          days
-##   differentiated_terminally_differentiated                       model_organ
-## 1                                      Yes extra-embryonic mesenchymal cells
-## 2                                      Yes extra-embryonic mesenchymal cells
-##   ko_strategy ko_gene library_preparation.biomaterial_id
-## 1        &lt;NA&gt;    &lt;NA&gt;                         GT23-12156
-## 2        &lt;NA&gt;    &lt;NA&gt;                         GT23-12157
-##   library_preparation_protocol.protocol_core.protocol_id
-## 1                                               JAXPL001
-## 2                                               JAXPL001
-##   dissociation_protocol.protocol_core.protocol_id fragment_size input_amount
-## 1                                             N.A           460          300
-## 2                                             N.A           428          300
-##   input_unit final_yield final_yield_unit lib_concentration
-## 1        ngs        37.8              ngs              9.23
-## 2        ngs       149.2              ngs             42.60
-##   lib_concentration_unit PCR_cycle PCR_cycle_sample_index
-## 1                     nM        10                     NA
-## 2                     nM        10                     NA</code></pre>
-<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">merge</span>(meta, seq)</span>
-<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(meta)</span></code></pre></div>
-<pre><code>## [1] 82 25</code></pre>
-<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>meta[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   library_preparation.biomaterial_id differentiated_biomaterial_id
-## 1                         GT23-10876              PrS-MOK20016-WT1
-## 2                         GT23-10877              PrS-MOK20016-WT2
-##   differentiated_biomaterial_description biomaterial_id
-## 1    KOLF2.2 derived primitive syncytium   MOK20016-WT1
-## 2    KOLF2.2 derived primitive syncytium   MOK20016-WT2
-##   differentiation_protocol.protocol_core.protocol_id
-## 1                                           JAXPD001
-## 2                                           JAXPD001
-##   differentiated_timepoint_value differentiated_timepoint_unit
-## 1                              6                          days
-## 2                              6                          days
-##   differentiated_terminally_differentiated
-## 1                                      Yes
-## 2                                      Yes
-##                                 model_organ ko_strategy ko_gene
-## 1 extra-embryonic primitive syncytial cells        &lt;NA&gt;    &lt;NA&gt;
-## 2 extra-embryonic primitive syncytial cells        &lt;NA&gt;    &lt;NA&gt;
-##   library_preparation_protocol.protocol_core.protocol_id
-## 1                                               JAXPL001
-## 2                                               JAXPL001
-##   dissociation_protocol.protocol_core.protocol_id fragment_size input_amount
-## 1                                             N.A           423          300
-## 2                                             N.A           411          300
-##   input_unit final_yield final_yield_unit lib_concentration
-## 1        ngs       199.8              ngs              39.5
-## 2        ngs       134.2              ngs              27.2
-##   lib_concentration_unit PCR_cycle PCR_cycle_sample_index
-## 1                     nM        10                     NA
-## 2                     nM        10                     NA
-##                                             file_id
-## 1 MDX1_KOLF2_1_GT23-10876_GGCATTCT-CAAGCTAG_S8_L001
-## 2 MDX1_KOLF2_2_GT23-10877_AATGCCTC-TGGATCGA_S3_L001
-##   sequencing_protocol.protocol_core.protocol_id        sequence_file.run_id
-## 1                                      JAXPS001 20230809_23-robson-007-run2
-## 2                                      JAXPS001 20230809_23-robson-007-run2</code></pre>
-<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>update_name <span class="ot">&lt;-</span> <span class="cf">function</span>(df1, old_name, new_name){</span>
-<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a>  ww1 <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">names</span>(df1) <span class="sc">==</span> old_name)</span>
-<span id="cb112-3"><a href="#cb112-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">length</span>(ww1) <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb112-4"><a href="#cb112-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(df1)[ww1] <span class="ot">=</span> new_name</span>
-<span id="cb112-5"><a href="#cb112-5" aria-hidden="true" tabindex="-1"></a>  df1</span>
-<span id="cb112-6"><a href="#cb112-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb112-7"><a href="#cb112-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-8"><a href="#cb112-8" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;library_preparation.biomaterial_id&quot;</span>, </span>
-<span id="cb112-9"><a href="#cb112-9" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;lib_biomaterial_id&quot;</span>)</span>
-<span id="cb112-10"><a href="#cb112-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-11"><a href="#cb112-11" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;differentiation_protocol.protocol_core.protocol_id&quot;</span>, </span>
-<span id="cb112-12"><a href="#cb112-12" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;differentiation_protocol&quot;</span>)</span>
-<span id="cb112-13"><a href="#cb112-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-14"><a href="#cb112-14" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;library_preparation_protocol.protocol_core.protocol_id&quot;</span>, </span>
-<span id="cb112-15"><a href="#cb112-15" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;library_preparation_protocol&quot;</span>)</span>
-<span id="cb112-16"><a href="#cb112-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-17"><a href="#cb112-17" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;dissociation_protocol.protocol_core.protocol_id&quot;</span>, </span>
-<span id="cb112-18"><a href="#cb112-18" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;dissociation_protocol&quot;</span>)</span>
-<span id="cb112-19"><a href="#cb112-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-20"><a href="#cb112-20" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;sequencing_protocol.protocol_core.protocol_id&quot;</span>, </span>
-<span id="cb112-21"><a href="#cb112-21" aria-hidden="true" tabindex="-1"></a>                   <span class="st">&quot;sequencing_protocol&quot;</span>)</span>
-<span id="cb112-22"><a href="#cb112-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-23"><a href="#cb112-23" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;sequence_file.run_id&quot;</span>, <span class="st">&quot;run_id&quot;</span>)</span>
-<span id="cb112-24"><a href="#cb112-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb112-25"><a href="#cb112-25" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(<span class="fu">names</span>(meta), <span class="fu">names</span>(cl))</span></code></pre></div>
-<pre><code>## [1] &quot;biomaterial_id&quot;</code></pre>
-<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">merge</span>(meta, cl)</span>
-<span id="cb114-2"><a href="#cb114-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(meta)</span></code></pre></div>
-<pre><code>## [1] 82 31</code></pre>
-<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a>meta[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
-<pre><code>##   biomaterial_id lib_biomaterial_id differentiated_biomaterial_id
-## 1   MOK20011-WT1         GT23-13719              PrS-MOK20011-WT1
-## 2   MOK20011-WT2         GT23-13720              PrS-MOK20011-WT2
-##   differentiated_biomaterial_description differentiation_protocol
-## 1    KOLF2.2 derived primitive syncytium                 JAXPD001
-## 2    KOLF2.2 derived primitive syncytium                 JAXPD001
-##   differentiated_timepoint_value differentiated_timepoint_unit
-## 1                              6                          days
-## 2                              6                          days
-##   differentiated_terminally_differentiated
-## 1                                      Yes
-## 2                                      Yes
-##                                 model_organ ko_strategy ko_gene
-## 1 extra-embryonic primitive syncytial cells        &lt;NA&gt;    &lt;NA&gt;
-## 2 extra-embryonic primitive syncytial cells        &lt;NA&gt;    &lt;NA&gt;
-##   library_preparation_protocol dissociation_protocol fragment_size input_amount
-## 1                     JAXPL001                   N.A           417          300
-## 2                     JAXPL001                   N.A           402          300
-##   input_unit final_yield final_yield_unit lib_concentration
-## 1        ngs       190.0              ngs          34.51784
-## 2        ngs        91.2              ngs          17.18679
-##   lib_concentration_unit PCR_cycle PCR_cycle_sample_index
-## 1                     nM        10                     NA
-## 2                     nM        10                     NA
-##                                            file_id sequencing_protocol
-## 1 RUNX1_WT1_GT23-13719_CCAAGTCT-TCATCCTT_S170_L003            JAXPS001
-## 2 RUNX1_WT2_GT23-13720_TTGGACTC-CTGCTTCC_S157_L003            JAXPS001
-##                   run_id biomaterial_description derived_cell_line_accession
-## 1 20231124_23-robson-013                 KOLF2.2                    KOLF2.2J
-## 2 20231124_23-robson-013                 KOLF2.2                    KOLF2.2J
-##   clone_id protocol_id zygosity type
-## 1      WT1         N.A      N.A iPSC
-## 2      WT2         N.A      N.A iPSC</code></pre>
-<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>ko_strategy, <span class="at">useNA =</span> <span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(<span class="fu">names</span>(dc), <span class="fu">names</span>(lib))</span></code></pre></div>
+<pre><code>## [1] &quot;label&quot;</code></pre>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dc<span class="sc">$</span>label<span class="sc">%in%</span>lib<span class="sc">$</span>label, </span>
+<span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## TRUE 
+##   82</code></pre>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(lib<span class="sc">$</span>label<span class="sc">%in%</span>dc<span class="sc">$</span>label, </span>
+<span id="cb128-2"><a href="#cb128-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## TRUE 
+##   82</code></pre>
+<div class="sourceCode" id="cb130"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb130-1"><a href="#cb130-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">merge</span>(dc, lib)</span>
+<span id="cb130-2"><a href="#cb130-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(meta)</span></code></pre></div>
+<pre><code>## [1] 82 24</code></pre>
+<div class="sourceCode" id="cb132"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb132-1"><a href="#cb132-1" aria-hidden="true" tabindex="-1"></a>meta[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##              label                                description clonal.label
+## 1 ExM-MOK20014-WT1 KOLF2.2 derived extra-embryonic mesenchyme MOK20014-WT1
+## 2 ExM-MOK20014-WT2 KOLF2.2 derived extra-embryonic mesenchyme MOK20014-WT2
+##   differentiated_product_protocol_id                      model_system
+## 1                           JAXPD002 extra-embryonic mesenchymal cells
+## 2                           JAXPD002 extra-embryonic mesenchymal cells
+##   timepoint_value timepoint_unit final_timepoint treatment_condition
+## 1               6           days             Yes      Not applicable
+## 2               6           days             Yes      Not applicable
+##   wt_control_status ko_strategy ko_gene library_preparation.label
+## 1                WT        &lt;NA&gt;    &lt;NA&gt;                GT23-12156
+## 2                WT        &lt;NA&gt;    &lt;NA&gt;                GT23-12157
+##   library_preparation.description
+## 1                              NA
+## 2                              NA
+##   library_preparation.library_preparation_protocol_id
+## 1                                            JAXPL001
+## 2                                            JAXPL001
+##   library_preparation.average_fragment_size
+## 1                                       460
+## 2                                       428
+##   library_preparation.input_amount_value library_preparation.input_amount_unit
+## 1                                    300                                    ng
+## 2                                    300                                    ng
+##   library_preparation.concentration_value
+## 1                                    9.23
+## 2                                   42.60
+##   library_preparation.concentration_unit library_preparation.total_yield_value
+## 1                                     nM                                  37.8
+## 2                                     nM                                 149.2
+##   library_preparation.total_yield_unit library_preparation.cdna_pcr_cycles
+## 1                                   ng                                  10
+## 2                                   ng                                  10
+##   library_preparation.pcr_cycles_for_indexing
+## 1                               Not available
+## 2                               Not available</code></pre>
+<div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="#cb134-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(<span class="fu">names</span>(meta), <span class="fu">names</span>(seq))</span></code></pre></div>
+<pre><code>## [1] &quot;library_preparation.label&quot;</code></pre>
+<div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="#cb136-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(meta<span class="sc">$</span>library_preparation.label))</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb138"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb138-1"><a href="#cb138-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(seq<span class="sc">$</span>library_preparation.label))</span></code></pre></div>
+<pre><code>## [1] FALSE</code></pre>
+<div class="sourceCode" id="cb140"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb140-1"><a href="#cb140-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>library_preparation.label<span class="sc">%in%</span>seq<span class="sc">$</span>library_preparation.label, </span>
+<span id="cb140-2"><a href="#cb140-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## TRUE 
+##   82</code></pre>
+<div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="#cb142-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(seq<span class="sc">$</span>library_preparation.label<span class="sc">%in%</span>meta<span class="sc">$</span>library_preparation.label, </span>
+<span id="cb142-2"><a href="#cb142-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">useNA=</span><span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+## TRUE 
+##   82</code></pre>
+<div class="sourceCode" id="cb144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb144-1"><a href="#cb144-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">merge</span>(meta, seq)</span>
+<span id="cb144-2"><a href="#cb144-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(meta)</span></code></pre></div>
+<pre><code>## [1] 82 26</code></pre>
+<div class="sourceCode" id="cb146"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb146-1"><a href="#cb146-1" aria-hidden="true" tabindex="-1"></a>meta[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##   library_preparation.label            label
+## 1                GT23-10876 PrS-MOK20016-WT1
+## 2                GT23-10877 PrS-MOK20016-WT2
+##                           description clonal.label
+## 1 KOLF2.2 derived primitive syncytium MOK20016-WT1
+## 2 KOLF2.2 derived primitive syncytium MOK20016-WT2
+##   differentiated_product_protocol_id                              model_system
+## 1                           JAXPD001 extra-embryonic primitive syncytial cells
+## 2                           JAXPD001 extra-embryonic primitive syncytial cells
+##   timepoint_value timepoint_unit final_timepoint treatment_condition
+## 1               6           days             Yes      Not applicable
+## 2               6           days             Yes      Not applicable
+##   wt_control_status ko_strategy ko_gene library_preparation.description
+## 1                WT        &lt;NA&gt;    &lt;NA&gt;                              NA
+## 2                WT        &lt;NA&gt;    &lt;NA&gt;                              NA
+##   library_preparation.library_preparation_protocol_id
+## 1                                            JAXPL001
+## 2                                            JAXPL001
+##   library_preparation.average_fragment_size
+## 1                                       423
+## 2                                       411
+##   library_preparation.input_amount_value library_preparation.input_amount_unit
+## 1                                    300                                    ng
+## 2                                    300                                    ng
+##   library_preparation.concentration_value
+## 1                                    39.5
+## 2                                    27.2
+##   library_preparation.concentration_unit library_preparation.total_yield_value
+## 1                                     nM                                 199.8
+## 2                                     nM                                 134.2
+##   library_preparation.total_yield_unit library_preparation.cdna_pcr_cycles
+## 1                                   ng                                  10
+## 2                                   ng                                  10
+##   library_preparation.pcr_cycles_for_indexing
+## 1                               Not available
+## 2                               Not available
+##                                             file_id        sequence_file.run_id
+## 1 MDX1_KOLF2_1_GT23-10876_GGCATTCT-CAAGCTAG_S8_L001 20230809_23-robson-007-run2
+## 2 MDX1_KOLF2_2_GT23-10877_AATGCCTC-TGGATCGA_S3_L001 20230809_23-robson-007-run2</code></pre>
+<div class="sourceCode" id="cb148"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a>update_name <span class="ot">&lt;-</span> <span class="cf">function</span>(df1, old_name, new_name){</span>
+<span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a>  ww1 <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">names</span>(df1) <span class="sc">==</span> old_name)</span>
+<span id="cb148-3"><a href="#cb148-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stopifnot</span>(<span class="fu">length</span>(ww1) <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb148-4"><a href="#cb148-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(df1)[ww1] <span class="ot">=</span> new_name</span>
+<span id="cb148-5"><a href="#cb148-5" aria-hidden="true" tabindex="-1"></a>  df1</span>
+<span id="cb148-6"><a href="#cb148-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb148-7"><a href="#cb148-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb148-8"><a href="#cb148-8" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">update_name</span>(meta, <span class="st">&quot;sequence_file.run_id&quot;</span>, <span class="st">&quot;run_id&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb149"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb149-1"><a href="#cb149-1" aria-hidden="true" tabindex="-1"></a><span class="fu">intersect</span>(<span class="fu">names</span>(meta), <span class="fu">names</span>(cl))</span></code></pre></div>
+<pre><code>## [1] &quot;clonal.label&quot;</code></pre>
+<div class="sourceCode" id="cb151"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb151-1"><a href="#cb151-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>clonal.label <span class="sc">%in%</span> cl<span class="sc">$</span>clonal.label)</span></code></pre></div>
+<pre><code>## 
+## TRUE 
+##   82</code></pre>
+<div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="#cb153-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cl<span class="sc">$</span>clonal.label <span class="sc">%in%</span> meta<span class="sc">$</span>clonal.label)</span></code></pre></div>
+<pre><code>## 
+## TRUE 
+##   82</code></pre>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(meta<span class="sc">$</span>clonal.label, cl<span class="sc">$</span>clonal.label)</span></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(cl<span class="sc">$</span>clonal.label, meta<span class="sc">$</span>clonal.label)</span></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">=</span> <span class="fu">merge</span>(meta, cl)</span>
+<span id="cb159-2"><a href="#cb159-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(meta)</span></code></pre></div>
+<pre><code>## [1] 82 35</code></pre>
+<div class="sourceCode" id="cb161"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1" aria-hidden="true" tabindex="-1"></a>meta[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>,]</span></code></pre></div>
+<pre><code>##   clonal.label library_preparation.label            label
+## 1 MOK20011-WT1                GT23-13719 PrS-MOK20011-WT1
+## 2 MOK20011-WT2                GT23-13720 PrS-MOK20011-WT2
+##                           description differentiated_product_protocol_id
+## 1 KOLF2.2 derived primitive syncytium                           JAXPD001
+## 2 KOLF2.2 derived primitive syncytium                           JAXPD001
+##                                model_system timepoint_value timepoint_unit
+## 1 extra-embryonic primitive syncytial cells               6           days
+## 2 extra-embryonic primitive syncytial cells               6           days
+##   final_timepoint treatment_condition wt_control_status ko_strategy ko_gene
+## 1             Yes      Not applicable                WT        &lt;NA&gt;    &lt;NA&gt;
+## 2             Yes      Not applicable                WT        &lt;NA&gt;    &lt;NA&gt;
+##   library_preparation.description
+## 1                              NA
+## 2                              NA
+##   library_preparation.library_preparation_protocol_id
+## 1                                            JAXPL001
+## 2                                            JAXPL001
+##   library_preparation.average_fragment_size
+## 1                                       417
+## 2                                       402
+##   library_preparation.input_amount_value library_preparation.input_amount_unit
+## 1                                    300                                    ng
+## 2                                    300                                    ng
+##   library_preparation.concentration_value
+## 1                                34.51784
+## 2                                17.18679
+##   library_preparation.concentration_unit library_preparation.total_yield_value
+## 1                                     nM                                 190.0
+## 2                                     nM                                  91.2
+##   library_preparation.total_yield_unit library_preparation.cdna_pcr_cycles
+## 1                                   ng                                  10
+## 2                                   ng                                  10
+##   library_preparation.pcr_cycles_for_indexing
+## 1                               Not available
+## 2                               Not available
+##                                            file_id                 run_id
+## 1 RUNX1_WT1_GT23-13719_CCAAGTCT-TCATCCTT_S170_L003 20231124_23-robson-013
+## 2 RUNX1_WT2_GT23-13720_TTGGACTC-CTGCTTCC_S157_L003 20231124_23-robson-013
+##   clonal.description clonal.parental_name clonal.clone_id clonal.type
+## 1            KOLF2.2             KOLF2.2J             WT1        iPSC
+## 2            KOLF2.2             KOLF2.2J             WT2        iPSC
+##   clonal.zygosity clonal.cell_line_generation_protocol
+## 1  Not applicable                       Not applicable
+## 2  Not applicable                       Not applicable
+##   clonal.treatment_condition clonal.wt_control_status
+## 1             Not applicable                       WT
+## 2             Not applicable                       WT
+##   expression_alteration.label
+## 1              Not applicable
+## 2              Not applicable</code></pre>
+<div class="sourceCode" id="cb163"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>ko_strategy, <span class="at">useNA =</span> <span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##   CE   KO  PTC &lt;NA&gt; 
 ##   21   19   21   21</code></pre>
-<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>ko_strategy[<span class="fu">which</span>(<span class="fu">is.na</span>(meta<span class="sc">$</span>ko_strategy))] <span class="ot">=</span> <span class="st">&quot;WT&quot;</span></span>
-<span id="cb120-2"><a href="#cb120-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb120-3"><a href="#cb120-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>ko_gene, <span class="at">useNA =</span> <span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb165"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>ko_strategy[<span class="fu">which</span>(<span class="fu">is.na</span>(meta<span class="sc">$</span>ko_strategy))] <span class="ot">=</span> <span class="st">&quot;WT&quot;</span></span>
+<span id="cb165-2"><a href="#cb165-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb165-3"><a href="#cb165-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>ko_gene, <span class="at">useNA =</span> <span class="st">&quot;ifany&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ## BHLHE40   MEF2C   MEIS1   MEIS2    MXD1   NCOA3   RUNX1    &lt;NA&gt; 
 ##       9       9       9       7       9       9       9      21</code></pre>
-<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>ko_gene[<span class="fu">which</span>(<span class="fu">is.na</span>(meta<span class="sc">$</span>ko_gene))] <span class="ot">=</span> <span class="st">&quot;WT&quot;</span></span>
-<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>model_system <span class="ot">=</span> <span class="cn">NA</span></span>
-<span id="cb122-4"><a href="#cb122-4" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>model_system <span class="ot">=</span> <span class="fu">str_extract</span>(meta<span class="sc">$</span>differentiated_biomaterial_id, <span class="st">&quot;^[^-]+&quot;</span>)</span>
-<span id="cb122-5"><a href="#cb122-5" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>model_system, meta<span class="sc">$</span>model_organ)</span></code></pre></div>
+<div class="sourceCode" id="cb167"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>ko_gene[<span class="fu">which</span>(<span class="fu">is.na</span>(meta<span class="sc">$</span>ko_gene))] <span class="ot">=</span> <span class="st">&quot;WT&quot;</span></span>
+<span id="cb167-2"><a href="#cb167-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb167-3"><a href="#cb167-3" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>model_organ <span class="ot">=</span> meta<span class="sc">$</span>model_system</span>
+<span id="cb167-4"><a href="#cb167-4" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>model_system <span class="ot">=</span> <span class="cn">NA</span></span>
+<span id="cb167-5"><a href="#cb167-5" aria-hidden="true" tabindex="-1"></a>meta<span class="sc">$</span>model_system <span class="ot">=</span> <span class="fu">str_extract</span>(meta<span class="sc">$</span>label, <span class="st">&quot;^[^-]+&quot;</span>)</span>
+<span id="cb167-6"><a href="#cb167-6" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>model_system, meta<span class="sc">$</span>model_organ)</span></code></pre></div>
 <pre><code>##      
 ##       extra-embryonic mesenchymal cells
 ##   ExM                                34
@@ -2283,21 +2481,21 @@ border-radius: 0px;
 ##       extra-embryonic primitive syncytial cells
 ##   ExM                                         0
 ##   PrS                                        48</code></pre>
-<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="#cb124-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>model_system, meta<span class="sc">$</span>ko_gene)</span></code></pre></div>
+<div class="sourceCode" id="cb169"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(meta<span class="sc">$</span>model_system, meta<span class="sc">$</span>ko_gene)</span></code></pre></div>
 <pre><code>##      
 ##       BHLHE40 MEF2C MEIS1 MEIS2 MXD1 NCOA3 RUNX1 WT
 ##   ExM       0     9     9     7    0     0     0  9
 ##   PrS       9     0     0     0    9     9     9 12</code></pre>
-<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fwrite</span>(meta, <span class="at">file =</span> <span class="st">&quot;data/May_2024/JAX_RNAseq2_ExtraEmbryonic_meta_data.tsv&quot;</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb171"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fwrite</span>(meta, <span class="at">file =</span> <span class="st">&quot;data/May_2024/JAX_RNAseq2_ExtraEmbryonic_meta_data.tsv&quot;</span>, <span class="at">sep=</span><span class="st">&quot;</span><span class="sc">\t</span><span class="st">&quot;</span>)</span></code></pre></div>
 </div>
 <div id="check-count-data" class="section level2">
 <h2>Check count data</h2>
 <div id="genescounts.csv" class="section level3">
 <h3>genesCounts.csv</h3>
-<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a>cts <span class="ot">=</span> <span class="fu">fread</span>(<span class="fu">file.path</span>(dat_path, <span class="st">&quot;genesCounts.csv&quot;</span>), <span class="at">data.table =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(cts)</span></code></pre></div>
+<div class="sourceCode" id="cb172"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true" tabindex="-1"></a>cts <span class="ot">=</span> <span class="fu">fread</span>(<span class="fu">file.path</span>(dat_path, <span class="st">&quot;genesCounts.csv&quot;</span>), <span class="at">data.table =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb172-2"><a href="#cb172-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(cts)</span></code></pre></div>
 <pre><code>## [1] 38592    83</code></pre>
-<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" aria-hidden="true" tabindex="-1"></a>cts[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, (<span class="fu">ncol</span>(cts)<span class="sc">-</span><span class="dv">1</span>)<span class="sc">:</span><span class="fu">ncol</span>(cts))]</span></code></pre></div>
+<div class="sourceCode" id="cb174"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1" aria-hidden="true" tabindex="-1"></a>cts[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, (<span class="fu">ncol</span>(cts)<span class="sc">-</span><span class="dv">1</span>)<span class="sc">:</span><span class="fu">ncol</span>(cts))]</span></code></pre></div>
 <pre><code>##              Name MEIS2_CE_A06_GT23-12174_TGCGAGAC-CAACAATG_S1_L001
 ## 1 ENSG00000268674                                                 0
 ## 2 ENSG00000271254                                               793
@@ -2307,13 +2505,15 @@ border-radius: 0px;
 ##   RUNX1_KO_G07_GT23-13724_CGGCGTGA-ACAGGCGC_S175_L003
 ## 1                                                   0
 ## 2                                                1079</code></pre>
-<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(<span class="fu">names</span>(cts)[<span class="sc">-</span><span class="dv">1</span>], meta<span class="sc">$</span>file_id)</span></code></pre></div>
+<div class="sourceCode" id="cb176"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(<span class="fu">names</span>(cts)[<span class="sc">-</span><span class="dv">1</span>], meta<span class="sc">$</span>file_id)</span></code></pre></div>
 <pre><code>## character(0)</code></pre>
-<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb178"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(meta<span class="sc">$</span>file_id, <span class="fu">names</span>(cts)[<span class="sc">-</span><span class="dv">1</span>])</span></code></pre></div>
+<pre><code>## character(0)</code></pre>
+<div class="sourceCode" id="cb180"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gc</span>()</span></code></pre></div>
 <pre><code>##           used (Mb) gc trigger (Mb) limit (Mb) max used (Mb)
-## Ncells 1038315 55.5    2152868  115         NA  1292835 69.1
-## Vcells 4053610 31.0    8388608   64      65536  4317277 33.0</code></pre>
-<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+## Ncells 1038377 55.5    2152864  115         NA  1293198 69.1
+## Vcells 4054611 31.0    8388608   64      65536  4494699 34.3</code></pre>
+<div class="sourceCode" id="cb182"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>## R version 4.2.3 (2023-03-15)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
 ## Running under: macOS Big Sur ... 10.16

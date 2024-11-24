@@ -59,15 +59,30 @@ table(meta$model_organ, meta$ko_gene)
 table(meta$run_id, meta$ko_gene)
 table(meta$ko_strategy, meta$ko_gene)
 
-table(meta$ko_gene, meta$differentiated_timepoint_value)
+table(meta$ko_gene, meta$timepoint_value)
 ```
 
 ## Read in gene count data and filter genes
+
+<span style="color:red">Manually correcting the gene strings in certain column names. </span>
+
+As of the time of running this code, all differences below are due to partial correction of the GHRL gene name. 
+
+It should be "GRHL1" instead of "GHRL1". 
+
+It is fixed in the file_id column in meta table, but not fixed in the count data file column names yet.
 
 ```{r fig.width = 4, fig.height=3}
 cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
 dim(cts)
 cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+setdiff(names(cts)[-1], meta$file_id)
+setdiff(meta$file_id, names(cts)[-1])
+
+## starting manually correcting count data file column names
+names(cts) = gsub("GHRL", "GRHL", names(cts))
+## end the manual correction
 
 stopifnot(setequal(names(cts)[-1], meta$file_id))
 
@@ -235,10 +250,6 @@ df_file_info_cond
 
 Plot the knockout genes from different DE groups all together in one figure. 
 
-<span style="color:red">Gene GHRL1 cannot be found in the annotation file. </span>
-<span style="color:red">Likely it should be "GRHL1", just misspelled. </span>
-<span style="color:red">Manually change it in current plots. </span>
-
 ```{r fig.width =9, fig.height=3}
 
 df_file_info$items = rep(NA, nrow(df_file_info))
@@ -260,11 +271,6 @@ table(table(df_file_info$items))
 
 fc0 = log2(1.5)
 p0  = 0.05
-
-## **** note that this is after creating the "item" column
-## **** leave the "item" column uncorrected in order to load result files
-## **** need to update it after the metadata file is also updated
-df_file_info$gene[which(df_file_info$gene=="GHRL1")] = "GRHL1"
 
 gene_symbols = df_file_info$gene
 gene_symbols
@@ -301,15 +307,8 @@ for (k in 1:nrow(df_file_info)){
   stopifnot(length(w_gene) == 1)
   stopifnot(!(df$gene_symbol[k]%in%genes_w_multi_ensembl))
   
-  ### *** manually set the gene name back to the misspelled one
-  ### *** in order to load results
-  if (df$gene_symbol[k]=="GRHL1"){
-    fc = paste0("GHRL1", "_", df$strategy[k], "_log2FoldChange")
-    padj = paste0("GHRL1", "_", df$strategy[k], "_padj")
-  }else{
-    fc = paste0(df$gene_symbol[k], "_", df$strategy[k], "_log2FoldChange")
-    padj = paste0(df$gene_symbol[k], "_", df$strategy[k], "_padj")    
-  }
+  fc = paste0(df$gene_symbol[k], "_", df$strategy[k], "_log2FoldChange")
+  padj = paste0(df$gene_symbol[k], "_", df$strategy[k], "_padj")    
 
   df[k,"nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
   df[k,"log2FoldChange"] = res[[fc]][w_gene]
@@ -405,9 +404,6 @@ In some settings, there are too many DE genes and they cannot all be labeled in 
 
 ### For DE between knockout and WT samples
 
-<span style="color:red">Gene GHRL1 cannot be found in the annotation file. </span>
-<span style="color:red">Likely it should be "GRHL1", just misspelled. </span>
-<span style="color:red">Manually set it back the misspelled one to load result file. </span>
 ```{r fig.width = 6.5, fig.height=5}
 
 df_file_info
@@ -420,12 +416,6 @@ for(k in 1:nrow(df_file_info)){
   it_k = df_file_info$items[k]
   d_group = df_file_info$DE_general_group[k]
   gene_name = df_file_info$gene[k]
-
-  ### *** manually set the gene name back to the misspelled one
-  ### *** in order to load results
-  if (gene_name=="GRHL1"){
-    gene_name = "GHRL1"
-  }
   
   print(it_k)
   
@@ -457,10 +447,18 @@ for(k in 1:nrow(df_file_info)){
   res_k$delabel[w_de] = res_k$gene_symbol[w_de]
 
   print(table(res_k$DE))
-    
+
+  if (gene_name=="EPAS1"){
+    d_group_in_title = d_group
+  }else{
+    d_group_in_title = gsub("_nor", "", d_group)
+  }
+  
   g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                     col=DE, label=delabel)) + 
-         geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_", df_file_info$gene_strategy[k])) + 
+         geom_point() + 
+         ggtitle(paste0(d_group_in_title, "\n", gene_name, "_", 
+                        df_file_info$gene_strategy[k])) + 
          geom_text_repel(point.padding = 0.5,
                          min.segment.length = 0, 
                          size = 3,  # Adjust text size

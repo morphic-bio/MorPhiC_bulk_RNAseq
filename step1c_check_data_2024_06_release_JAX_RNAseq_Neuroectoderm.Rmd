@@ -1,6 +1,6 @@
 ---
 title: "Check RNAseq data of 2024-06 release, JAX_RNAseq_Neuroectoderm"
-author: "Wei Sun"
+author: "Si Liu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -43,21 +43,17 @@ theme_set(theme_classic())
 path = "../../MorPhiC/data/June-2024/JAX_RNAseq_Neuroectoderm/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 
+metadata_path = "data/metadata_spreadsheets"
+
 read_header <- function(file_name, sheet){
   
   meta_header = read_excel(file_name, sheet = sheet, 
                          skip = 3, n_max = 1, col_names = FALSE)
   meta_header = as.character(meta_header)
-  meta_header = gsub("cell_line.", "", meta_header, fixed = TRUE)
-  meta_header = gsub("differentiated_cell_line.", "", meta_header, fixed = TRUE)
-  meta_header = gsub("biomaterial_core.", "", meta_header, fixed = TRUE)
-  meta_header = gsub("gene_expression_alteration_protocol.protocol_core.", 
-                     "", meta_header, fixed = TRUE)
+  meta_header = gsub("_cell_line", "", meta_header, fixed = TRUE)
+  meta_header = gsub("differentiated_product.", "", meta_header, fixed = TRUE)
   meta_header = gsub(".text", "", meta_header, fixed = TRUE)
   
-  meta_header = gsub("gene_expression_alteration_protocol.", "", 
-                     meta_header, fixed = TRUE)
-
   meta_header
 }
 
@@ -66,38 +62,31 @@ read_header <- function(file_name, sheet){
 ## Read in meta data
 
 ```{r fig.width = 3, fig.height=3}
-meta_file = "../../MorPhiC/data/June-2024/JAX_RNAseq_Neuroectoderm/metadata/JAX_RNAseq_Neuroectoderm_metadata_corrected.xlsx"
+meta_file = paste0(metadata_path, "/v7_JAX_RNAseq3_Prod.xlsx")
 
-cl_header = read_header(meta_file, sheet = "Cell line ")
+cl_header = read_header(meta_file, sheet = "Clonal cell line")
 cl_header
 
-cl = read_excel(meta_file, sheet = "Cell line ", skip = 5, col_names = FALSE)
+cl = read_excel(meta_file, sheet = "Clonal cell line", skip = 5, col_names = FALSE)
 names(cl) = cl_header
 cl = as.data.frame(cl)
 dim(cl)
 cl[1:2,]
 
-dc_header = read_header(meta_file, sheet = "Differentiated cell line")
+dc_header = read_header(meta_file, sheet = "Differentiated product")
 dc_header
 
-dc = read_excel(meta_file, sheet = "Differentiated cell line", 
+dc = read_excel(meta_file, sheet = "Differentiated product", 
                 skip = 5, col_names = FALSE)
 names(dc) = dc_header
 dc = as.data.frame(dc)
 dim(dc)
 dc[1:2,]
 
-## remove columns 3:8, differentiated_ncbi_taxon_id to 
-## differentiated_biosamples_accession
-dc = dc[,-(3:8)]
-dim(dc)
-dc[1:2,]
-
-eas_header = read_header(meta_file, sheet = "Expression alteration strategy")
+eas_header = read_header(meta_file, sheet = "Expression alteration")
 eas_header
-eas_header = c(eas_header, "altered_locus", "guide_sequence")
 
-eas = read_excel(meta_file, sheet = "Expression alteration strategy", 
+eas = read_excel(meta_file, sheet = "Expression alteration", 
                 skip = 5, col_names = FALSE)
 names(eas) = eas_header
 eas = as.data.frame(eas)
@@ -108,46 +97,63 @@ eas[1:2,]
 ## Check cell lines
 
 ```{r}
-any(duplicated(cl$biomaterial_id))
-table(cl$protocol_id)
-table(cl$type)
-table(cl$derived_cell_line_accession)
-table(cl$zygosity)
-sort(table(cl$clone_id), decreasing = TRUE)
+any(duplicated(cl$clonal.label))
+table(cl$clonal.type)
+table(cl$clonal.parental_name)
+table(cl$clonal.zygosity)
+sort(table(cl$clonal.clone_id), decreasing = TRUE)
 
-table(dc$biomaterial_id %in% cl$biomaterial_id)
-table(cl$biomaterial_id %in% dc$biomaterial_id)
-setdiff(dc$biomaterial_id, cl$biomaterial_id)
-setdiff(cl$biomaterial_id, dc$biomaterial_id)
+table(dc$clonal.label %in% cl$clonal.label)
+table(cl$clonal.label %in% dc$clonal.label)
+setdiff(dc$clonal.label, cl$clonal.label)
+setdiff(cl$clonal.label, dc$clonal.label)
 
-table(table(dc$biomaterial_id))
-table(dc$differentiated_timepoint_value)
-table(dc$differentiated_terminally_differentiated)
-table(dc$differentiation_protocol.protocol_core.protocol_id, 
-      dc$model_organ)
+any(duplicated(dc$label))
+table(table(dc$clonal.label))
+table(dc$timepoint_value)
+table(dc$timepoint_unit)
+table(dc$final_timepoint)
+table(dc$differentiated_product_protocol_id, 
+      dc$model_system)
+table(dc$final_timepoint, 
+      dc$timepoint_value)
+
+table(dc$timepoint_value, 
+      dc$model_system)
 ```
 
 ## Check Expression alteration strategy
 ```{r}
-table(eas$protocol_id)
-table(eas$allele_specific)
-table(eas$protocol_id, eas$altered_gene_symbols)
-table(eas$protocol_id, eas$crispr.sgrna_target)
+any(duplicated(eas$expression_alteration.label))
+setdiff(eas$expression_alteration.label, cl$expression_alteration.label)
+setdiff(cl$expression_alteration.label, eas$expression_alteration.label)
+
+table(eas$expression_alteration.parent_protocol_id)
+table(eas$expression_alteration.method)
+table(eas$expression_alteration.genes.allele_specific)
+table(eas$expression_alteration.parent_protocol_id, 
+      eas$expression_alteration.genes.altered_gene_symbol, useNA="ifany")
+table(eas$expression_alteration.parent_protocol_id, 
+      eas$expression_alteration.genes.targeted_genomic_region, useNA="ifany")
+table(eas$expression_alteration.genes.targeted_genomic_region, 
+      eas$expression_alteration.genes.editing_strategy, useNA="ifany")
+table(eas$expression_alteration.genes.editing_strategy, 
+      eas$expression_alteration.genes.expected_alteration_type, useNA="ifany")
 ```
 
 ## Extract KO strategy information
 
 ```{r}
 dc[["ko_strategy"]] = 
-  str_extract(dc$differentiated_biomaterial_description, 
+  str_extract(dc$description, 
               "\\(KO\\)|\\(CE\\)|\\(PTC\\)")
 dc[["ko_strategy"]] = gsub("\\(|\\)", "", dc[["ko_strategy"]])
 
-dc[["ko_gene"]] = str_extract(dc$differentiated_biomaterial_description, 
+dc[["ko_gene"]] = str_extract(dc$description, 
                                   "(?<=KOLF2.2 deleted ).\\S+")
 table(dc$ko_strategy, dc$ko_gene, useNA = 'ifany')
 
-table(dc$differentiated_biomaterial_description, 
+table(dc$description, 
       dc$ko_strategy, useNA = 'ifany')
 ```
 
@@ -156,11 +162,6 @@ table(dc$differentiated_biomaterial_description,
 ```{r}
 lib_header = read_header(meta_file, sheet = "Library preparation")
 lib_header
-lib_header = c(lib_header, 
-               c("fragment_size", "input_amount", "input_unit", 
-                 "final_yield", "final_yield_unit", 
-                 "lib_concentration", "lib_concentration_unit",
-                 "PCR_cycle", "PCR_cycle_sample_index"))
 
 lib = read_excel(meta_file, sheet = "Library preparation", 
                 skip = 5, col_names = FALSE)
@@ -170,6 +171,10 @@ lib = as.data.frame(lib)
 dim(lib)
 lib[1:2,]
 
+any(duplicated(lib$label))
+setdiff(dc$label, lib$label)
+setdiff(lib$label, dc$label)
+
 seq_header = read_header(meta_file, sheet = "Sequence file")
 seq_header
 
@@ -178,22 +183,37 @@ seq = read_excel(meta_file, sheet = "Sequence file",
 names(seq) = seq_header
 seq = as.data.frame(seq)
 seq$file_id = gsub("_R(1|2)_001.fastq.gz", "", 
-                   seq$sequence_file.file_core.file_name)
+                   seq$sequence_file.label)
 dim(seq)
 seq[1:2,]
 
-seq = unique(seq[,c("file_id", "library_preparation.biomaterial_id", 
-                    "sequencing_protocol.protocol_core.protocol_id", 
+seq = unique(seq[,c("file_id", "library_preparation.label", 
                     "sequence_file.run_id")])
 dim(seq)
 seq[1:2,]
+length(unique(seq$library_preparation.label))
 
 table(seq$sequence_file.run_id)
 
 intersect(names(dc), names(lib))
+table(dc$label%in%lib$label, 
+      useNA="ifany")
+table(lib$label%in%dc$label, 
+      useNA="ifany")
+
 meta = merge(dc, lib)
 dim(meta)
 meta[1:2,]
+
+intersect(names(meta), names(seq))
+
+any(duplicated(meta$library_preparation.label))
+any(duplicated(seq$library_preparation.label))
+
+table(meta$library_preparation.label%in%seq$library_preparation.label, 
+      useNA="ifany")
+table(seq$library_preparation.label%in%meta$library_preparation.label, 
+      useNA="ifany")
 
 meta = merge(meta, seq)
 dim(meta)
@@ -206,24 +226,16 @@ update_name <- function(df1, old_name, new_name){
   df1
 }
 
-meta = update_name(meta, "library_preparation.biomaterial_id", 
-                   "lib_biomaterial_id")
-
-meta = update_name(meta, "differentiation_protocol.protocol_core.protocol_id", 
-                   "differentiation_protocol")
-
-meta = update_name(meta, "library_preparation_protocol.protocol_core.protocol_id", 
-                   "library_preparation_protocol")
-
-meta = update_name(meta, "dissociation_protocol.protocol_core.protocol_id", 
-                   "dissociation_protocol")
-
-meta = update_name(meta, "sequencing_protocol.protocol_core.protocol_id", 
-                   "sequencing_protocol")
-
 meta = update_name(meta, "sequence_file.run_id", "run_id")
+```
 
+```{r}
 intersect(names(meta), names(cl))
+
+table(meta$clonal.label %in% cl$clonal.label)
+table(cl$clonal.label %in% meta$clonal.label)
+setdiff(meta$clonal.label, cl$clonal.label)
+setdiff(cl$clonal.label, meta$clonal.label)
 
 meta = merge(meta, cl)
 dim(meta)
@@ -235,8 +247,9 @@ meta$ko_strategy[which(is.na(meta$ko_strategy))] = "WT"
 table(meta$ko_gene, useNA = "ifany")
 meta$ko_gene[which(is.na(meta$ko_gene))] = "WT"
 
+meta$model_organ = meta$model_system
 meta$model_system = NA
-meta$model_system = str_extract(meta$differentiated_biomaterial_id, "^[^-]+")
+meta$model_system = str_extract(meta$label, "^[^-]+")
 table(meta$model_system, meta$model_organ)
 
 table(meta$model_system, meta$ko_gene)
@@ -255,6 +268,7 @@ dim(cts)
 cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
 
 setdiff(names(cts)[-1], meta$file_id)
+setdiff(meta$file_id, names(cts)[-1])
 ```
 
 

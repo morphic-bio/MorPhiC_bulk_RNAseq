@@ -18,8 +18,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# explicitly set warning level in R, to prevent a warning from being converted to an error
-options(warn=1)
 ```
 
 Differential expression using the bulk RNAseq JAX_RNAseq_Neuroectoderm data from the June 2024 release.
@@ -48,7 +46,6 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#path = "../../data/MorPhiC/June-2024/JAX_RNAseq_Neuroectoderm/"
 path = "../../MorPhiC/data/June-2024/JAX_RNAseq_Neuroectoderm/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
@@ -62,59 +59,9 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(table(meta$biomaterial_id))
-table(table(meta$lib_biomaterial_id))
-table(table(meta$differentiated_biomaterial_id))
-```
-
-## Manually update timepoint information in the metadata
-
-(1) Manually correct a typo:
-
-For the row with column differentiated_biomaterial_id=="CBO-MOK20004-WT-Day3", it should have value 3 instead of the original 4 in the column differentiated_timepoint_value. 
-
-```{r}
-print("Before correcting the error in timepoint for CBO-MOK20004-WT-Day3:")
-print("Table between ko_gene and differentiated_timepoint_value:")
-table(meta$ko_gene, meta$differentiated_timepoint_value)
-
-meta[which(meta$differentiated_biomaterial_id=="CBO-MOK20004-WT-Day3"), 
-     "differentiated_timepoint_value"] = 3
-
-print("After correcting the error in timepoint for CBO-MOK20004-WT-Day3:")
-print("Table between ko_gene and differentiated_timepoint_value:")
-table(meta$ko_gene, meta$differentiated_timepoint_value)
-```
-
-(2) Manually update timepoint information for some originally day 5 samples in the metadata
-
-According to information from JAX, part of the samples from day 5 in fact should
-have a timepoint that is closer to day 6. This is the group of samples under day 5
-and from run_id 
-
-    20230522_23-scbct-052
-    
-For these samples, label them as day 6. 
-
-Since the other samples from day 5 only have one WT, in later DE analysis, ignore 
-these samples and do not run DE analysis for day 5. 
-
-```{r}
-
-table(meta$run_id, meta$differentiated_timepoint_value)
-
-index_day5_to_change = which((meta$run_id=="20230522_23-scbct-052") & 
-                               (meta$differentiated_timepoint_value==5))
-length(index_day5_to_change)
-meta[index_day5_to_change, c("run_id", "differentiated_timepoint_value")]
-
-meta$differentiated_timepoint_value[index_day5_to_change] = 6
-
-table(meta$run_id, meta$differentiated_timepoint_value)
-
-print("After correcting timepoint for some samples originally labeled as day 5:")
-print("Table between ko_gene and differentiated_timepoint_value:")
-table(meta$ko_gene, meta$differentiated_timepoint_value)
+table(table(meta$clonal.label))
+table(table(meta$library_preparation.label))
+table(table(meta$label))
 ```
 
 ## Read in gene count data and filter genes
@@ -132,12 +79,14 @@ table(names(cts)[-1] == meta$file_id)
 cts_dat = data.matrix(cts[,-1])
 rownames(cts_dat) = cts$Name
 
-unique_timepoints = unique(meta$differentiated_timepoint_value)
+unique_timepoints = unique(meta$timepoint_value)
 unique_timepoints = sort(unique_timepoints)
 
-xx = as.character(meta$differentiated_timepoint_value)
+xx = as.character(meta$timepoint_value)
 xx = factor(xx, levels = as.character(unique_timepoints))
 meta$timepoint = xx
+
+table(meta$ko_gene, meta$timepoint)
 ```
 
 ### Read in gene annoation
@@ -446,7 +395,7 @@ Use day to construct DE groups.
 Run DESeq2 for different day groups separately
 
     day 3 + day 4, with a day indictor
-    day 5 (do not run for day 5, since after updating day label, the samples left only have one WT)
+    day 5 (do not run for day 5, since there is only one WT)
     day 6
     day 7
     day 8 (exclude samples from run ID short scbct-028-run3)
@@ -455,17 +404,22 @@ Run DESeq2 for different day groups separately
 For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
 
 In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + day + condition, model system + day + run_id, model system + day, etc.). 
-The first version of the output files contains gene id, and for each knockout strategy:
 
-    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+The first version of the output files contains 
     
-The second version of the output files contains gene id, 
-
-    chr, strand, position, gene name
+    gene id, gene symbol
 
 and for each knockout strategy:
 
-    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
+    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+    
+The second version of the output files contains 
+
+    gene id, gene symbol, chr, strand, position
+
+and for each knockout strategy:
+
+    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4)
 
 In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
 
@@ -544,7 +498,6 @@ for(model1 in unique(meta$model_system)){
   
   # run DESeq2 for different day groups separately
   # day 3 + day 4
-  # day 5
   # day 6
   # day 7
   # day 8 (not excluding RFX4 for now)

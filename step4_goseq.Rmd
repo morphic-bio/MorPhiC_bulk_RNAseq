@@ -22,9 +22,7 @@ params:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(dev="CairoPNG")
 ```
-The code for 2024_09_UCSF_Bulk_EB_Timecourse dataset is in a separate file. 
-
-This code file can be applied to all other datasets from 2023_12 release to 2024_09 release.
+This code file can be applied to all datasets from 2023_12 release to 2024_09 release.
 
 In each setting, based on the processed output file, take all genes with non-NA adjusted pvalues
 as genes to consider, and significant genes based on adjusted p-value cutoff 0.05 and 
@@ -177,8 +175,6 @@ if (length(condition_DE_files)>0){
   print(df_file_info_cond$items)
   print(df_file_info_cond)
 }
-
-# set an exception for UCSF data
 
 ```
 

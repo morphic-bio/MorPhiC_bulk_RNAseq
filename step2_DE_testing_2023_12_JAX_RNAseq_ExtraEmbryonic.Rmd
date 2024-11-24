@@ -49,7 +49,6 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#dat_path = "~/research/data/MorPhiC/December-2023/JAX_RNAseq_ExtraEmbryonic/"
 dat_path = "../../MorPhiC/data/December-2023/JAX_RNAseq_ExtraEmbryonic/"
 dat_path = paste0(dat_path, "processed/Tables")
 ```
@@ -63,15 +62,15 @@ dim(meta)
 meta[1:2,]
 names(meta)
 
-table(table(meta$biomaterial_id))
-table(table(meta$lib_biomaterial_id))
-table(table(meta$differentiated_biomaterial_id))
+table(table(meta$clonal.label))
+table(table(meta$library_preparation.label))
+table(table(meta$label))
 ```
 
 ### Extract condition information
 ```{r}
-meta$differentiated_biomaterial_id[1:6]
-cell_line_id = str_split(meta$differentiated_biomaterial_id, pattern = '-')
+meta$label[1:6]
+cell_line_id = str_split(meta$label, pattern = '-')
 table(sapply(cell_line_id, length))
 
 cell_line_id = lapply(cell_line_id, function(x) { length(x) <- 4; x})
@@ -82,21 +81,15 @@ meta$condition = cell_line_id[, 4]
 meta$condition[which(is.na(meta$condition))] = "nor"
 table(meta$condition, useNA="ifany")
 table(meta$model_organ, meta$condition, useNA="ifany")
+
+table(meta$run_id, useNA="ifany")
 table(meta$run_id, meta$condition, useNA="ifany")
 ```
 
-### Manually update one run id
-
-Run ID "20231004_23-robson-008-run2" is very similar to "20230918_23-robson-008" in experiment. It is merged into "20230918_23-robson-008".
+### Explore run id and ko gene info
 
 ```{r fig.width = 3, fig.height=3}
-table(meta$run_id, useNA="ifany")
-
-w2update = which(meta$run_id == "20231004_23-robson-008-run2")
-meta$run_id[w2update] = "20230918_23-robson-008"
-
 table(meta$run_id, meta$model_system, useNA="ifany")
-table(meta$run_id, meta$condition, useNA="ifany")
 
 table(meta$model_system, meta$ko_gene, useNA="ifany")
 table(meta$run_id, meta$ko_gene, useNA="ifany")
@@ -105,10 +98,25 @@ table(meta$ko_strategy, meta$ko_gene, useNA="ifany")
 
 ## Read in gene count data and filter genes
 
+<span style="color:red">Manually correcting the gene strings in certain column names. </span>
+
+As of the time of running this code, all differences below are due to partial correction of the GHRL gene name. 
+
+It should be "GRHL1" instead of "GHRL1". 
+
+It is fixed in the file_id column in meta table, but not fixed in the count data file column names yet.
+
 ```{r fig.width = 4, fig.height=3}
 cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
 dim(cts)
 cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+setdiff(names(cts)[-1], meta$file_id)
+setdiff(meta$file_id, names(cts)[-1])
+
+## starting manually correcting count data file column names
+names(cts) = gsub("GHRL", "GRHL", names(cts))
+## end the manual correction
 
 stopifnot(setequal(names(cts)[-1], meta$file_id))
 
@@ -118,8 +126,8 @@ table(names(cts)[-1] == meta$file_id)
 cts_dat = data.matrix(cts[,-1])
 rownames(cts_dat) = cts$Name
 
-table(meta$differentiated_timepoint_value, useNA="ifany")
-meta$timepoint = as.character(meta$differentiated_timepoint_value)
+table(meta$timepoint_value, useNA="ifany")
+meta$timepoint = as.character(meta$timepoint_value)
 
 ```
 
@@ -353,7 +361,7 @@ for(cur_mc in unique_model_condition_ss){
   print(table(meta_m$ko_strategy, unlist(extracted_ko_strings)))
   
   if (cur_mc == "PrS_nor"){
-    print("The overlap between WT and KO is not real overlap. It is due to the gene name contains substring 'KO' in these three samples:")
+    print("The overlap between WT and KO is not real overlap. It is due to a different part of the filename contains substring 'KO' in these three samples:")
     print(meta_m$file_id[(meta_m$ko_strategy=="WT") & (unlist(extracted_ko_strings)=="KO")])
   }
   
@@ -444,13 +452,17 @@ Run analysis for each DE group separately.
 For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
 
 In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
-The first version of the output files contains gene id, and for each knockout strategy:
+The first version of the output files contains 
+    
+    gene id, gene symbol
+
+and for each knockout strategy:
 
     baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
     
-The second version of the output files contains gene id, 
+The second version of the output files contains  
 
-    chr, strand, position, gene name
+    gene id, gene symbol, chr, strand, position
 
 and for each knockout strategy:
 
@@ -891,14 +903,14 @@ meta$ko_group = paste(meta$ko_gene, meta$ko_strategy, sep="_")
 relevant_ko_groups = unique(meta$ko_group[which(meta$condition=="hyp")])
 relevant_ko_groups = sort(relevant_ko_groups)
 
-relevant_samples = meta$differentiated_biomaterial_id[which(meta$run_id=="20230918_23-robson-008")]
+relevant_samples = meta$label[which(meta$run_id=="20230918_23-robson-008")]
 relevant_samples
 
 for (cur_ko_group in relevant_ko_groups){
   
   # note that gene_group is for indicating which knockout gene that WT samples are for
   # for knockout samples, its value is the knockout gene
-  sample2kp = which((meta$differentiated_biomaterial_id%in%relevant_samples)&
+  sample2kp = which((meta$label%in%relevant_samples)&
                     (meta$ko_group == cur_ko_group))
   cts_dat_cond = cts_dat[,sample2kp]
   meta_cond    = meta[sample2kp,]
@@ -921,8 +933,9 @@ for (cur_ko_group in relevant_ko_groups){
   
   print(table(meta_cond$condition, meta_cond$run_id_short))
   
-  cols2kp = c("model_system", "timepoint", "biomaterial_id", "condition")
+  cols2kp = c("model_system", "timepoint", "clonal.label", "condition")
   sample_info_cond = meta_cond[,cols2kp]
+  colnames(sample_info_cond)[which(colnames(sample_info_cond)=="clonal.label")] = "clonal_label"
   
   dim(sample_info_cond)
   sample_info_cond[1:2,]
@@ -956,7 +969,7 @@ for (cur_ko_group in relevant_ko_groups){
                                   ~ condition + log_q75)
   }else{
     dds = DESeqDataSetFromMatrix(cts_dat_cond, colData=sample_info_cond, 
-                                  ~ biomaterial_id + log_q75 + condition)     
+                                  ~ clonal_label + log_q75 + condition)     
   }
   
   start.time <- Sys.time()
@@ -998,7 +1011,7 @@ for (cur_ko_group in relevant_ko_groups){
                                     ~ condition)
     }else{
       dds = DESeqDataSetFromMatrix(cts_dat_cond, colData=sample_info_cond, 
-                                    ~ biomaterial_id + condition)  
+                                    ~ clonal_label + condition)  
     }
     dds = DESeq(dds)
   }

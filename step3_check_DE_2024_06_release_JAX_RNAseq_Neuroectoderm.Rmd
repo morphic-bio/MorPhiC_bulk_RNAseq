@@ -41,7 +41,6 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-#path = "../../data/MorPhiC/June-2024/JAX_RNAseq_Neuroectoderm/"
 path = "../../MorPhiC/data/June-2024/JAX_RNAseq_Neuroectoderm/"
 dat_path = paste0(path, "processed/release110-gencode44/Tables")
 ```
@@ -381,9 +380,15 @@ for(k in 1:nrow(df_file_info)){
   
     print(table(res_k$DE))
     
+    if (gene_name=="EPAS1"){
+      d_group_in_title = d_group
+    }else{
+      d_group_in_title = gsub("_nor", "", d_group)
+    }
+    
     g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                       col=DE, label=delabel)) + 
-           geom_point() + ggtitle(paste0(d_group, "\n", gene_name, "_", ko1)) + 
+           geom_point() + ggtitle(paste0(d_group_in_title, "\n", gene_name, "_", ko1)) + 
            geom_text_repel(point.padding = 0.5,
                            min.segment.length = 0, 
                            size = 3,  # Adjust text size

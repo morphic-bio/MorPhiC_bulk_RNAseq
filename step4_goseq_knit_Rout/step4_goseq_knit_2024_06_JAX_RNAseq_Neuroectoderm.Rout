@@ -377,7 +377,7 @@ label: unnamed-chunk-8
 
 output file: step4_goseq.knit.md
 
-/app/software/RStudio-Server/1.4.1717-foss-2021b-Java-11-R-4.1.2/bin/pandoc/pandoc +RTS -K512m -RTS step4_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step4_goseq/step4_goseq_2024_06_JAX_RNAseq_Neuroectoderm.html --lua-filter /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --include-in-header /loc/scratch/65125359/Rtmp4vmUQj/rmarkdown-str2a5f341820c0.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
+/app/software/RStudio-Server/1.4.1717-foss-2021b-Java-11-R-4.1.2/bin/pandoc/pandoc +RTS -K512m -RTS step4_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step4_goseq/step4_goseq_2024_06_JAX_RNAseq_Neuroectoderm.html --lua-filter /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /app/software/R/4.1.2-foss-2021b/lib/R/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --include-in-header /loc/scratch/1647266/RtmplJLQfd/rmarkdown-str705820f75f9c.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --variable code_folding=hide --variable code_menu=1 
 
 Output created: step4_goseq/step4_goseq_2024_06_JAX_RNAseq_Neuroectoderm.html
 There were 18 warnings (use warnings() to see them)
@@ -485,4 +485,4 @@ loaded via a namespace (and not attached):
 > q(save = "no")
 > proc.time()
    user  system elapsed 
-149.016   7.538 169.376 
+145.335   7.594 167.479 
