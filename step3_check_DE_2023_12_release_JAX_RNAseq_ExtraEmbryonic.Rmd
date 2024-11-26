@@ -40,6 +40,8 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
+library(svglite)
+
 dat_path = "../../MorPhiC/data/December-2023/JAX_RNAseq_ExtraEmbryonic/"
 dat_path = paste0(dat_path, "processed/Tables")
 ```
@@ -218,6 +220,23 @@ colnames(df_file_info_cond) = c("DE_general_group", "gene", "gene_strategy")
 df_file_info_cond
 
 ```
+
+
+## Prepare output directories for saving figure files out
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+figure_dir = file.path("figures", release_name)
+volcano_figure_dir = file.path(figure_dir, "volcano_plots")
+
+if (!file.exists(volcano_figure_dir)){
+  dir.create(volcano_figure_dir, recursive = TRUE)
+}
+
+```
+
 
 
 ## Number of DE genes and properties of knockout gene
@@ -399,7 +418,6 @@ p1 <- ggplot(df_cond, aes(x=gene_strategy, y=nDE, fill=gene_strategy)) +
 
 print(p1)
 
-
 ```
 
 
@@ -474,6 +492,9 @@ for(k in 1:nrow(df_file_info)){
 
   }
   
+  saved_figure_name = paste0(d_group_in_title, "_", gene_name, "_", ko1, ".svg")
+  ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
+         plot=g2, width=4, height=3, units="in")
 }
 
 
@@ -539,6 +560,10 @@ for(k in 1:nrow(df_file_info_cond)){
     
   print(g2)
   
+  saved_figure_name = paste0(d_group, "_", gene_strategy_name, 
+                            "_hyp_vs_nor.svg")
+  ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
+         plot=g2, width=4, height=3, units="in")
 }
 ```
 

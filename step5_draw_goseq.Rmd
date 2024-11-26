@@ -85,6 +85,21 @@ for(label in names(res)){
 
 ```
 
+## Prepare output directories for saving figure files out
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+figure_dir = file.path("figures", release_name)
+goseq_figure_dir = file.path(figure_dir, "goseq_plots")
+
+if (!file.exists(goseq_figure_dir)){
+  dir.create(goseq_figure_dir, recursive = TRUE)
+}
+
+```
+
 ## Generate plots
 
 ```{r fig.width = 7, fig.height = 5}
@@ -151,6 +166,12 @@ for(k in 1:length(df_list)){
   
   canvas <- ggdraw() + draw_plot(g1, x = 0, y = 1-h1, width = 1, height = h1)    
   print(canvas)
+  
+  saved_figure_name = gsub("\n", "_", nm1)
+  saved_figure_name = paste0(gsub(" ", "_", saved_figure_name), ".svg")
+
+  ggsave(file=file.path(goseq_figure_dir, saved_figure_name), 
+         plot=canvas, width=8, height=5, units="in")
 }
 ```
 

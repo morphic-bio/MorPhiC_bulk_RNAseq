@@ -1,0 +1,107 @@
+
+R version 4.2.3 (2023-03-15) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> 
+> Sys.setenv(RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/MacOS/pandoc")
+> 
+> render_report = function(release_name) {
++ 
++   rmarkdown::render(
++     "step5_draw_goseq.Rmd", 
++     params = list(release_name = release_name),
++     output_file = paste0("step5_draw_goseq/step5_draw_goseq_", release_name, ".html")
++   )
++ }
+> 
+> rs = c("2023_12_JAX_RNAseq_ExtraEmbryonic"
++        # "2024_05_JAX_RNAseq2_ExtraEmbryonic",
++        # "2024_06_JAX_RNAseq_Neuroectoderm",
++        # "2024_06_JAX_RNAseq4_ExEm_brain", 
++        # "2024_09_JAX_RNAseq5_ExE_CBO",
++        # "2024_09_JAX_RNAseq6_Diverse",
++        # "2024_09_JAX_RNAseq7_Reversion",
++        # "2024_09_UCSF_Bulk_EB_Timecourse"
++        )
+> 
+> 
+> for(r1 in rs){
++   render_report(r1)
++ }
+
+
+processing file: step5_draw_goseq.Rmd
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
+output file: step5_draw_goseq.knit.md
+
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2023_12_JAX_RNAseq_ExtraEmbryonic.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//Rtmppfifs6/rmarkdown-str383c77aa381c.html --variable code_folding=hide --variable code_menu=1 
+
+Output created: step5_draw_goseq/step5_draw_goseq_2023_12_JAX_RNAseq_ExtraEmbryonic.html
+> 
+> 
+> sessionInfo()
+R version 4.2.3 (2023-03-15)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur ... 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] tidyr_1.3.1       cowplot_1.1.3     stringr_1.5.1     ggrepel_0.9.5    
+[5] ggpubr_0.6.0      ggplot2_3.5.1     data.table_1.15.4
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.1  xfun_0.47         bslib_0.8.0       purrr_1.0.2      
+ [5] carData_3.0-5     colorspace_2.1-1  vctrs_0.6.5       generics_0.1.3   
+ [9] htmltools_0.5.8.1 yaml_2.3.10       utf8_1.2.4        rlang_1.1.4      
+[13] jquerylib_0.1.4   pillar_1.9.0      glue_1.7.0        withr_3.0.1      
+[17] lifecycle_1.0.4   munsell_0.5.1     ggsignif_0.6.4    gtable_0.3.5     
+[21] ragg_1.2.7        evaluate_0.24.0   labeling_0.4.3    knitr_1.48       
+[25] fastmap_1.2.0     fansi_1.0.6       highr_0.11        broom_1.0.6      
+[29] Rcpp_1.0.13       scales_1.3.0      backports_1.5.0   cachem_1.1.0     
+[33] jsonlite_1.8.8    abind_1.4-5       farver_2.1.2      systemfonts_1.1.0
+[37] textshaping_0.3.7 digest_0.6.37     stringi_1.8.4     rstatix_0.7.2    
+[41] dplyr_1.1.4       grid_4.2.3        cli_3.6.3         tools_4.2.3      
+[45] magrittr_2.0.3    sass_0.4.9        tibble_3.2.1      car_3.1-2        
+[49] pkgconfig_2.0.3   rmarkdown_2.28    svglite_2.1.3     R6_2.5.1         
+[53] compiler_4.2.3   
+> 
+> q(save = "no")
+> proc.time()
+   user  system elapsed 
+  5.746   0.456   6.589 
