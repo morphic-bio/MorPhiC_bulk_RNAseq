@@ -32,11 +32,12 @@ Type 'q()' to quit R.
 > rs = c("2023_12_JAX_RNAseq_ExtraEmbryonic",
 +        "2024_05_JAX_RNAseq2_ExtraEmbryonic",
 +        "2024_06_JAX_RNAseq_Neuroectoderm",
-+        "2024_06_JAX_RNAseq4_ExEm_brain", 
++        "2024_06_JAX_RNAseq4_ExEm_brain",
 +        "2024_09_JAX_RNAseq5_ExE_CBO",
 +        "2024_09_JAX_RNAseq6_Diverse",
 +        "2024_09_JAX_RNAseq7_Reversion",
-+        "2024_09_UCSF_Bulk_EB_Timecourse")
++        "2024_09_UCSF_Bulk_EB_Timecourse"
++        )
 > 
 > 
 > for(r1 in rs){
@@ -45,153 +46,169 @@ Type 'q()' to quit R.
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2023_12_JAX_RNAseq_ExtraEmbryonic.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre3836e8f864f.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2023_12_JAX_RNAseq_ExtraEmbryonic.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref99283f11c4.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2023_12_JAX_RNAseq_ExtraEmbryonic.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_05_JAX_RNAseq2_ExtraEmbryonic.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre3837a8f84cc.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_05_JAX_RNAseq2_ExtraEmbryonic.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref9963ca6995.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_05_JAX_RNAseq2_ExtraEmbryonic.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_06_JAX_RNAseq_Neuroectoderm.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre3837ed36ca2.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_06_JAX_RNAseq_Neuroectoderm.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref99bf48df0.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_06_JAX_RNAseq_Neuroectoderm.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_06_JAX_RNAseq4_ExEm_brain.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre3837f3fdd02.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_06_JAX_RNAseq4_ExEm_brain.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref992352de0c.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_06_JAX_RNAseq4_ExEm_brain.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq5_ExE_CBO.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre3834e012666.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq5_ExE_CBO.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref9964fb6d30.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq5_ExE_CBO.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq6_Diverse.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre383b114978.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq6_Diverse.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref997164ec21.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq6_Diverse.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq7_Reversion.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre383394df58c.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq7_Reversion.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref99101c3166.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_09_JAX_RNAseq7_Reversion.html
 
 
 processing file: step5_draw_goseq.Rmd
-1/11                  
-2/11 [setup]          
-3/11                  
-4/11 [load_libraries] 
-5/11                  
-6/11 [unnamed-chunk-1]
-7/11                  
-8/11 [unnamed-chunk-2]
-9/11                  
-10/11 [unnamed-chunk-3]
-11/11                  
+1/13                  
+2/13 [setup]          
+3/13                  
+4/13 [load_libraries] 
+5/13                  
+6/13 [unnamed-chunk-1]
+7/13                  
+8/13 [unnamed-chunk-2]
+9/13                  
+10/13 [unnamed-chunk-3]
+11/13                  
+12/13 [unnamed-chunk-4]
+13/13                  
 output file: step5_draw_goseq.knit.md
 
-/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_UCSF_Bulk_EB_Timecourse.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpiOgbr9/rmarkdown-stre38345d52cb0.html --variable code_folding=hide --variable code_menu=1 
+/Users/sliu/opt/anaconda3/bin/pandoc +RTS -K512m -RTS step5_draw_goseq.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output step5_draw_goseq/step5_draw_goseq_2024_09_UCSF_Bulk_EB_Timecourse.html --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --section-divs --table-of-contents --toc-depth 3 --variable toc_float=1 --variable toc_selectors=h1,h2,h3 --variable toc_collapsed=1 --variable toc_print=1 --template /Library/Frameworks/R.framework/Versions/4.2/Resources/library/rmarkdown/rmd/h/default.html --highlight-style tango --variable theme=journal --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /var/folders/2w/md4qmqxd3cn9kfl7flgbmyrw0000gp/T//RtmpfgO0uD/rmarkdown-stref9916f04775.html --variable code_folding=hide --variable code_menu=1 
 
 Output created: step5_draw_goseq/step5_draw_goseq_2024_09_UCSF_Bulk_EB_Timecourse.html
 > 
@@ -216,21 +233,22 @@ other attached packages:
 [5] ggpubr_0.6.0      ggplot2_3.5.1     data.table_1.15.4
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.13       highr_0.11        bslib_0.8.0       compiler_4.2.3   
- [5] pillar_1.9.0      jquerylib_0.1.4   tools_4.2.3       digest_0.6.37    
- [9] jsonlite_1.8.8    evaluate_0.24.0   lifecycle_1.0.4   tibble_3.2.1     
-[13] gtable_0.3.5      pkgconfig_2.0.3   rlang_1.1.4       cli_3.6.3        
-[17] yaml_2.3.10       xfun_0.47         fastmap_1.2.0     withr_3.0.1      
-[21] dplyr_1.1.4       knitr_1.48        generics_0.1.3    vctrs_0.6.5      
-[25] sass_0.4.9        grid_4.2.3        tidyselect_1.2.1  glue_1.7.0       
-[29] R6_2.5.1          rstatix_0.7.2     fansi_1.0.6       rmarkdown_2.28   
-[33] carData_3.0-5     farver_2.1.2      car_3.1-2         purrr_1.0.2      
-[37] magrittr_2.0.3    backports_1.5.0   scales_1.3.0      htmltools_0.5.8.1
-[41] abind_1.4-5       colorspace_2.1-1  ggsignif_0.6.4    labeling_0.4.3   
-[45] utf8_1.2.4        stringi_1.8.4     munsell_0.5.1     broom_1.0.6      
-[49] cachem_1.1.0     
+ [1] tidyselect_1.2.1  xfun_0.47         bslib_0.8.0       purrr_1.0.2      
+ [5] carData_3.0-5     colorspace_2.1-1  vctrs_0.6.5       generics_0.1.3   
+ [9] htmltools_0.5.8.1 yaml_2.3.10       utf8_1.2.4        rlang_1.1.4      
+[13] jquerylib_0.1.4   pillar_1.9.0      glue_1.7.0        withr_3.0.1      
+[17] lifecycle_1.0.4   munsell_0.5.1     ggsignif_0.6.4    gtable_0.3.5     
+[21] ragg_1.2.7        evaluate_0.24.0   labeling_0.4.3    knitr_1.48       
+[25] fastmap_1.2.0     fansi_1.0.6       highr_0.11        broom_1.0.6      
+[29] Rcpp_1.0.13       scales_1.3.0      backports_1.5.0   cachem_1.1.0     
+[33] jsonlite_1.8.8    abind_1.4-5       farver_2.1.2      systemfonts_1.1.0
+[37] textshaping_0.3.7 digest_0.6.37     stringi_1.8.4     rstatix_0.7.2    
+[41] dplyr_1.1.4       grid_4.2.3        cli_3.6.3         tools_4.2.3      
+[45] magrittr_2.0.3    sass_0.4.9        tibble_3.2.1      car_3.1-2        
+[49] pkgconfig_2.0.3   rmarkdown_2.28    svglite_2.1.3     R6_2.5.1         
+[53] compiler_4.2.3   
 > 
 > q(save = "no")
 > proc.time()
    user  system elapsed 
- 18.227   1.407  20.569 
+ 24.919   1.487  27.300 

@@ -492,9 +492,26 @@ for(k in 1:nrow(df_file_info)){
 
   }
   
+
+  g3 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
+                    col=DE, label=delabel)) + 
+         geom_point() + 
+         geom_text_repel(point.padding = 0.5,
+                         min.segment.length = 0, 
+                         size = 3,  # Adjust text size
+                         box.padding = 0.5,
+                         max.overlaps = 20, 
+                         show.legend = FALSE) + 
+         scale_color_manual(values=col2use) + 
+         theme(
+          panel.background = element_rect(fill = "transparent", color = NA),
+          plot.background = element_rect(fill = "transparent", color = NA),
+          legend.background = element_rect(fill = "transparent", color = NA)
+         )
+  
   saved_figure_name = paste0(d_group_in_title, "_", gene_name, "_", ko1, ".svg")
   ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
-         plot=g2, width=4, height=3, units="in")
+         plot=g3, width=5, height=3.2, bg = "transparent", units="in")
 }
 
 
@@ -560,10 +577,10 @@ for(k in 1:nrow(df_file_info_cond)){
     
   print(g2)
   
-  saved_figure_name = paste0(d_group, "_", gene_strategy_name, 
-                            "_hyp_vs_nor.svg")
-  ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
-         plot=g2, width=4, height=3, units="in")
+  # saved_figure_name = paste0(d_group, "_", gene_strategy_name, 
+  #                           "_hyp_vs_nor.svg")
+  # ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
+  #        plot=g2, width=4, height=2.5, bg = "transparent", units="in")
 }
 ```
 

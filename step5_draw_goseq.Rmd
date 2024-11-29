@@ -70,7 +70,8 @@ df_list = list()
 
 for(label in names(res)){
   res1 = res[[label]]
-  type = names(res[[label]])
+  names(res1)[which(names(res1)=="go_bp")] = "GO biological process"
+  type = names(res1)
   
   df_go = NULL
   
@@ -148,18 +149,20 @@ for(k in 1:length(df_list)){
                  "\n", paste(substrings[length(substrings)], collapse = " "))
   }
   
-  mycolors <- c("go_bp" = "#F8766D", "reactome" = "#00BFC4")
+  mycolors <- c("GO biological process" = "#F8766D", "reactome" = "#00BFC4")
   filtered_colors <- mycolors[unique(d1$type)]
   
   g1 = ggplot(d1, aes(x = -log10(FDR), y = y, color=type)) +
     geom_point(size = 2.5) + 
     labs(x = "-log10(FDR)", y="", title = nm1) + 
-    scale_y_continuous(breaks = 1:nrow(d1), labels = d1_label) + 
+    scale_y_continuous(breaks = 1:nrow(d1), 
+                       labels = d1_label, 
+                       limits = c(0.8, nrow(d1)+0.2)) + 
     theme(legend.position = "top") + 
     scale_color_manual(values = filtered_colors) + 
     guides(color = guide_legend(title = NULL))
 
-  h1 = 0.75*nrow(d1)/20 + 0.25
+  h1 = 0.75*(nrow(d1)+0.4)/20 + 0.25
   if (nrow(d1)<=2){
     h1 = 0.75*(nrow(d1)+1)/20 + 0.25
   }
@@ -167,11 +170,37 @@ for(k in 1:length(df_list)){
   canvas <- ggdraw() + draw_plot(g1, x = 0, y = 1-h1, width = 1, height = h1)    
   print(canvas)
   
-  saved_figure_name = gsub("\n", "_", nm1)
-  saved_figure_name = paste0(gsub(" ", "_", saved_figure_name), ".svg")
-
-  ggsave(file=file.path(goseq_figure_dir, saved_figure_name), 
-         plot=canvas, width=8, height=5, units="in")
+  if (!grepl("Hypoxia vs Normoxia", nm1)){
+    
+    g2 = ggplot(d1, aes(x = -log10(FDR), y = y, color=type)) +
+      geom_point(size = 2.5) + 
+      labs(x = "-log10(FDR)", y="") + 
+      scale_y_continuous(breaks = 1:nrow(d1), 
+                         labels = d1_label, 
+                         limits = c(0.8, nrow(d1)+0.2)) + 
+      theme(legend.position = "top") + 
+      scale_color_manual(values = filtered_colors) + 
+      guides(color = guide_legend(title = NULL)) + 
+      theme(
+        panel.background = element_rect(fill = "transparent", color = NA),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)
+       )
+    
+    h1 = 0.75*(nrow(d1)+0.4)/20 + 0.25
+    if (nrow(d1)<=2){
+      h1 = 0.75*(nrow(d1)+1)/20 + 0.25
+    }
+    
+    canvas2 <- ggdraw() + draw_plot(g2, x = 0, y = 1-h1, width = 1, height = h1)    
+    
+    saved_figure_name = gsub("\n", "_", nm1)
+    saved_figure_name = paste0(gsub(" ", "_", saved_figure_name), ".svg")
+  
+    ggsave(file=file.path(goseq_figure_dir, saved_figure_name), 
+           plot=canvas2, width=8, height=5, bg = "transparent", units="in")
+  }
+  
 }
 ```
 

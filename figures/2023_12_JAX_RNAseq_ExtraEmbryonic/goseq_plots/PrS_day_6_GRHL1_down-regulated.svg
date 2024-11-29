@@ -23,93 +23,91 @@
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwzMDYuMDA='>
-    <rect x='0.00' y='0.00' width='576.00' height='306.00' />
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwzMTEuNDA='>
+    <rect x='0.00' y='0.00' width='576.00' height='311.40' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzMDYuMDA=)'>
-<rect x='0.00' y='0.00' width='576.00' height='306.00' style='stroke-width: 1.07; stroke: #FFFFFF; fill: #FFFFFF;' />
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzMTEuNDA=)'>
+<rect x='0.00' y='0.00' width='576.00' height='311.40' style='stroke-width: 1.07; stroke: none;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjcxLjU4fDU3MC41Mnw3Ni43M3wyNzQuMTA='>
-    <rect x='271.58' y='76.73' width='298.94' height='197.36' />
+  <clipPath id='cpMjcxLjU4fDU3MC41Mnw0NC42OHwyNzkuNTA='>
+    <rect x='271.58' y='44.68' width='298.94' height='234.82' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjcxLjU4fDU3MC41Mnw3Ni43M3wyNzQuMTA=)'>
-<rect x='271.58' y='76.73' width='298.94' height='197.36' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<circle cx='285.17' cy='265.13' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='285.17' cy='253.16' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='285.17' cy='241.20' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='315.59' cy='229.24' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='346.25' cy='217.28' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='387.91' cy='205.32' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='392.09' cy='193.36' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='392.09' cy='181.40' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='392.94' cy='169.43' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='392.94' cy='157.47' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='404.41' cy='145.51' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='432.53' cy='133.55' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='432.68' cy='121.59' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='467.68' cy='109.63' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='504.44' cy='97.67' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='556.93' cy='85.70' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<g clip-path='url(#cpMjcxLjU4fDU3MC41Mnw0NC42OHwyNzkuNTA=)'>
+<rect x='271.58' y='44.68' width='298.94' height='234.82' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='285.17' cy='266.05' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='285.17' cy='252.19' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='285.17' cy='238.33' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='315.59' cy='224.46' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='346.25' cy='210.60' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='387.91' cy='196.74' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='392.09' cy='182.88' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='392.09' cy='169.02' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='392.94' cy='155.16' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='392.94' cy='141.29' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='404.41' cy='127.43' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='432.53' cy='113.57' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='432.68' cy='99.71' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='467.68' cy='85.85' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='504.44' cy='71.99' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='556.93' cy='58.12' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
-<polyline points='271.58,274.10 271.58,76.73 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<text x='266.65' y='268.28' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='231.67px' lengthAdjust='spacingAndGlyphs'>                                     atf6 atf6 alpha activates chaperones</text>
-<text x='266.65' y='256.32' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='238.05px' lengthAdjust='spacingAndGlyphs'>                              response of eif2ak1 hri to heme deficiency</text>
-<text x='266.65' y='244.36' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='229.20px' lengthAdjust='spacingAndGlyphs'>                                            ire1alpha activates chaperones</text>
-<text x='266.65' y='232.39' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='226.76px' lengthAdjust='spacingAndGlyphs'>                                        asparagine n linked glycosylation</text>
-<text x='266.65' y='220.43' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='239.05px' lengthAdjust='spacingAndGlyphs'>                               atf6 atf6 alpha activates chaperone genes</text>
-<text x='266.65' y='208.47' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='238.11px' lengthAdjust='spacingAndGlyphs'>                 negative regulation of alpha beta t cell proliferation</text>
-<text x='266.65' y='196.51' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='228.70px' lengthAdjust='spacingAndGlyphs'>                                               endocrine hormone secretion</text>
-<text x='266.65' y='184.55' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='225.32px' lengthAdjust='spacingAndGlyphs'>                              regulation of alpha beta t cell activation</text>
-<text x='266.65' y='172.59' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='224.29px' lengthAdjust='spacingAndGlyphs'>                                     cellular response to biotic stimulus</text>
-<text x='266.65' y='160.63' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='236.63px' lengthAdjust='spacingAndGlyphs'>                    negative regulation of alpha beta t cell activation</text>
-<text x='266.65' y='148.66' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='233.63px' lengthAdjust='spacingAndGlyphs'>                                 response to molecule of bacterial origin</text>
-<text x='266.65' y='136.70' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='226.76px' lengthAdjust='spacingAndGlyphs'>                                             unfolded protein response upr</text>
-<text x='266.65' y='124.74' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='238.53px' lengthAdjust='spacingAndGlyphs'>                           protein localization to endoplasmic reticulum</text>
-<text x='266.65' y='112.78' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.48px' lengthAdjust='spacingAndGlyphs'>                                                          endocrine process</text>
-<text x='266.65' y='100.82' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='242.42px' lengthAdjust='spacingAndGlyphs'>                                 response to endoplasmic reticulum stress</text>
-<text x='266.65' y='88.86' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.47px' lengthAdjust='spacingAndGlyphs'>                                                          hormone transport</text>
-<polyline points='268.84,265.13 271.58,265.13 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,253.16 271.58,253.16 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,241.20 271.58,241.20 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,229.24 271.58,229.24 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,217.28 271.58,217.28 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,205.32 271.58,205.32 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,193.36 271.58,193.36 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,181.40 271.58,181.40 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,169.43 271.58,169.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,157.47 271.58,157.47 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,145.51 271.58,145.51 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,133.55 271.58,133.55 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,121.59 271.58,121.59 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,109.63 271.58,109.63 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,97.67 271.58,97.67 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.84,85.70 271.58,85.70 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='271.58,274.10 570.52,274.10 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='280.66,276.84 280.66,274.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='340.36,276.84 340.36,274.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='400.06,276.84 400.06,274.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='459.77,276.84 459.77,274.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='519.47,276.84 519.47,274.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<text x='280.66' y='285.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.5</text>
-<text x='340.36' y='285.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.0</text>
-<text x='400.06' y='285.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.5</text>
-<text x='459.77' y='285.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.0</text>
-<text x='519.47' y='285.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.5</text>
-<text x='421.05' y='298.10' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
-<rect x='358.81' y='37.54' width='124.49' height='28.24' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<rect x='364.29' y='43.02' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<circle cx='372.93' cy='51.66' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<rect x='417.55' y='43.02' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none; fill: #FFFFFF;' />
-<circle cx='426.19' cy='51.66' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<text x='387.05' y='54.81' style='font-size: 8.80px; font-family: "Arial";' textLength='24.48px' lengthAdjust='spacingAndGlyphs'>go_bp</text>
-<text x='440.30' y='54.81' style='font-size: 8.80px; font-family: "Arial";' textLength='36.68px' lengthAdjust='spacingAndGlyphs'>reactome</text>
-<text x='271.58' y='14.94' style='font-size: 13.20px; font-family: "Arial";' textLength='105.57px' lengthAdjust='spacingAndGlyphs'>PrS day 6 GRHL1</text>
-<text x='271.58' y='29.20' style='font-size: 13.20px; font-family: "Arial";' textLength='90.94px' lengthAdjust='spacingAndGlyphs'>down-regulated</text>
+<polyline points='271.58,279.50 271.58,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='266.65' y='269.20' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='231.67px' lengthAdjust='spacingAndGlyphs'>                                     atf6 atf6 alpha activates chaperones</text>
+<text x='266.65' y='255.34' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='238.05px' lengthAdjust='spacingAndGlyphs'>                              response of eif2ak1 hri to heme deficiency</text>
+<text x='266.65' y='241.48' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='229.20px' lengthAdjust='spacingAndGlyphs'>                                            ire1alpha activates chaperones</text>
+<text x='266.65' y='227.62' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='226.76px' lengthAdjust='spacingAndGlyphs'>                                        asparagine n linked glycosylation</text>
+<text x='266.65' y='213.76' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='239.05px' lengthAdjust='spacingAndGlyphs'>                               atf6 atf6 alpha activates chaperone genes</text>
+<text x='266.65' y='199.89' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='238.11px' lengthAdjust='spacingAndGlyphs'>                 negative regulation of alpha beta t cell proliferation</text>
+<text x='266.65' y='186.03' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='228.70px' lengthAdjust='spacingAndGlyphs'>                                               endocrine hormone secretion</text>
+<text x='266.65' y='172.17' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='225.32px' lengthAdjust='spacingAndGlyphs'>                              regulation of alpha beta t cell activation</text>
+<text x='266.65' y='158.31' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='224.29px' lengthAdjust='spacingAndGlyphs'>                                     cellular response to biotic stimulus</text>
+<text x='266.65' y='144.45' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='236.63px' lengthAdjust='spacingAndGlyphs'>                    negative regulation of alpha beta t cell activation</text>
+<text x='266.65' y='130.59' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='233.63px' lengthAdjust='spacingAndGlyphs'>                                 response to molecule of bacterial origin</text>
+<text x='266.65' y='116.72' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='226.76px' lengthAdjust='spacingAndGlyphs'>                                             unfolded protein response upr</text>
+<text x='266.65' y='102.86' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='238.53px' lengthAdjust='spacingAndGlyphs'>                           protein localization to endoplasmic reticulum</text>
+<text x='266.65' y='89.00' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.48px' lengthAdjust='spacingAndGlyphs'>                                                          endocrine process</text>
+<text x='266.65' y='75.14' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='242.42px' lengthAdjust='spacingAndGlyphs'>                                 response to endoplasmic reticulum stress</text>
+<text x='266.65' y='61.28' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.47px' lengthAdjust='spacingAndGlyphs'>                                                          hormone transport</text>
+<polyline points='268.84,266.05 271.58,266.05 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,252.19 271.58,252.19 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,238.33 271.58,238.33 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,224.46 271.58,224.46 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,210.60 271.58,210.60 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,196.74 271.58,196.74 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,182.88 271.58,182.88 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,169.02 271.58,169.02 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,155.16 271.58,155.16 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,141.29 271.58,141.29 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,127.43 271.58,127.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,113.57 271.58,113.57 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,99.71 271.58,99.71 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,85.85 271.58,85.85 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,71.99 271.58,71.99 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='268.84,58.12 271.58,58.12 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='271.58,279.50 570.52,279.50 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='280.66,282.24 280.66,279.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='340.36,282.24 340.36,279.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='400.06,282.24 400.06,279.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='459.77,282.24 459.77,279.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='519.47,282.24 519.47,279.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='280.66' y='290.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.5</text>
+<text x='340.36' y='290.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.0</text>
+<text x='400.06' y='290.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.5</text>
+<text x='459.77' y='290.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.0</text>
+<text x='519.47' y='290.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.5</text>
+<text x='421.05' y='303.50' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='327.30' y='5.48' width='187.50' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='332.78' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='341.42' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<rect x='449.05' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='457.69' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<text x='355.54' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<text x='471.81' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='36.68px' lengthAdjust='spacingAndGlyphs'>reactome</text>
 </g>
 </svg>
