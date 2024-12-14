@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: none;'/>
+<defs>
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA='>
+    <rect x='0.00' y='0.00' width='576.00' height='360.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwyNTcuNDA='>
+    <rect x='0.00' y='0.00' width='576.00' height='257.40' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwyNTcuNDA=)'>
+<rect x='0.00' y='0.00' width='576.00' height='257.40' style='stroke-width: 1.07; stroke: none;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMjYxLjg0fDU3MC41Mnw0NC42OHwyMjUuNTA='>
+    <rect x='261.84' y='44.68' width='308.68' height='180.82' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMjYxLjg0fDU3MC41Mnw0NC42OHwyMjUuNTA=)'>
+<rect x='261.84' y='44.68' width='308.68' height='180.82' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='275.87' cy='214.39' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='275.87' cy='199.97' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='289.25' cy='185.55' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='289.25' cy='171.14' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='289.30' cy='156.72' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='292.39' cy='142.30' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='309.67' cy='127.88' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='319.44' cy='113.46' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='330.77' cy='99.04' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='419.30' cy='84.62' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='453.84' cy='70.20' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='556.49' cy='55.78' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+<polyline points='261.84,225.50 261.84,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='256.90' y='217.55' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='212.50px' lengthAdjust='spacingAndGlyphs'>                                                       response to zinc ion</text>
+<text x='256.90' y='203.13' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.98px' lengthAdjust='spacingAndGlyphs'>                                                    recombinational repair</text>
+<text x='256.90' y='188.71' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='228.69px' lengthAdjust='spacingAndGlyphs'>                                         cellular response to cadmium ion</text>
+<text x='256.90' y='174.29' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='224.29px' lengthAdjust='spacingAndGlyphs'>                                       intracellular zinc ion homeostasis</text>
+<text x='256.90' y='159.87' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='222.35px' lengthAdjust='spacingAndGlyphs'>                                          cellular response to copper ion</text>
+<text x='256.90' y='145.45' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.97px' lengthAdjust='spacingAndGlyphs'>                                                          dna recombination</text>
+<text x='256.90' y='131.03' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='218.40px' lengthAdjust='spacingAndGlyphs'>                                             cellular response to zinc ion</text>
+<text x='256.90' y='116.61' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='215.45px' lengthAdjust='spacingAndGlyphs'>                                                  cholesterol biosynthesis</text>
+<text x='256.90' y='102.19' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='233.14px' lengthAdjust='spacingAndGlyphs'>                                     detoxification of inorganic compound</text>
+<text x='256.90' y='87.77' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='216.94px' lengthAdjust='spacingAndGlyphs'>                                              detoxification of copper ion</text>
+<text x='256.90' y='73.35' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='215.45px' lengthAdjust='spacingAndGlyphs'>                                                    response to metal ions</text>
+<text x='256.90' y='58.93' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='223.29px' lengthAdjust='spacingAndGlyphs'>                                              metallothioneins bind metals</text>
+<polyline points='259.10,214.39 261.84,214.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,199.97 261.84,199.97 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,185.55 261.84,185.55 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,171.14 261.84,171.14 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,156.72 261.84,156.72 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,142.30 261.84,142.30 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,127.88 261.84,127.88 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,113.46 261.84,113.46 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,99.04 261.84,99.04 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,84.62 261.84,84.62 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,70.20 261.84,70.20 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='259.10,55.78 261.84,55.78 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='261.84,225.50 570.52,225.50 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='300.55,228.24 300.55,225.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='355.16,228.24 355.16,225.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='409.77,228.24 409.77,225.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='464.38,228.24 464.38,225.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='518.99,228.24 518.99,225.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='300.55' y='236.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='4.90px' lengthAdjust='spacingAndGlyphs'>2</text>
+<text x='355.16' y='236.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='4.90px' lengthAdjust='spacingAndGlyphs'>3</text>
+<text x='409.77' y='236.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='4.90px' lengthAdjust='spacingAndGlyphs'>4</text>
+<text x='464.38' y='236.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='4.90px' lengthAdjust='spacingAndGlyphs'>5</text>
+<text x='518.99' y='236.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='4.90px' lengthAdjust='spacingAndGlyphs'>6</text>
+<text x='416.18' y='249.50' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='322.43' y='5.48' width='187.50' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='327.91' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='336.55' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<rect x='444.18' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='452.82' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<text x='350.67' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<text x='466.94' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='36.68px' lengthAdjust='spacingAndGlyphs'>reactome</text>
+</g>
+</svg>

@@ -1,0 +1,241 @@
+---
+title: "Check RNAseq data of 2024-10 release, NW_RNAseq_1"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Check the bulk RNAseq NW_RNAseq_1 data from October 2024 release.
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(readxl)
+
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/October-2024/NW_RNAseq_1"
+dat_path = file.path(path, "processed/release110-gencode44/Tables")
+
+metadata_path = file.path(path, "metadata")
+
+read_header <- function(file_name, sheet){
+  
+  meta_header = read_excel(file_name, sheet = sheet, 
+                         skip = 3, n_max = 1, col_names = FALSE)
+  meta_header = as.character(meta_header)
+  meta_header = gsub("cell_line.", "", meta_header, fixed = TRUE)
+  meta_header = gsub("undifferentiated_product.", "", meta_header, fixed = TRUE)
+
+  meta_header
+}
+
+```
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta_file = paste0(metadata_path, "/NWU_RNAseq1_metadata.xlsx")
+
+cl_header = read_header(meta_file, sheet = "Clonal cell line")
+cl_header
+
+cl = read_excel(meta_file, sheet = "Clonal cell line", skip = 5, col_names = FALSE)
+names(cl) = cl_header
+## drop columns 7-9 since they are columns with no content
+cl = cl[, -c(7:9)]
+cl = as.data.frame(cl)
+dim(cl)
+cl
+
+dc_header = read_header(meta_file, sheet = "Undifferentiated product")
+dc_header
+dc_header[1] = "undifferentiated_product.label"
+  
+dc = read_excel(meta_file, sheet = "Undifferentiated product", 
+                skip = 5, col_names = FALSE)
+names(dc) = dc_header
+dc = as.data.frame(dc)
+dim(dc)
+dc[1:2,]
+## drop columns 3 and 7 since they are columns with no content
+dc = dc[, -c(3, 7)]
+dim(dc)
+dc[1:2,]
+
+eas_header = read_header(meta_file, sheet = "Expression alteration")
+eas_header
+
+eas = read_excel(meta_file, sheet = "Expression alteration", 
+                skip = 5, col_names = FALSE)
+names(eas) = c(eas_header[1:3], 
+               "allele_specific", "altered_gene_symbol", 
+               "hgnc_ID", "targeted_genomic_region", 
+               "expected_alteration_type", "editing_strategy")
+eas = as.data.frame(eas)
+dim(eas)
+eas[1:2,]
+
+```
+
+## Read in library preparation information
+```{r}
+lib_header = read_header(meta_file, sheet = "Library preparation")
+lib_header
+lib_header[13] = "undifferentiated_product.label" 
+
+lib = read_excel(meta_file, sheet = "Library preparation", 
+                skip = 5, col_names = FALSE)
+dim(lib)
+names(lib) = lib_header
+lib = as.data.frame(lib)
+dim(lib)
+lib[1:2,]
+
+lib = lib[, c(1, 3, 13)]
+lib[1:2, ]
+```
+
+## Read in sequence file information
+```{r}
+seq_header = read_header(meta_file, sheet = "Sequence file")
+seq_header
+
+seq = read_excel(meta_file, sheet = "Sequence file", 
+                skip = 5, col_names = FALSE)
+names(seq) = seq_header
+seq = as.data.frame(seq)
+seq$file_id = gsub("_R(1|2)_001.fastq.gz", "", 
+                   seq$sequence_file.label)
+dim(seq)
+seq[1:2,]
+  
+seq = unique(seq[,c("file_id", "library_preparation.label")])
+dim(seq)
+seq[1:2,]
+
+```
+
+## Extract treatment information
+
+```{r}
+dc[["treatment"]] = sub("^([^_]*_){3}", "", dc$description)
+table(dc$treatment, dc$timepoint_value)
+table(dc$treatment, dc$treatment_condition)
+```
+
+## Merge tabs to make a flat metadata table
+
+```{r}
+
+intersect(names(dc), names(lib))
+
+any(duplicated(lib$undifferentiated_product.label))
+
+setdiff(dc$undifferentiated_product.label, 
+        lib$undifferentiated_product.label)
+setdiff(lib$undifferentiated_product.label, 
+        dc$undifferentiated_product.label)
+
+meta = merge(dc, lib)
+dim(meta)
+meta[1:2,]
+
+intersect(names(meta), names(seq))
+
+any(duplicated(meta$library_preparation.label))
+any(duplicated(seq$library_preparation.label))
+
+table(meta$library_preparation.label%in%seq$library_preparation.label, 
+      useNA="ifany")
+table(seq$library_preparation.label%in%meta$library_preparation.label, 
+      useNA="ifany")
+
+meta = merge(meta, seq)
+dim(meta)
+meta[1:2,]
+```
+
+```{r}
+
+intersect(names(meta), names(cl))
+
+table(meta$clonal_label %in% cl$clonal_label)
+table(cl$clonal_label %in% meta$clonal_label)
+setdiff(meta$clonal_label, cl$clonal_label)
+setdiff(cl$clonal_label, meta$clonal_label)
+
+meta = merge(meta, cl)
+dim(meta)
+meta[1:2,]
+
+table(meta$treatment, 
+      meta$clonal_parental_cell_line_name)
+table(meta$treatment, 
+      meta$clonal_clone_id)
+table(meta$treatment, 
+      meta$expression_alteration.label)
+
+
+update_name <- function(df1, old_name, new_name){
+  ww1 = which(names(df1) == old_name)
+  stopifnot(length(ww1) == 1)
+  names(df1)[ww1] = new_name
+  df1
+}
+
+meta = update_name(meta, "library_preparation.label", 
+                   "lib_label")
+meta[1:2, ]
+  
+fwrite(meta, file = "data/October_2024/NW_RNAseq_1_meta_data.tsv", sep="\t")
+```
+
+## Check count data
+
+### genesCounts.csv
+
+```{r fig.width = 5.5, fig.height=4}
+
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts)-1):ncol(cts))]
+
+setdiff(names(cts)[-1], meta$file_id)
+setdiff(meta$file_id, names(cts)[-1])
+```
+
+
+```{r}
+gc()
+sessionInfo()
+```
+
+
+

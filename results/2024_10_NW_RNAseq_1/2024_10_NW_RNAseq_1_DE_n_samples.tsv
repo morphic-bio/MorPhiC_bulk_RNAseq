@@ -1,0 +1,7 @@
+DE_group	treatment_comparison	n_treatment_first	n_treatment_second
+CHD1	Auxin_24h_vs_DMSO	2	2
+CHD1	Auxin_6h_vs_DMSO	2	2
+CHD1	Auxin_24h_vs_Auxin_6h	2	2
+RBBP4	Auxin_24h_vs_DMSO	2	2
+RBBP4	Auxin_6h_vs_DMSO	2	2
+RBBP4	Auxin_24h_vs_Auxin_6h	2	2

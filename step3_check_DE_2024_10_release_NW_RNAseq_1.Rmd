@@ -1,5 +1,5 @@
 ---
-title: "Check the results of differential expression analysis for 2024-09 release UCSF_Bulk_EB_Timecourse"
+title: "Check the results of differential expression analysis for 2024_10 release NW_RNAseq_1"
 author: "Si Liu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
@@ -41,15 +41,15 @@ library(UpSetR)
 library(readxl)
 theme_set(theme_classic())
 
-path = "../../MorPhiC/data/September-2024/UCSF_Bulk_EB_Timecourse/"
-dat_path = paste0(path, "processed/release110-gencode44/Tables")
+path = "../../MorPhiC/data/October-2024/NW_RNAseq_1"
+dat_path = file.path(path, "processed/release110-gencode44/Tables")
 ```
 
 
 ## Read in meta data
 
 ```{r fig.width = 3, fig.height=3}
-meta = fread("data/September_2024/UCSF_Bulk_EB_Timecourse_meta_data.tsv", 
+meta = fread("data/October_2024/NW_RNAseq_1_meta_data.tsv", 
              data.table = FALSE)
 dim(meta)
 meta[1:2,]
@@ -58,7 +58,7 @@ names(meta)
 meta$file_id
 ```
 
-## Read in gene count data and filter genes
+## Read in gene count data
 
 ```{r fig.width = 4, fig.height=3}
 cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
@@ -139,9 +139,17 @@ table(is.na(gene_info$gene_symbol))
 
 ## Prepare for reading in DE results
 
-For the September 2024 release of UCSF_Bulk_EB_Timecourse, all samples are WT samples. 
+For the October 2024 release of NW_RNAseq_1, the knockout strategy is degron.
 
-DE analysis was run between samples of consecutive days, excluding iPSC samples.
+This dataset involves two genes and three treatment settings:
+
+    DMSO
+    Auxin_6h
+    Auxin_24h
+
+Each knockout gene is used as a DE group. 
+
+The comparison is between each pair of two treatments. 
 
 The specific DE groups can be found in the file with naming in the format:
 
@@ -149,7 +157,7 @@ The specific DE groups can be found in the file with naming in the format:
 
 ```{r fig.width = 4, fig.height=3}
 
-release_name = "2024_09_UCSF_Bulk_EB_Timecourse"
+release_name = "2024_10_NW_RNAseq_1"
 result_dir = file.path("results", release_name)
 processed_output_dir = file.path(result_dir, "processed")
 
@@ -159,11 +167,11 @@ all_result_files = sort(all_result_files)
 
 extract_cores <- function(x){
   x_split = str_split(x, "_")[[1]]
-  x_start = 7
+  x_start = 6
   x_end = length(x_split)-1
-  x_d_group = paste(x_split[x_start:(x_end)], collapse="_")
-  x_days = paste(x_split[(x_start+2):(x_end)], collapse="_")
-  return(c(x_d_group, x_days))
+  x_d_group = x_split[x_start]
+  x_pairs = paste(x_split[(x_start+1):(x_end)], collapse="_")
+  return(c(x_d_group, x_pairs))
 }
 
 df_file_info = NULL
@@ -173,7 +181,7 @@ for (x in all_result_files){
 }
 
 df_file_info = as.data.frame(df_file_info)
-colnames(df_file_info) = c("DE_general_group", "days")
+colnames(df_file_info) = c("knockout_gene", "treatment_pair")
 df_file_info
 
 ```
@@ -193,52 +201,90 @@ if (!file.exists(volcano_figure_dir)){
 
 ```
 
-## Number of DE genes
 
-Barchart for number of DE genes
+## Number of DE genes and properties of knockout gene
+
+Plot the treatment pairs under different knockout genes all together in one figure.
 
 ```{r fig.width =5, fig.height=3}
+
+df_file_info$items = paste(df_file_info$knockout_gene, 
+                           df_file_info$treatment_pair, sep="_")
+df_file_info$items
+
+table(table(df_file_info$items))
 
 fc0 = log2(1.5)
 p0  = 0.05
 
-df = data.frame(items = df_file_info$DE_general_group, 
-                days = df_file_info$days, 
-                nDE = NA)
+gene_symbols = df_file_info$knockout_gene
+gene_symbols
+
+table(gene_symbols %in% gene_info$gene_symbol)
+
+genes_w_multi_ensembl = names(which(table(gene_info$gene_symbol)>1))
+genes_w_multi_ensembl
+
+  
+df = data.frame(KO = df_file_info$items, 
+                ko_gene = df_file_info$knockout_gene,
+                treat_pair = df_file_info$treatment_pair, 
+                nDE = NA, 
+                padj = NA, 
+                log2FoldChange = NA)
+
+gene_ids = gene_info$ensembl_gene_id[match(df_file_info$knockout_gene, 
+                                           gene_info$gene_symbol)]
+gene_ids
+
 
 for (k in 1:nrow(df_file_info)){
     
   res = fread(file.path(processed_output_dir,
-                        paste0(release_name, "_", 
-                               df$items[k], 
-                               "_DEseq2.tsv")),
+                        paste0(release_name, "_", df_file_info$items[k], "_DEseq2.tsv")),
                         data.table = FALSE)
   print(res[1:2,])
-  fc = paste0(df$days[k], "_log2FoldChange")
-  padj = paste0(df$days[k], "_padj")
+  
+  gene_id = gene_ids[k]
+  w_gene = which(res$gene_ID == gene_id)
+
+  stopifnot(length(w_gene) == 1)
+  stopifnot(!(df$ko_gene[k]%in%genes_w_multi_ensembl))
+  
+  fc = paste0(df$treat_pair[k], "_log2FoldChange")
+  padj = paste0(df$treat_pair[k], "_padj")
+
   df[k,"nDE"] = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE)
+  df[k,"log2FoldChange"] = res[[fc]][w_gene]
+  df[k,"padj"] = res[[padj]][w_gene]
   
 }
   
 df
 
-df$days = factor(df$days, 
-                 levels = c("day_2_vs_day_0",
-                            "day_4_vs_day_2",
-                            "day_6_vs_day_4",
-                            "day_8_vs_day_6",
-                            "day_10_vs_day_8"))
-
-p1 <- ggplot(df, aes(x=days, y=nDE, fill=days)) +
-      geom_bar(stat="identity")+theme_classic() + 
-      ylab("Number of DE genes")+
-      ggtitle("EB WT") + 
-      theme(axis.title.x=element_blank(),
-            axis.text.x=element_blank(),
-            axis.ticks.x=element_blank())
+p1 <- ggplot(df, aes(x=log2FoldChange, y=-log10(padj), 
+               label=ko_gene, color=treat_pair)) + 
+      geom_point(size=2) + scale_color_brewer(palette = "Dark2")+ 
+      geom_text_repel(point.padding = 0.5, min.segment.length = 0, 
+                      size = 3,  # Adjust text size
+                      box.padding = 0.5, 
+                      max.overlaps = 20, show.legend = FALSE) + 
+      ggtitle("DE results of treatment pairs under each KO gene\nplotted for each KO gene itself") + 
+      labs(x="log2 fold change", y="-log10(adjusted p-value)")  + 
+      geom_hline(yintercept = 2, color = "grey", linetype = "dashed") + 
+      geom_vline(xintercept = c(log2(1/1.5), log2(1.5)), color = "grey",
+                 linetype = "dashed")
 
 print(p1)
+```
 
+```{r fig.width =4, fig.height=3.2}
+p2 <- ggplot(df, aes(x=ko_gene, y=nDE, fill=treat_pair)) +
+      geom_bar(position="dodge", stat="identity")+theme_classic() + 
+      ylab("Number of DE genes")+
+      ggtitle("Number of DE genes\nfrom each treatment pair\nunder each KO gene")
+
+print(p2)
 
 ```
 
@@ -248,35 +294,27 @@ print(p1)
 In some settings, there are too many DE genes and they cannot all be labeled in the volcano plots.
 
 ```{r fig.width = 6.5, fig.height=5}
+
 df_file_info
 
 fc0
 p0
 
-compare_order = c("day_2_vs_day_0",
-                  "day_4_vs_day_2",
-                  "day_6_vs_day_4",
-                  "day_8_vs_day_6",
-                  "day_10_vs_day_8")
-
-df_file_info_orderd = df_file_info[match(compare_order, df_file_info$days),]
-df_file_info_orderd
-
-for(k in 1:nrow(df_file_info_orderd)){
+for(k in 1:nrow(df_file_info)){
   
-  it_k = df_file_info_orderd$DE_general_group[k]
-  d_group = df_file_info_orderd$days[k]
-
+  it_k = df_file_info$items[k]
+  ko_gene = df_file_info$knockout_gene[k]
+  trt_pair = df_file_info$treatment_pair[k]
+  
   print(it_k)
   
   res = fread(file.path(processed_output_dir,
-                        paste0(release_name, "_", 
-                               it_k, 
-                               "_DEseq2.tsv")),
-                        data.table = FALSE)  
+                        paste0(release_name, "_", it_k, "_DEseq2.tsv")),
+              data.table = FALSE)
 
-  res_k = res[,c(1, grep(d_group, names(res)))]
-  names(res_k) = gsub(paste0(d_group, "_"), "", names(res_k))
+
+  res_k = res[,c(1, grep(trt_pair, names(res)))]
+  names(res_k) = gsub(paste0(trt_pair, "_"), "", names(res_k))
 
   ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
   ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
@@ -298,11 +336,10 @@ for(k in 1:nrow(df_file_info_orderd)){
   res_k$delabel[w_de] = res_k$gene_symbol[w_de]
 
   print(table(res_k$DE))
-    
+
   g2 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                     col=DE, label=delabel)) + 
-         geom_point() + ggtitle(paste0("EB WT\n", 
-                                       d_group)) + 
+         geom_point() + ggtitle(paste0("Under knockout gene ", ko_gene, "\n", trt_pair)) + 
          geom_text_repel(point.padding = 0.5,
                          min.segment.length = 0, 
                          size = 3,  # Adjust text size
@@ -315,8 +352,7 @@ for(k in 1:nrow(df_file_info_orderd)){
   
   g3 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                     col=DE, label=delabel)) + 
-         geom_point() + ggtitle(paste0("EB WT\n", 
-                                       d_group)) + 
+         geom_point() + ggtitle(paste0("Under knockout gene ", ko_gene, "\n", trt_pair)) + 
          geom_text_repel(point.padding = 0.5,
                          min.segment.length = 0, 
                          size = 3,  # Adjust text size
@@ -330,13 +366,14 @@ for(k in 1:nrow(df_file_info_orderd)){
           legend.background = element_rect(fill = "transparent", color = NA)
          )
   
-  saved_figure_name = paste0("EB_WT_", d_group, ".svg")
+  saved_figure_name = paste0(it_k, ".svg")
   ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
          plot=g3, width=5, height=3.2, bg = "transparent", units="in")
   
 }
-```
 
+
+```
 
 
 

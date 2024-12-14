@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: none;'/>
+<defs>
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA='>
+    <rect x='0.00' y='0.00' width='576.00' height='360.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+<rect x='0.00' y='0.00' width='576.00' height='365.40' style='stroke-width: 1.07; stroke: none;' />
+</g>
+<defs>
+  <clipPath id='cpMjY2LjIzfDU3MC41Mnw0NC42OHwzMzMuNTA='>
+    <rect x='266.23' y='44.68' width='304.29' height='288.82' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMjY2LjIzfDU3MC41Mnw0NC42OHwzMzMuNTA=)'>
+<rect x='266.23' y='44.68' width='304.29' height='288.82' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='280.06' cy='317.66' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='281.24' cy='304.13' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='282.02' cy='290.59' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='282.02' cy='277.06' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='282.58' cy='263.52' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='282.58' cy='249.99' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='285.62' cy='236.46' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='291.27' cy='222.92' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='296.04' cy='209.39' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='297.08' cy='195.85' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='312.27' cy='182.32' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='315.28' cy='168.79' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='331.82' cy='155.25' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='348.48' cy='141.72' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='353.40' cy='128.18' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='395.12' cy='114.65' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='401.09' cy='101.11' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='465.89' cy='87.58' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='541.48' cy='74.05' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='556.69' cy='60.51' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+<polyline points='266.23,333.50 266.23,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='261.30' y='320.81' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='228.72px' lengthAdjust='spacingAndGlyphs'>                                     mitotic g1 phase and g1 s transition</text>
+<text x='261.30' y='307.28' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='199.24px' lengthAdjust='spacingAndGlyphs'>                                                                     s phase</text>
+<text x='261.30' y='293.75' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='220.84px' lengthAdjust='spacingAndGlyphs'>                                              mitochondrial protein import</text>
+<text x='261.30' y='280.21' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='206.61px' lengthAdjust='spacingAndGlyphs'>                                                            trna processing</text>
+<text x='261.30' y='266.68' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='207.59px' lengthAdjust='spacingAndGlyphs'>                                                           synthesis of dna</text>
+<text x='261.30' y='253.14' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='215.45px' lengthAdjust='spacingAndGlyphs'>                                                  cholesterol biosynthesis</text>
+<text x='261.30' y='239.61' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='203.68px' lengthAdjust='spacingAndGlyphs'>                                                            dna replication</text>
+<text x='261.30' y='226.08' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='230.68px' lengthAdjust='spacingAndGlyphs'>                                       ribosomal large subunit biogenesis</text>
+<text x='261.30' y='212.54' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='215.44px' lengthAdjust='spacingAndGlyphs'>                                                    trna metabolic process</text>
+<text x='261.30' y='199.01' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='206.11px' lengthAdjust='spacingAndGlyphs'>                                                           rna modification</text>
+<text x='261.30' y='185.47' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='212.50px' lengthAdjust='spacingAndGlyphs'>                                                    maturation of ssu rrna</text>
+<text x='261.30' y='171.94' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='207.10px' lengthAdjust='spacingAndGlyphs'>                                                            rrna processing</text>
+<text x='261.30' y='158.40' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='214.96px' lengthAdjust='spacingAndGlyphs'>                                                 mitochondrial translation</text>
+<text x='261.30' y='144.87' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='237.07px' lengthAdjust='spacingAndGlyphs'>                            rrna modification in the nucleus and cytosol</text>
+<text x='261.30' y='131.34' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='231.64px' lengthAdjust='spacingAndGlyphs'>                                       ribosomal small subunit biogenesis</text>
+<text x='261.30' y='117.80' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='214.96px' lengthAdjust='spacingAndGlyphs'>                                                 mitochondrial translation</text>
+<text x='261.30' y='104.27' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='229.19px' lengthAdjust='spacingAndGlyphs'>                                             mitochondrial gene expression</text>
+<text x='261.30' y='90.73' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='215.93px' lengthAdjust='spacingAndGlyphs'>                                                    rrna metabolic process</text>
+<text x='261.30' y='77.20' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='211.02px' lengthAdjust='spacingAndGlyphs'>                                                           ncrna processing</text>
+<text x='261.30' y='63.67' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='217.40px' lengthAdjust='spacingAndGlyphs'>                                                        ribosome biogenesis</text>
+<polyline points='263.49,317.66 266.23,317.66 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,304.13 266.23,304.13 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,290.59 266.23,290.59 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,277.06 266.23,277.06 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,263.52 266.23,263.52 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,249.99 266.23,249.99 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,236.46 266.23,236.46 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,222.92 266.23,222.92 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,209.39 266.23,209.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,195.85 266.23,195.85 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,182.32 266.23,182.32 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,168.79 266.23,168.79 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,155.25 266.23,155.25 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,141.72 266.23,141.72 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,128.18 266.23,128.18 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,114.65 266.23,114.65 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,101.11 266.23,101.11 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,87.58 266.23,87.58 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,74.05 266.23,74.05 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.49,60.51 266.23,60.51 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='266.23,333.50 570.52,333.50 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='301.63,336.24 301.63,333.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='356.15,336.24 356.15,333.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='410.68,336.24 410.68,333.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='465.20,336.24 465.20,333.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='519.73,336.24 519.73,333.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='301.63' y='344.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='9.79px' lengthAdjust='spacingAndGlyphs'>10</text>
+<text x='356.15' y='344.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='9.79px' lengthAdjust='spacingAndGlyphs'>15</text>
+<text x='410.68' y='344.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='9.79px' lengthAdjust='spacingAndGlyphs'>20</text>
+<text x='465.20' y='344.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='9.79px' lengthAdjust='spacingAndGlyphs'>25</text>
+<text x='519.73' y='344.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='9.79px' lengthAdjust='spacingAndGlyphs'>30</text>
+<text x='418.37' y='357.50' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='324.63' y='5.48' width='187.50' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='330.10' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='338.74' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<rect x='446.37' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='455.01' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<text x='352.86' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<text x='469.13' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='36.68px' lengthAdjust='spacingAndGlyphs'>reactome</text>
+</g>
+</svg>
