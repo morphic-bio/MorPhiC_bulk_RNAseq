@@ -352,7 +352,7 @@ for(k in 1:nrow(df_file_info)){
   
   g3 = ggplot(res_k, aes(x=log2FoldChange, y=-log10(padj), 
                     col=DE, label=delabel)) + 
-         geom_point() + ggtitle(paste0("Under knockout gene ", ko_gene, "\n", trt_pair)) + 
+         geom_point() +
          geom_text_repel(point.padding = 0.5,
                          min.segment.length = 0, 
                          size = 3,  # Adjust text size
