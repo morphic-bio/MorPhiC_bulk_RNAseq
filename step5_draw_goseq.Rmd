@@ -142,7 +142,9 @@ for(k in 1:length(df_list)){
                  "\nHypoxia vs Normoxia\n", 
                  nm1_substrings[2])
   }else{
-    nm1 = gsub("Normoxia ", "", nm1)
+    if (!grepl("EPAS1", nm1)){ # keep Normoxia for comparisons involving EPAS1 gene
+      nm1 = gsub("Normoxia ", "", nm1)
+    }
     nm1 = sub("reverted ", "", nm1) # only replace the first occurrence of "reverted "
     substrings = str_split(nm1, " ")[[1]]
     nm1 = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
