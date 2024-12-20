@@ -1,5 +1,5 @@
-# JAX bulk RNAseq
-Workflows for JAX bulk RNAseq data analysis
+# MorPhiC bulk RNAseq
+Workflows for MorPhiC bulk RNAseq data analysis
 
 ## step1_check_data
 
