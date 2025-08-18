@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: none;'/>
+<defs>
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA='>
+    <rect x='0.00' y='0.00' width='576.00' height='360.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwxODkuOTA='>
+    <rect x='0.00' y='0.00' width='576.00' height='189.90' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwxODkuOTA=)'>
+<rect x='0.00' y='-0.000000000000028' width='576.00' height='189.90' style='stroke-width: 1.07; stroke: none;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMjY2LjI1fDU3MC41Mnw0NC42OHwxNTguMDA='>
+    <rect x='266.25' y='44.68' width='304.27' height='113.32' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMjY2LjI1fDU3MC41Mnw0NC42OHwxNTguMDA=)'>
+<rect x='266.25' y='44.68' width='304.27' height='113.32' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='280.09' cy='149.63' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='317.89' cy='133.53' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='317.89' cy='117.43' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='347.34' cy='101.34' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='433.97' cy='85.24' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='475.76' cy='69.14' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='556.69' cy='53.05' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
+<polyline points='266.25,158.00 266.25,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='261.32' y='152.78' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='224.82px' lengthAdjust='spacingAndGlyphs'>                                         peptide ligand binding receptors</text>
+<text x='261.32' y='136.68' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='209.57px' lengthAdjust='spacingAndGlyphs'>                                                         signaling by nodal</text>
+<text x='261.32' y='120.59' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='237.09px' lengthAdjust='spacingAndGlyphs'>                   transcriptional regulation of pluripotent stem cells</text>
+<text x='261.32' y='104.49' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='211.01px' lengthAdjust='spacingAndGlyphs'>                                                            neuronal system</text>
+<text x='261.32' y='88.39' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='221.39px' lengthAdjust='spacingAndGlyphs'>                                         regulation of signaling by nodal</text>
+<text x='261.32' y='72.30' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='225.76px' lengthAdjust='spacingAndGlyphs'>                                         formation of definitive endoderm</text>
+<text x='261.32' y='56.20' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='211.54px' lengthAdjust='spacingAndGlyphs'>                                               tight junction interactions</text>
+<polyline points='263.52,149.63 266.25,149.63 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.52,133.53 266.25,133.53 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.52,117.43 266.25,117.43 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.52,101.34 266.25,101.34 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.52,85.24 266.25,85.24 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.52,69.14 266.25,69.14 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='263.52,53.05 266.25,53.05 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='266.25,158.00 570.52,158.00 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='291.65,160.74 291.65,158.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='381.14,160.74 381.14,158.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='470.62,160.74 470.62,158.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='560.11,160.74 560.11,158.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='291.65' y='169.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.5</text>
+<text x='381.14' y='169.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.0</text>
+<text x='470.62' y='169.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.5</text>
+<text x='560.11' y='169.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.0</text>
+<text x='418.39' y='182.00' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='382.77' y='5.48' width='71.23' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='388.25' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='396.89' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<text x='411.01' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='36.68px' lengthAdjust='spacingAndGlyphs'>reactome</text>
+</g>
+</svg>
