@@ -1,0 +1,763 @@
+---
+title: "Differential expression analysis for 2025-06 release JAX_RNAseq10"
+author: "Bo Yu, Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# explicitly set warning level in R, to prevent a warning from being converted to an error
+options(warn=1)
+```
+
+Differential expression using the bulk RNAseq JAX_RNAseq10 data from the June 2025 release.
+
+See bulk_RNAseq.xlsx for details of the dataset.
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+library(viridis)
+library(ggpointdensity)
+library(tidyverse)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+library(ggsci)
+library(ggprism)
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/MorPhiC_internal_releases/MorPhiC_Release_June_2025/JAX_RNAseq10/"
+dat_path = file.path(path, "processed/Tables")
+```
+
+## Read in meta data
+
+```{r fig.width = 3, fig.height=3}
+meta = fread("data/June_2025/JAX_RNAseq10_meta_data.tsv", data.table = FALSE)
+dim(meta)
+meta[1:2, ]
+names(meta)
+names(meta)[apply(meta, 2, \(x) any(is.na(x)))]
+
+table(meta$clonal.label)
+table(table(meta$clonal.label))
+table(table(meta$label))
+
+meta$timepoint = as.factor(meta$timepoint_value)
+```
+
+### Add gene group information
+
+```{r}
+unique(meta$clonal.description)
+# Add clonal.description for WT clones, to specify which KO samples they serve as controls for
+table(meta$clonal.label, meta$ko_gene)
+meta[meta$ko_gene == 'WT', 'clonal.description'] = sapply(meta[meta$ko_gene == 'WT', 'clonal.label'], \(wt_clone_label) {
+  ko_clone_labels = sub("-WT\\d+$", "", wt_clone_label)
+  ko_clone_labels = strsplit(ko_clone_labels, split = '_', fixed = TRUE)[[1]]
+  if (length(ko_clone_labels) > 1) {
+    ko_clone_labels = c(
+      ko_clone_labels[1], 
+      paste0("MOK20", sprintf("%03d", as.integer(ko_clone_labels[-1])))
+    )
+  }
+  rx = paste0("^(", paste(ko_clone_labels, collapse = "|"), ")")
+  ko_genes = sort(unique(meta$ko_gene[grepl(rx, meta$clonal.label) & meta$ko_gene != "WT"]))
+  stopifnot(all(!is.na(ko_genes)), length(ko_genes) > 0)
+  paste0("KOLF2.2J control for ", paste(ko_genes, collapse = ", "))
+})
+meta[meta$ko_gene == 'WT', c('clonal.label', 'clonal.description')]
+
+# Add gene group as one factor to specify which samples go to same DE analysis
+# One gene only goes to one gene_group in this dataset
+# List all gene groups
+gene_group = table(meta[meta$ko_gene == 'WT', 'clonal.description']) |>
+  unclass() |>
+  as.data.frame() |>
+  (\(x) { 
+    names(x) = 'nor'
+    x 
+  })() |>
+  rownames_to_column(var = 'desc') |>
+  mutate(
+    gene_group = sapply(strsplit(desc, 'for '), \(x) paste0(strsplit(x[2], ', ')[[1]], collapse = '_')),
+    gene_list = strsplit(gene_group, '_')
+  )
+gene_group
+# Create gene_group column for meta data
+meta$gene_group = unlist(plyr::alply(meta, 1, \(x) {
+  group = if (x$ko_gene != 'WT') {
+    gene_group |>
+      filter(sapply(gene_list, \(genes) x$ko_gene %in% genes)) |>
+      pull(gene_group)
+  } else {
+    gene_group |>
+      filter(desc == x$clonal.description) |>
+      pull(gene_group)
+  }
+  stopifnot(length(group) == 1)
+  group
+}))
+table(meta$ko_gene, meta$gene_group)
+table(meta$ko_gene, meta$gene_group, meta$model_system)
+```
+
+## Read in gene count data
+
+```{r}
+cts = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts)
+cts[1:2, c(1:2, (ncol(cts) - 1) : ncol(cts))]
+# Align counts with meta data
+stopifnot(
+  setequal(meta$file_id, names(cts)[-1]),
+  !any(duplicated(meta$file_id)),
+  !any(duplicated(names(cts)[-1]))
+)
+meta = meta[match(names(cts)[-1], meta$file_id), ]
+# To matrix
+cts_dat = data.matrix(cts[, -1])
+rownames(cts_dat) = cts$Name
+```
+
+### Exclude genes without annotation
+
+```{r}
+# Read in gene annotation
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2, ]
+# Make sure all KO genes have unique ensembl gene id
+gene_anno |> 
+  filter(hgnc_symbol %in% setdiff(meta$ko_gene, 'WT')) |>
+  arrange(hgnc_symbol)
+# Exclude genes without annotation
+stopifnot(all(rownames(cts_dat) %in% gene_anno$ensembl_gene_id))
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r}
+gene_info = data.frame(
+  t(apply(cts_dat, 1, tapply, meta$model_system, min)), 
+  t(apply(cts_dat, 1, tapply, meta$model_system, median)), 
+  t(apply(cts_dat, 1, tapply, meta$model_system, \(x) quantile(x, probs = 0.75))), 
+  t(apply(cts_dat, 1, tapply, meta$model_system, max))
+)
+gene_info[1:2, ]
+names(gene_info) = paste0(
+  rep(c("ENDO_", "MESO_"), times = 4), 
+  rep(c("min", "median", "q75", "max"), each = 2)
+)
+summary(gene_info)
+table(gene_info$ENDO_q75 > 0, gene_info$MESO_q75 > 0)
+
+# Subset genes
+w2kp = which(gene_info$ENDO_q75 > 0 | gene_info$MESO_q75 > 0)
+cts_dat = cts_dat[w2kp, ]
+gene_info = gene_info[w2kp, ]
+```
+
+### Check read depth vs. gene expression quantile
+
+```{r, fig.width = 4, fig.height=3}
+meta$read_depth = colSums(cts_dat)/1e6
+meta$q75 = apply(cts_dat, 2, quantile, probs = 0.75)
+
+ggplot(meta, aes(x=read_depth, y=q75, color=ko_strategy, shape = model_system)) +
+    geom_point(size=2, alpha=0.7) + ggtitle("Gene counts") + 
+  scale_shape_manual(values = c(7, 16)) + 
+  xlab("read depth (million)") + ylab("75 percentile of gene expression") + 
+  labs(color = "KO type", shape = "Model") + 
+  scale_color_brewer(palette = "Set1")
+```
+
+```{r fig.width = 5.2, fig.height=3}
+unique(meta$run_id)
+meta$run_id_short = meta$run_id
+table(meta$model_system, meta$run_id_short)
+
+ggplot(meta, aes(x=read_depth, y=q75, color=run_id_short, shape = model_system)) +
+    geom_point(size=2, alpha=0.7) + ggtitle("Gene counts") + 
+  scale_shape_manual(values = c(7, 16)) + 
+  xlab("read depth (million)") + ylab("75 percentile of gene expression") + 
+  labs(color = "Run ID", shape = "Model") + 
+  scale_color_brewer(palette = "Set1")
+```
+
+## Check PCA result of WT samples
+
+```{r fig.width = 6, fig.height=4.5}
+sample2kp = which(meta$ko_gene == "WT")
+cts_dat_m = cts_dat[,sample2kp]
+meta_m    = meta[sample2kp,]
+summary(meta_m$q75)
+dim(cts_dat_m)
+
+stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
+table(meta_m$file_id == colnames(cts_dat_m), useNA="ifany")
+
+q75 = apply(cts_dat_m, 1, quantile, probs=0.75)
+cts_dat_n = t(cts_dat_m[q75 > 0,])
+cts_dat_n = log(median(meta_m$q75)*cts_dat_n/meta_m$q75 + 1)
+dim(cts_dat_n)
+
+sample_pca = prcomp(cts_dat_n, center = TRUE, scale. = TRUE)
+names(sample_pca)
+pc_scores = sample_pca$x
+eigen_vals = sample_pca$sdev^2
+eigen_vals[1:5]/sum(eigen_vals)
+pvs = round(eigen_vals[1:5]/sum(eigen_vals)*100,1)
+pvs
+
+PC_df = data.frame(pc_scores)
+PC_df = cbind(PC_df, meta_m)
+
+gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=gene_group, color=model_system)) +
+  geom_point(size=2.5, alpha=0.7) + scale_color_brewer(palette = "Dark2") +
+  scale_shape_prism() + 
+  labs(color="Model system", shape ="Gene group") + 
+  xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+  ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+  ggtitle("Wild type samples") + 
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  ) +
+  theme(
+    legend.margin = margin(0, 0, 0, 0), 
+    legend.box.just = "left", 
+    legend.direction = "vertical" 
+  )
+
+print(gPC)
+
+
+gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=gene_group,
+                        color=run_id_short)) +
+  geom_point(size=2.5, alpha=0.7) + 
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_prism() + 
+  labs(color="Run_id", shape ="Gene group") + 
+  xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+  ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+  ggtitle("Wild type samples") + 
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  ) + 
+  theme(
+    legend.margin = margin(0, 0, 0, 0), 
+    legend.box.just = "left", 
+    legend.direction = "vertical" 
+  )
+
+print(gPC)
+```
+
+## Analyze samples of different model systems or batches
+
+```{r fig.width = 6, fig.height=4.5, message=FALSE, warning=FALSE}
+meta$condition = 'nor'
+meta$model_condition = paste(meta$model_system, meta$condition, sep="_")
+table(meta$model_condition)
+
+table(meta$run_id, meta$model_condition)
+
+table(meta$run_id, meta$ko_gene)
+table(meta$run_id, meta$gene_group)
+table(meta$ko_strategy, meta$ko_gene)
+
+unique_model_condition_ss = unique(meta$model_condition)
+unique_model_condition_ss = sort(unique_model_condition_ss)
+
+for(cur_mc in unique_model_condition_ss){
+  print("")
+  print("==========================================")
+  print(cur_mc)
+  print("==========================================")
+  print("")
+  
+  sample2kp = which(meta$model_condition == cur_mc)
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+  
+  # verify the consistency between ko_strategy from metadata column and 
+  # that from filenames
+  extracted_ko_strings = str_extract_all(meta_m$file_id, "PTC|WT|KO")
+  print(table(sapply(extracted_ko_strings, length)))
+  print(table(meta_m$ko_strategy, unlist(extracted_ko_strings)))
+  
+  stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
+  table(meta_m$file_id == colnames(cts_dat_m), useNA="ifany")
+  
+
+  q75 = apply(cts_dat_m, 1, quantile, probs=0.75)
+
+  cts_dat_n = t(cts_dat_m[q75 > 0,])
+  cts_dat_n = log(median(meta_m$q75)*cts_dat_n/meta_m$q75 + 1)
+  dim(cts_dat_n)
+  
+  sample_pca = prcomp(cts_dat_n, center = TRUE, scale. = TRUE)
+  names(sample_pca)
+  pc_scores = sample_pca$x
+  eigen_vals = sample_pca$sdev^2
+  eigen_vals[1:5]/sum(eigen_vals)
+  pvs = round(eigen_vals[1:5]/sum(eigen_vals)*100,1)
+  pvs
+  
+  PC_df = data.frame(pc_scores)
+  PC_df = cbind(PC_df, meta_m)
+  
+  colnames(PC_df)[which(colnames(PC_df)=="timepoint")] = "day"
+  
+  only_ko_strategy = setdiff(unique(PC_df$ko_strategy), "WT")
+
+  unique_ko_genes = sort(unique(PC_df$ko_gene))
+  unique_ko_genes = c(unique_ko_genes[unique_ko_genes!="WT"], "WT")
+  PC_df$ko_gene = factor(PC_df$ko_gene, unique_ko_genes)
+  
+  print(table(PC_df$gene_group, PC_df$ko_gene, useNA="ifany"))
+
+  shapes = c(0, 1, 7, 8, 9, 10, 11, 15, 16, 17)
+  
+  
+  table(meta_m$clonal.description, meta_m$timepoint)
+  
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_gene, color=run_id_short)) +
+              geom_point(size=2.5, alpha=0.7) + 
+              scale_color_brewer(palette = "Dark2") +
+              scale_shape_manual(values = shapes[1:length(unique(PC_df$ko_gene))]) + 
+              xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+              ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+              ggtitle(paste0(cur_mc, " ", only_ko_strategy, " for knockout genes")) + 
+              guides(
+                color = guide_legend(title = NULL, order = 1),
+                shape = guide_legend(title = NULL, order = 2)
+              ) +
+              theme(
+                legend.margin = margin(0, 0, 0, 0), 
+                legend.box.just = "left", 
+                legend.direction = "vertical" 
+              )
+
+  print(gPC)
+  
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=ko_gene, color=gene_group)) +
+              geom_point(size=2.5, alpha=0.7) + scale_color_brewer(palette = "Dark2") +
+                scale_shape_manual(values = shapes[1:length(unique(PC_df$ko_gene))]) + 
+              xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+              ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+              ggtitle(paste0(cur_mc, " ", only_ko_strategy, " for knockout genes\n", 
+                             "color shows gene-condition group the WT sample is for")) + 
+              guides(
+                color = guide_legend(title = NULL, order = 1),
+                shape = guide_legend(title = NULL, order = 2)
+              ) + 
+              theme_classic() + 
+              theme(
+                legend.margin = margin(0, 0, 0, 0), 
+                legend.box.just = "left", 
+                legend.direction = "vertical" 
+              )
+
+  print(gPC)
+
+}
+
+```
+
+Run DE analysis for each gene group separately. They natually separate all batches. 
+
+```{r}
+table(meta$gene_group, meta$run_id, meta$model_system, meta$timepoint)
+```
+
+For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
+
+In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
+
+The first version of the output files contains 
+    
+    gene id, gene symbol
+
+and for each knockout strategy:
+
+    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+    
+The second version of the output files contains  
+
+    gene id, gene symbol, chr, strand, position
+
+and for each knockout strategy:
+
+    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4).
+
+In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
+
+### Prepare output directories for DE results
+
+```{r message=FALSE, warning=FALSE}
+
+release_name = "2025_06_JAX_RNAseq10"
+
+output_dir = file.path("results", release_name)
+raw_output_dir = file.path(output_dir, "raw")
+processed_output_dir = file.path(output_dir, "processed")
+
+if (!file.exists(raw_output_dir)){
+  dir.create(raw_output_dir, recursive = TRUE)
+}
+
+if (!file.exists(processed_output_dir)){
+  dir.create(processed_output_dir, recursive = TRUE)
+}
+
+```
+
+### DE analysis for all genes
+```{r fig.width = 4.8, fig.height=3.2, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+unique_model_ss = unique(meta$model_system)
+unique_model_ss = sort(unique_model_ss)
+
+for(model1 in unique_model_ss){
+  
+  print("")
+  print("==========================================")
+  print(model1)
+  print("==========================================")
+  print("")
+  
+  sample2kp = which(meta$model_system == model1)
+  
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+ 
+  table(meta_m$ko_strategy)
+  stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
+  
+  ## Generate sample information matrix
+  cols2kp = c("model_system", "condition", "ko_strategy", "ko_gene", "gene_group", 
+              "run_id", "run_id_short", "timepoint", "q75")
+  sample_info = meta_m[,cols2kp]
+  colnames(sample_info)[which(colnames(sample_info)=="timepoint")] = "day"
+  
+  dim(sample_info)
+  sample_info[1:2,]
+  
+  sample_info$ko_gene_gene_group = paste(sample_info$ko_gene, 
+                                         sample_info$gene_group, sep="_")
+  
+  print(table(sample_info$run_id, sample_info$ko_gene))
+  print(table(sample_info$ko_gene, sample_info$day)) 
+  print(table(sample_info$ko_gene_gene_group, sample_info$day)) 
+  
+  # print the table of ko_gene and run_id by (day, condition) combinations
+  sample_info$day_condition = paste0(sample_info$day, "_", sample_info$condition)
+  unique_day_condition_model_s = unique(sample_info$day_condition)
+  unique_day_condition_model_s = as.character(sort(unique_day_condition_model_s))
+  
+  for (cur_d_c in as.character(unique_day_condition_model_s)){
+    sample_info_by_day = sample_info[which(sample_info$day_condition==as.character(cur_d_c)), ]
+    print("---------------------------")
+    print(paste0("Model system: ", model1))
+    print(paste0("On day_condition ", as.character(cur_d_c), ": "))
+    print("Cross table between knockout gene and run id:")
+    print(table(sample_info_by_day$ko_gene, sample_info_by_day$run_id_short))    
+    print("Cross table between knockout gene and knockout gene group:")
+    print(table(sample_info_by_day$ko_gene, sample_info_by_day$gene_group))  
+  }
+
+  sample_info$model_day = paste0(sample_info$model_system, 
+                                 "_day_", 
+                                 as.character(sample_info$day))
+    
+  sample_info$de_grp = sample_info$model_day
+  
+  unique_de_grps = unique(sample_info$de_grp)
+  sorted_de_grps = sort(unique_de_grps)
+  
+  for (d_group in sorted_de_grps){
+    
+    if (d_group == 'ENDO_day_5') {
+      strategy = 'KO'
+    } else {
+      strategy = 'PTC'
+    }
+    
+    dg_index = which(sample_info$de_grp==d_group)
+    cts_dat_m_dg = cts_dat_m[, dg_index]
+    sample_info_dg = sample_info[dg_index, ]
+    
+    stopifnot(all(sample_info_dg$de_grp==d_group))
+    
+    print("")
+    print("-----------------------------------")
+    print(paste0("Model system: ", model1))  
+    if (sum(sample_info_dg$ko_gene=="WT") < 2){
+      print(sprintf("DE group %s has only %d wild type samples", 
+                    d_group, sum(sample_info_dg$ko_gene=="WT")))
+      print(sprintf("do not run DESeq2 for it"))
+      print("-----------------------------------")  
+      next
+    }else{
+      print(sprintf("DE group %s DESeq2 results:", d_group))
+      print("-----------------------------------")  
+    }    
+    
+    
+    # do two steps of filtering
+    # first, filter based on q75 of each gene
+    # second, filter based on whether each gene is expressed in at least 4 cells
+    
+    dg_q75 = apply(cts_dat_m_dg, 1, quantile, probs=0.75)
+    cts_dat_m_dg = cts_dat_m_dg[dg_q75 > 0,]
+    
+    print(sprintf("After filtering by gene expression q75, the number of genes reduces from %d to %d", 
+                  length(dg_q75), nrow(cts_dat_m_dg)))
+
+    n_pos = rowSums(cts_dat_m_dg>0)
+    cts_dat_m_dg = cts_dat_m_dg[n_pos >= 4,]
+
+    if (length(n_pos)==nrow(cts_dat_m_dg)){
+      print("After filtering by nonzero expression in at least 4 samples, the number of genes does not change.")
+    }else{
+      print(sprintf("After filtering by nonzero expression in at least 4 samples, the number of genes reduces from %d to %d", 
+                    length(n_pos), nrow(cts_dat_m_dg)))    
+    }
+    
+    # update the q75 based on only genes that will be used in the DE analysis
+    sample_info_dg$q75 = apply(cts_dat_m_dg, 2, quantile, probs = 0.75)
+    sample_info_dg$log_q75 = log(sample_info_dg$q75)
+    
+    sample_info_dg$ko_gene = as.factor(sample_info_dg$ko_gene)
+    
+    if (length(unique(sample_info_dg$run_id))==1){
+      dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                    ~ ko_gene + log_q75)
+    }else{
+      dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                    ~ ko_gene + run_id + log_q75)     
+    }
+  
+    start.time <- Sys.time()
+    dds = DESeq(dds)
+    end.time <- Sys.time()
+
+    time.taken <- end.time - start.time
+    print(time.taken)
+    
+    ## association with read-depth
+    res_rd = results(dds, name = "log_q75")
+    res_rd = as.data.frame(res_rd)
+    dim(res_rd)
+    res_rd[1:2,]
+    
+    table(is.na(res_rd$padj))
+  
+    g0 = ggplot(res_rd %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      geom_histogram(color="darkblue", fill="lightblue", 
+                     breaks = seq(0,1,by=0.01)) + 
+      ggtitle(paste0(d_group, "\nread depth"))
+    print(g0)
+  
+    ## Rerun the analysis without read-depth if it is not significant for 
+    ## most genes, and the number of samples is small
+    ## i.e., proportion of non-null in the distribution is smaller than 0.01
+    ## (this needs to be restricted to the genes with not NA adjusted pvalue)
+    ## or if smaller than 0.1 and the number of samples is not greater than 6
+
+    pi_1_rd = max(0, mean(res_rd$pvalue[!is.na(res_rd$padj)] < 0.05) - 0.05)
+    pi_1_rd = max(pi_1_rd, 0, 1 - 2*mean(res_rd$pvalue[!is.na(res_rd$padj)] > 0.5))
+    
+    print(sprintf("prop of non-null for rd: %.2e", pi_1_rd))
+    
+    if(pi_1_rd < 0.01 || (ncol(cts_dat_m_dg) <= 6 && pi_1_rd < 0.1 )){
+      
+      print("rerun DESeq2 without read depth")
+      
+      include_rd = 0
+      
+      if (length(unique(sample_info_dg$run_id))==1){
+        dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                      ~ ko_gene)
+      }else{
+        dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                      ~ ko_gene + run_id)     
+      }
+      
+      dds = DESeq(dds)
+      
+    }else{
+      include_rd = 1
+    }
+
+    ## association with run_id
+      
+    if (length(unique(sample_info_dg$run_id))>1){
+      if(include_rd)
+        dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_gene + log_q75)
+      else
+        dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_gene)
+      
+      res_lrt = results(dds_lrt)
+    
+      res_run_id = as.data.frame(res_lrt)
+      dim(res_run_id)
+      res_run_id[1:2,]
+    
+      table(is.na(res_run_id$padj))
+      
+      g0 = ggplot(res_run_id %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+        geom_histogram(color="darkblue", fill="lightblue", 
+                       breaks = seq(0,1,by=0.01)) + 
+        ggtitle(paste0(d_group, "\nRun ID"))
+      print(g0)
+    
+    }
+    
+    ## DE analysis for each KO gene
+    table(sample_info_dg$ko_gene)
+    
+    genos = setdiff(unique(sample_info_dg$ko_gene), "WT")
+    genos = sort(genos)
+    
+    for(geno in genos){
+      
+      res_g1 = results(dds, contrast = c("ko_gene", geno, "WT"))
+      res_g1 = signif(data.frame(res_g1), 3)
+
+      # add a column to record the number of zeros per test
+      test_index = which(sample_info_dg$ko_gene%in%c(geno, "WT"))
+      
+      cts_dat_m_dg_test = cts_dat_m_dg[, test_index]
+      n_zero = rowSums(cts_dat_m_dg_test==0)
+      res_g1$n_zeros = n_zero    
+
+      # record the number of samples involved in the comparison
+      test_ko_gene_vec = sample_info_dg$ko_gene[test_index]
+      
+      df_size = rbind(df_size, 
+                      c(d_group, 
+                        paste0(geno, "_", strategy), 
+                        sum(test_ko_gene_vec!="WT"), 
+                        sum(test_ko_gene_vec=="WT")))   
+      
+      # prepare a processed version of output
+      res_g1_reduced = res_g1[, c("log2FoldChange", "pvalue", "padj", "n_zeros")]
+      res_g1_reduced$padj[which(res_g1_reduced$n_zeros>=4)] = NA
+      
+      if ((sum(test_ko_gene_vec!="WT")==1)|(sum(test_ko_gene_vec=="WT")==1)){
+        res_g1_reduced$padj = NA
+      }
+      
+      res_g1_reduced = res_g1_reduced[, c("log2FoldChange", "pvalue", "padj")]      
+  
+      n_DE = sum(res_g1_reduced$padj < 0.05 & abs(res_g1_reduced$log2FoldChange) > log2(1.5), 
+                 na.rm = TRUE)
+      print(paste0(d_group, " under KO gene ", geno, ":"))
+      print(sprintf("number of DE genes: %d", n_DE))
+
+      g1 = ggplot(res_g1_reduced %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+        geom_histogram(color="darkblue", fill="lightblue", 
+                       breaks = seq(0,1,by=0.01)) + 
+        ggtitle(paste0(d_group, "\n", geno))
+      print(g1)
+
+      tag1 = sprintf("%s_%s_", geno, strategy)
+      colnames(res_g1) = paste0(tag1, colnames(res_g1))
+      colnames(res_g1_reduced) = paste0(tag1, colnames(res_g1_reduced))
+      
+      
+      res_df = data.frame(gene_ID=rownames(res_g1), 
+                          res_g1)
+      dim(res_df)
+      res_df[1:2,]
+      
+      
+      res_reduced_gene_anno = gene_anno[match(rownames(res_g1_reduced), 
+                                              gene_anno$ensembl_gene_id), ]
+      stopifnot(all(rownames(res_g1_reduced)==res_reduced_gene_anno$ensembl_gene_id))     
+      
+      # set gene hgnc_symbol that equal "" to NA
+      hgnc_symbol_vec = res_reduced_gene_anno$hgnc_symbol
+      hgnc_symbol_vec[which(hgnc_symbol_vec=="")] = NA
+      
+      res_reduced_df = data.frame(gene_ID=rownames(res_g1_reduced), 
+                                  hgnc_symbol=hgnc_symbol_vec,
+                                  chr=res_reduced_gene_anno$chr, 
+                                  strand=res_reduced_gene_anno$strand, 
+                                  start=res_reduced_gene_anno$start, 
+                                  end=res_reduced_gene_anno$end, 
+                                  res_g1_reduced)
+      
+      print("hgnc_symbol empty string and NA tables:")
+      print(table(res_reduced_df$hgnc_symbol=="", useNA="ifany"))
+      print(table(is.na(res_reduced_df$hgnc_symbol)))
+        
+      dim(res_reduced_df)
+      res_reduced_df[1:2,]      
+      
+      if (model1=="PrS"){
+        setting_name = unique(paste0(sample_info_dg$model_day, "_", 
+                                     sample_info_dg$condition))
+      }else{
+        setting_name = unique(sample_info_dg$model_day)
+      }
+      
+      fwrite(res_df, 
+             sprintf("%s/%s_%s_%s_DEseq2_raw.tsv", 
+                     raw_output_dir, release_name, setting_name, geno), 
+             sep="\t")
+      fwrite(res_reduced_df, 
+             sprintf("%s/%s_%s_%s_DEseq2.tsv", 
+                     processed_output_dir, release_name, setting_name, geno), 
+             sep="\t")      
+
+    }
+    
+  }
+  
+}
+
+colnames(df_size) = c("DE_group", "knockout_gene_strategy", "n_ko", "n_WT")
+df_size = as.data.frame(df_size)
+
+multi_rows = which(table(df_size$knockout_gene_strategy)>1)
+multi_rows
+
+df_size[which(df_size$knockout_gene_strategy%in%names(multi_rows)),]
+
+fwrite(df_size, 
+       sprintf("%s/%s_DE_n_samples.tsv", output_dir, release_name), 
+       sep="\t")
+```
+
+```{r}
+gc()
+sessionInfo()
+```
+
