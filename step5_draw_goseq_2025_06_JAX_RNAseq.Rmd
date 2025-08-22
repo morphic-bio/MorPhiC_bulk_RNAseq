@@ -1,0 +1,221 @@
+---
+title: "Visualize goseq results"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+params:
+  release_name: "2023_12_JAX_RNAseq_ExtraEmbryonic"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(data.table)
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+library(stringr)
+library(cowplot)
+
+library(tidyr)
+theme_set(theme_classic())
+
+release_name = params$release_name
+release_name
+
+```
+
+## Read in results
+
+```{r}
+
+result_dir = file.path("results", release_name)
+enrichment_output_dir = file.path(result_dir, "enrichment")
+
+res = readRDS(file.path(enrichment_output_dir, 
+                        sprintf("%s_enrichment.rds", release_name)))
+names(res)
+
+multi_strategy_datasets = c("2023_12_JAX_RNAseq_ExtraEmbryonic",
+                            "2024_05_JAX_RNAseq2_ExtraEmbryonic", 
+                            "2024_06_JAX_RNAseq_Neuroectoderm", 
+                            "2024_09_JAX_RNAseq6_Diverse", 
+                            "2024_09_JAX_RNAseq7_Reversion")
+  
+if (release_name%in%multi_strategy_datasets){
+  
+  to_plot = grep("PTC|reverted|WT_WT_hyp_vs_nor", names(res))
+  res = res[to_plot]
+
+}
+
+sapply(res, function(x){sapply(x,nrow)})
+
+df_list = list()
+
+for(label in names(res)){
+  res1 = res[[label]]
+  names(res1)[which(names(res1)=="go_bp")] = "GO biological process"
+  type = names(res1)
+  
+  df_go = NULL
+  
+  for(gset1 in type){
+    res_g1 = res1[[gset1]]
+    res_g1$type = gset1
+    df_go = rbind(df_go, res_g1)
+  }
+  
+  df_list[[label]] = df_go
+}
+
+```
+
+## Prepare output directories for saving figure files out
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+figure_dir = file.path("figures", release_name)
+goseq_figure_dir = file.path(figure_dir, "goseq_plots")
+
+if (!file.exists(goseq_figure_dir)){
+  dir.create(goseq_figure_dir, recursive = TRUE)
+}
+
+```
+
+## Generate plots
+
+```{r fig.width = 7, fig.height = 5}
+nchar_limit = 70
+
+for(k in 1:length(df_list)){
+  d1 = df_list[[k]]
+  
+  if(sum(d1$FDR < 0.05) == 0){ next }
+  
+  d1 = d1[d1$FDR < 0.05,]
+  d1 = d1[order(d1$FDR, decreasing = TRUE),]
+  
+  d1_label = sapply(d1$category, function(x) {
+    space_positions = gregexpr(" ", x)[[1]]
+    if (nchar(x) > nchar_limit) {
+      break_pos = max(space_positions[space_positions < nchar_limit])
+      return(paste0(paste0(rep(" ", nchar_limit-break_pos), collapse=""), 
+                    substr(x, 1, break_pos), "\n", 
+                    substr(x, break_pos+1, nchar(x))))
+    } else {
+      x = paste0(paste0(rep(" ", 1.1*(nchar_limit-nchar(x))), collapse=""), x)
+      return(x)
+    }
+  })
+
+  d1$y = 1:nrow(d1)
+  nm1 = names(df_list)[k]
+  nm1 = gsub("_", " ", nm1)
+  nm1 = gsub("PTC ", "", nm1)
+  nm1 = gsub("nor ", "Normoxia ", nm1)
+  nm1 = gsub("hyp ", "Hypoxia ", nm1)
+  nm1 = gsub("up", "up-regulated", nm1)
+  nm1 = gsub("down", "down-regulated", nm1)
+  
+  if (grepl("Hypoxia vs Normoxia", nm1)){
+    nm1_substrings = strsplit(nm1, " Hypoxia vs Normoxia ")[[1]]
+    nm1 = paste0(nm1_substrings[1], 
+                 "\nHypoxia vs Normoxia\n", 
+                 nm1_substrings[2])
+  }else{
+    if (!grepl("EPAS1", nm1)){ # keep Normoxia for comparisons involving EPAS1 gene
+      nm1 = gsub("Normoxia ", "", nm1)
+    }
+    nm1 = sub("reverted ", "", nm1) # only replace the first occurrence of "reverted "
+    substrings = str_split(nm1, " ")[[1]]
+    nm1 = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
+                 "\n", paste(substrings[length(substrings)], collapse = " "))
+  }
+  
+  mycolors <- c("GO biological process" = "#F8766D", "reactome" = "#00BFC4")
+  filtered_colors <- mycolors[unique(d1$type)]
+  
+  g1 = ggplot(d1, aes(x = -log10(FDR), y = y, color=type)) +
+    geom_point(size = 2.5) + 
+    labs(x = "-log10(FDR)", y="", title = nm1) + 
+    scale_y_continuous(breaks = 1:nrow(d1), 
+                       labels = d1_label, 
+                       limits = c(0.8, nrow(d1)+0.2)) + 
+    theme(legend.position = "top") + 
+    scale_color_manual(values = filtered_colors) + 
+    guides(color = guide_legend(title = NULL))
+
+  h1 = 0.75*(nrow(d1)+0.4)/20 + 0.25
+  if (nrow(d1)<=2){
+    h1 = 0.75*(nrow(d1)+1)/20 + 0.25
+  }
+  
+  canvas <- ggdraw() + draw_plot(g1, x = 0, y = 1-h1, width = 1, height = h1)    
+  print(canvas)
+  
+  if (!grepl("Hypoxia vs Normoxia", nm1)){
+    
+    g2 = ggplot(d1, aes(x = -log10(FDR), y = y, color=type)) +
+      geom_point(size = 2.5) + 
+      labs(x = "-log10(FDR)", y="") + 
+      scale_y_continuous(breaks = 1:nrow(d1), 
+                         labels = d1_label, 
+                         limits = c(0.8, nrow(d1)+0.2)) + 
+      theme(legend.position = "top") + 
+      scale_color_manual(values = filtered_colors) + 
+      guides(color = guide_legend(title = NULL)) + 
+      theme(
+        panel.background = element_rect(fill = "transparent", color = NA),
+        plot.background = element_rect(fill = "transparent", color = NA),
+        legend.background = element_rect(fill = "transparent", color = NA)
+       )
+    
+    h1 = 0.75*(nrow(d1)+0.4)/20 + 0.25
+    if (nrow(d1)<=2){
+      h1 = 0.75*(nrow(d1)+1)/20 + 0.25
+    }
+    
+    canvas2 <- ggdraw() + draw_plot(g2, x = 0, y = 1-h1, width = 1, height = h1)    
+    
+    saved_figure_name = gsub("\n", "_", nm1)
+    saved_figure_name = paste0(gsub(" ", "_", saved_figure_name), ".svg")
+  
+    ggsave(file=file.path(goseq_figure_dir, saved_figure_name), 
+           plot=canvas2, width=8, height=5, bg = "transparent", units="in")
+    
+    png_figure_name = gsub("\n", "_", nm1)
+    png_figure_name = paste0(gsub(" ", "_", png_figure_name), ".png")
+    
+    ggsave(file=file.path(goseq_figure_dir, png_figure_name), 
+           plot=canvas2, width=1920, height=1200, bg = "transparent", units="px")
+  }
+  
+}
+```
+
+
+
+```{r}
+gc()
+sessionInfo()
+```
+
