@@ -298,7 +298,7 @@ for(k in 1:nrow(df_file_info)){
   ggsave(file=file.path(volcano_figure_dir, saved_figure_name), 
          device = grDevices::svg,
          plot=g3, width=5, height=3.2, bg = "transparent", units="in")
-  png_figure_name = paste0(d_group_in_title, "_", gene_name, "_PTC.png")
+  png_figure_name = paste0(d_group_in_title, "_", gene_name, "_", strategy, ".png")
   ggsave(file=file.path(volcano_figure_dir, png_figure_name), 
          device = grDevices::png,
          plot=g3, width=1920, height=1230, bg = "transparent", units="px")
