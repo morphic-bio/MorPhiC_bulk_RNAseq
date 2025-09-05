@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<g class='svglite'>
 <defs>
   <style type='text/css'><![CDATA[
     .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
@@ -12,6 +13,10 @@
     .svglite text {
       white-space: pre;
     }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
   ]]></style>
 </defs>
 <rect width='100%' height='100%' style='stroke: none; fill: none;'/>
@@ -23,58 +28,59 @@
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwxNzYuNDA='>
-    <rect x='0.00' y='0.00' width='576.00' height='176.40' />
+  <clipPath id='cpMC4wMHw1NzYuMDB8OTEuODB8MjY4LjIw'>
+    <rect x='0.00' y='91.80' width='576.00' height='176.40' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwxNzYuNDA=)'>
-<rect x='0.00' y='0.000000000000028' width='576.00' height='176.40' style='stroke-width: 1.07; stroke: none;' />
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8OTEuODB8MjY4LjIw)'>
+<rect x='0.00' y='91.80' width='576.00' height='176.40' style='stroke-width: 1.07; stroke: none;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjY4Ljk3fDU3MC41Mnw0NC42OHwxNDQuNTA='>
-    <rect x='268.97' y='44.68' width='301.55' height='99.82' />
+  <clipPath id='cpMjAzLjkxfDU3MC41MnwxMzYuNDh8MjM2LjMx'>
+    <rect x='203.91' y='136.48' width='366.61' height='99.83' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjY4Ljk3fDU3MC41Mnw0NC42OHwxNDQuNTA=)'>
-<rect x='268.97' y='44.68' width='301.55' height='99.82' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='282.68' cy='136.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='508.58' cy='119.79' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='508.58' cy='102.99' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='508.58' cy='86.18' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='556.81' cy='69.38' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='556.81' cy='52.58' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<g clip-path='url(#cpMjAzLjkxfDU3MC41MnwxMzYuNDh8MjM2LjMx)'>
+<rect x='203.91' y='136.48' width='366.61' height='99.83' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='220.57' cy='228.41' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='495.21' cy='211.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='495.21' cy='194.80' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='495.21' cy='177.99' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='553.86' cy='161.18' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='553.86' cy='144.38' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
-<polyline points='268.97,144.50 268.97,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<text x='264.04' y='139.75' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='227.24px' lengthAdjust='spacingAndGlyphs'>                                                  diencephalon development</text>
-<text x='264.04' y='122.95' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='240.52px' lengthAdjust='spacingAndGlyphs'>                          positive regulation of notch signaling pathway</text>
-<text x='264.04' y='106.14' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='227.24px' lengthAdjust='spacingAndGlyphs'>                                                 telencephalon development</text>
-<text x='264.04' y='89.34' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='225.75px' lengthAdjust='spacingAndGlyphs'>                                               cerebral cortex development</text>
-<text x='264.04' y='72.53' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='216.93px' lengthAdjust='spacingAndGlyphs'>                                                     forebrain development</text>
-<text x='264.04' y='55.73' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='234.07px' lengthAdjust='spacingAndGlyphs'>                                              endocrine system development</text>
-<polyline points='266.23,136.60 268.97,136.60 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='266.23,119.79 268.97,119.79 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='266.23,102.99 268.97,102.99 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='266.23,86.18 268.97,86.18 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='266.23,69.38 268.97,69.38 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='266.23,52.58 268.97,52.58 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='268.97,144.50 570.52,144.50 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='273.52,147.24 273.52,144.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='345.23,147.24 345.23,144.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='416.94,147.24 416.94,144.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='488.65,147.24 488.65,144.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='560.36,147.24 560.36,144.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<text x='273.52' y='155.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.3</text>
-<text x='345.23' y='155.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.4</text>
-<text x='416.94' y='155.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.5</text>
-<text x='488.65' y='155.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.6</text>
-<text x='560.36' y='155.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.7</text>
-<text x='419.75' y='168.50' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
-<rect x='358.87' y='5.48' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
-<rect x='364.35' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='372.99' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<text x='387.11' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<polyline points='203.91,236.31 203.91,136.48 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='198.97' y='231.56' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='105.12px' lengthAdjust='spacingAndGlyphs'>diencephalon development</text>
+<text x='198.97' y='214.75' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='176.95px' lengthAdjust='spacingAndGlyphs'>positive regulation of notch signaling pathway</text>
+<text x='198.97' y='197.95' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='107.56px' lengthAdjust='spacingAndGlyphs'>telencephalon development</text>
+<text x='198.97' y='181.14' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='110.95px' lengthAdjust='spacingAndGlyphs'>cerebral cortex development</text>
+<text x='198.97' y='164.33' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='87.48px' lengthAdjust='spacingAndGlyphs'>forebrain development</text>
+<text x='198.97' y='147.53' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='121.73px' lengthAdjust='spacingAndGlyphs'>endocrine system development</text>
+<polyline points='201.17,228.41 203.91,228.41 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='201.17,211.60 203.91,211.60 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='201.17,194.80 203.91,194.80 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='201.17,177.99 203.91,177.99 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='201.17,161.18 203.91,161.18 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='201.17,144.38 203.91,144.38 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='203.91,236.31 570.52,236.31 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='209.43,239.05 209.43,236.31 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='296.62,239.05 296.62,236.31 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='383.80,239.05 383.80,236.31 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='470.98,239.05 470.98,236.31 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='558.17,239.05 558.17,236.31 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='209.43' y='247.54' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.3</text>
+<text x='296.62' y='247.54' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.4</text>
+<text x='383.80' y='247.54' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.5</text>
+<text x='470.98' y='247.54' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.6</text>
+<text x='558.17' y='247.54' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.7</text>
+<text x='387.21' y='260.30' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.50px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='326.34' y='97.28' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='331.82' y='102.76' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='340.46' cy='111.40' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<text x='354.58' y='114.55' style='font-size: 8.80px; font-family: "Arial";' textLength='86.05px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+</g>
 </g>
 </svg>

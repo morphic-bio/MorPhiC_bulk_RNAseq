@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<g class='svglite'>
 <defs>
   <style type='text/css'><![CDATA[
     .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
@@ -12,6 +13,10 @@
     .svglite text {
       white-space: pre;
     }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
   ]]></style>
 </defs>
 <rect width='100%' height='100%' style='stroke: none; fill: none;'/>
@@ -23,50 +28,51 @@
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwxNDkuNDA='>
-    <rect x='0.00' y='0.00' width='576.00' height='149.40' />
+  <clipPath id='cpMC4wMHw1NzYuMDB8MTA1LjMwfDI1NC43MA=='>
+    <rect x='0.00' y='105.30' width='576.00' height='149.40' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwxNDkuNDA=)'>
-<rect x='0.00' y='0.000000000000028' width='576.00' height='149.40' style='stroke-width: 1.07; stroke: none;' />
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MTA1LjMwfDI1NC43MA==)'>
+<rect x='0.00' y='105.30' width='576.00' height='149.40' style='stroke-width: 1.07; stroke: none;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjY0Ljc4fDU3MC41Mnw0NC42OHwxMTcuNTA='>
-    <rect x='264.78' y='44.68' width='305.74' height='72.82' />
+  <clipPath id='cpMjE0LjcyfDU3MC41MnwxNDkuOTh8MjIyLjgx'>
+    <rect x='214.72' y='149.98' width='355.80' height='72.83' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjY0Ljc4fDU3MC41Mnw0NC42OHwxMTcuNTA=)'>
-<rect x='264.78' y='44.68' width='305.74' height='72.82' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='278.68' cy='110.29' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='304.81' cy='90.82' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='304.81' cy='71.35' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='556.62' cy='51.88' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<g clip-path='url(#cpMjE0LjcyfDU3MC41MnwxNDkuOTh8MjIyLjgx)'>
+<rect x='214.72' y='149.98' width='355.80' height='72.83' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='230.90' cy='215.61' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='261.30' cy='196.13' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='261.30' cy='176.66' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='554.35' cy='157.18' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
-<polyline points='264.78,117.50 264.78,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<text x='259.85' y='113.45' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='221.34px' lengthAdjust='spacingAndGlyphs'>                                             pattern specification process</text>
-<text x='259.85' y='93.98' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='225.31px' lengthAdjust='spacingAndGlyphs'>                              regulation of myeloid cell differentiation</text>
-<text x='259.85' y='74.51' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.49px' lengthAdjust='spacingAndGlyphs'>                                              myeloid cell differentiation</text>
-<text x='259.85' y='55.03' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='236.61px' lengthAdjust='spacingAndGlyphs'>                    negative regulation of myeloid cell differentiation</text>
-<polyline points='262.04,110.29 264.78,110.29 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='262.04,90.82 264.78,90.82 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='262.04,71.35 264.78,71.35 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='262.04,51.88 264.78,51.88 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='264.78,117.50 570.52,117.50 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='273.85,120.24 273.85,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='370.43,120.24 370.43,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='467.02,120.24 467.02,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='563.60,120.24 563.60,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<text x='273.85' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.6</text>
-<text x='370.43' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.0</text>
-<text x='467.02' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.4</text>
-<text x='563.60' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.8</text>
-<text x='417.65' y='141.50' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
-<rect x='356.78' y='5.48' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
-<rect x='362.26' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='370.90' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<text x='385.01' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<polyline points='214.72,222.81 214.72,149.98 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='209.79' y='218.76' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='111.45px' lengthAdjust='spacingAndGlyphs'>pattern specification process</text>
+<text x='209.79' y='199.28' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='151.81px' lengthAdjust='spacingAndGlyphs'>regulation of myeloid cell differentiation</text>
+<text x='209.79' y='179.81' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='101.00px' lengthAdjust='spacingAndGlyphs'>myeloid cell differentiation</text>
+<text x='209.79' y='160.33' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='187.50px' lengthAdjust='spacingAndGlyphs'>negative regulation of myeloid cell differentiation</text>
+<polyline points='211.98,215.61 214.72,215.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='211.98,196.13 214.72,196.13 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='211.98,176.66 214.72,176.66 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='211.98,157.18 214.72,157.18 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='214.72,222.81 570.52,222.81 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='225.28,225.55 225.28,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='337.68,225.55 337.68,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='450.07,225.55 450.07,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='562.47,225.55 562.47,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='225.28' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.6</text>
+<text x='337.68' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.0</text>
+<text x='450.07' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.4</text>
+<text x='562.47' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.8</text>
+<text x='392.62' y='246.80' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.50px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='331.75' y='110.78' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='337.23' y='116.26' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='345.87' cy='124.90' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<text x='359.99' y='128.05' style='font-size: 8.80px; font-family: "Arial";' textLength='86.05px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+</g>
 </g>
 </svg>

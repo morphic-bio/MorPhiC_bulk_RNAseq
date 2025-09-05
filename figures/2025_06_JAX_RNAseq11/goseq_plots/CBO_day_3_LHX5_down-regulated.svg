@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<g class='svglite'>
 <defs>
   <style type='text/css'><![CDATA[
     .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
@@ -12,6 +13,10 @@
     .svglite text {
       white-space: pre;
     }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
   ]]></style>
 </defs>
 <rect width='100%' height='100%' style='stroke: none; fill: none;'/>
@@ -23,43 +28,44 @@
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwxMTcuMDA='>
-    <rect x='0.00' y='0.00' width='576.00' height='117.00' />
+  <clipPath id='cpMC4wMHw1NzYuMDB8MTIxLjUwfDIzOC41MA=='>
+    <rect x='0.00' y='121.50' width='576.00' height='117.00' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwxMTcuMDA=)'>
-<rect x='0.00' y='-0.000000000000014' width='576.00' height='117.00' style='stroke-width: 1.07; stroke: none;' />
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MTIxLjUwfDIzOC41MA==)'>
+<rect x='0.00' y='121.50' width='576.00' height='117.00' style='stroke-width: 1.07; stroke: none;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjQxLjc0fDU3MC41Mnw0NC42OHw4NS4xMA=='>
-    <rect x='241.74' y='44.68' width='328.78' height='40.42' />
+  <clipPath id='cpMTE5LjEzfDU3MC41MnwxNjYuMTh8MjA2LjYx'>
+    <rect x='119.13' y='166.18' width='451.39' height='40.43' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjQxLjc0fDU3MC41Mnw0NC42OHw4NS4xMA==)'>
-<rect x='241.74' y='44.68' width='328.78' height='40.42' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='406.13' cy='64.89' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<g clip-path='url(#cpMTE5LjEzfDU3MC41MnwxNjYuMTh8MjA2LjYx)'>
+<rect x='119.13' y='166.18' width='451.39' height='40.43' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='344.82' cy='186.39' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
-<polyline points='241.74,85.10 241.74,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<text x='236.81' y='68.04' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.52px' lengthAdjust='spacingAndGlyphs'>                                                 forebrain regionalization</text>
-<polyline points='239.00,64.89 241.74,64.89 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='241.74,85.10 570.52,85.10 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='260.26,87.84 260.26,85.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='326.01,87.84 326.01,85.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='391.77,87.84 391.77,85.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='457.52,87.84 457.52,85.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='523.28,87.84 523.28,85.10 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<text x='260.26' y='96.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>1.42</text>
-<text x='326.01' y='96.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>1.44</text>
-<text x='391.77' y='96.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>1.46</text>
-<text x='457.52' y='96.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>1.48</text>
-<text x='523.28' y='96.33' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.13px' lengthAdjust='spacingAndGlyphs'>1.50</text>
-<text x='406.13' y='109.10' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
-<rect x='345.26' y='5.48' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
-<rect x='350.74' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='359.38' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<text x='373.49' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<polyline points='119.13,206.61 119.13,166.18 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='114.19' y='189.54' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='93.83px' lengthAdjust='spacingAndGlyphs'>forebrain regionalization</text>
+<polyline points='116.39,186.39 119.13,186.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='119.13,206.61 570.52,206.61 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='144.55,209.35 144.55,206.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='234.83,209.35 234.83,206.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='325.11,209.35 325.11,206.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='415.38,209.35 415.38,206.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='505.66,209.35 505.66,206.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='144.55' y='217.84' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.11px' lengthAdjust='spacingAndGlyphs'>1.42</text>
+<text x='234.83' y='217.84' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.11px' lengthAdjust='spacingAndGlyphs'>1.44</text>
+<text x='325.11' y='217.84' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.11px' lengthAdjust='spacingAndGlyphs'>1.46</text>
+<text x='415.38' y='217.84' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.11px' lengthAdjust='spacingAndGlyphs'>1.48</text>
+<text x='505.66' y='217.84' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='17.11px' lengthAdjust='spacingAndGlyphs'>1.50</text>
+<text x='344.82' y='230.60' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.50px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='283.95' y='126.98' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='289.43' y='132.46' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='298.07' cy='141.10' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<text x='312.19' y='144.25' style='font-size: 8.80px; font-family: "Arial";' textLength='86.05px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+</g>
 </g>
 </svg>

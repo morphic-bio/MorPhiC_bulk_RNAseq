@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<g class='svglite'>
 <defs>
   <style type='text/css'><![CDATA[
     .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
@@ -12,6 +13,10 @@
     .svglite text {
       white-space: pre;
     }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
   ]]></style>
 </defs>
 <rect width='100%' height='100%' style='stroke: none; fill: none;'/>
@@ -23,52 +28,53 @@
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwxNDkuNDA='>
-    <rect x='0.00' y='0.00' width='576.00' height='149.40' />
+  <clipPath id='cpMC4wMHw1NzYuMDB8MTA1LjMwfDI1NC43MA=='>
+    <rect x='0.00' y='105.30' width='576.00' height='149.40' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwxNDkuNDA=)'>
-<rect x='0.00' y='0.000000000000028' width='576.00' height='149.40' style='stroke-width: 1.07; stroke: none;' />
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8MTA1LjMwfDI1NC43MA==)'>
+<rect x='0.00' y='105.30' width='576.00' height='149.40' style='stroke-width: 1.07; stroke: none;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjYzLjYyfDU3MC41Mnw0NC42OHwxMTcuNTA='>
-    <rect x='263.62' y='44.68' width='306.90' height='72.82' />
+  <clipPath id='cpMTk2LjA1fDU3MC41MnwxNDkuOTh8MjIyLjgx'>
+    <rect x='196.05' y='149.98' width='374.47' height='72.83' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjYzLjYyfDU3MC41Mnw0NC42OHwxMTcuNTA=)'>
-<rect x='263.62' y='44.68' width='306.90' height='72.82' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='277.57' cy='110.29' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='277.57' cy='90.82' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='375.92' cy='71.35' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='556.57' cy='51.88' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<g clip-path='url(#cpMTk2LjA1fDU3MC41MnwxNDkuOTh8MjIyLjgx)'>
+<rect x='196.05' y='149.98' width='374.47' height='72.83' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='213.07' cy='215.61' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='213.07' cy='196.13' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='333.07' cy='176.66' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='553.50' cy='157.18' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
-<polyline points='263.62,117.50 263.62,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<text x='258.69' y='113.45' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='227.24px' lengthAdjust='spacingAndGlyphs'>                                                  diencephalon development</text>
-<text x='258.69' y='93.98' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='235.15px' lengthAdjust='spacingAndGlyphs'>                           negative regulation of neuron differentiation</text>
-<text x='258.69' y='74.51' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='208.58px' lengthAdjust='spacingAndGlyphs'>                                                              axon guidance</text>
-<text x='258.69' y='55.03' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='213.52px' lengthAdjust='spacingAndGlyphs'>                                                 forebrain regionalization</text>
-<polyline points='260.88,110.29 263.62,110.29 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='260.88,90.82 263.62,90.82 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='260.88,71.35 263.62,71.35 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='260.88,51.88 263.62,51.88 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='263.62,117.50 570.52,117.50 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='308.63,120.24 308.63,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='372.65,120.24 372.65,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='436.67,120.24 436.67,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='500.70,120.24 500.70,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='564.72,120.24 564.72,117.50 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<text x='308.63' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.0</text>
-<text x='372.65' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.5</text>
-<text x='436.67' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.0</text>
-<text x='500.70' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.5</text>
-<text x='564.72' y='128.73' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>4.0</text>
-<text x='417.07' y='141.50' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
-<rect x='356.20' y='5.48' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
-<rect x='361.67' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='370.31' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<text x='384.43' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<polyline points='196.05,222.81 196.05,149.98 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='191.12' y='218.76' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='105.12px' lengthAdjust='spacingAndGlyphs'>diencephalon development</text>
+<text x='191.12' y='199.28' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='168.92px' lengthAdjust='spacingAndGlyphs'>negative regulation of neuron differentiation</text>
+<text x='191.12' y='179.81' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='57.22px' lengthAdjust='spacingAndGlyphs'>axon guidance</text>
+<text x='191.12' y='160.33' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='93.83px' lengthAdjust='spacingAndGlyphs'>forebrain regionalization</text>
+<polyline points='193.31,215.61 196.05,215.61 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='193.31,196.13 196.05,196.13 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='193.31,176.66 196.05,176.66 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='193.31,157.18 196.05,157.18 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='196.05,222.81 570.52,222.81 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='250.97,225.55 250.97,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='329.09,225.55 329.09,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='407.21,225.55 407.21,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='485.32,225.55 485.32,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='563.44,225.55 563.44,222.81 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='250.97' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.0</text>
+<text x='329.09' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.5</text>
+<text x='407.21' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>3.0</text>
+<text x='485.32' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>3.5</text>
+<text x='563.44' y='234.04' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>4.0</text>
+<text x='383.29' y='246.80' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.50px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='322.41' y='110.78' width='121.75' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='327.89' y='116.26' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='336.53' cy='124.90' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<text x='350.65' y='128.05' style='font-size: 8.80px; font-family: "Arial";' textLength='86.05px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+</g>
 </g>
 </svg>

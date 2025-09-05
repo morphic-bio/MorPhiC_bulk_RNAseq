@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
-<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='576.00pt' height='360.00pt' viewBox='0 0 576.00 360.00'>
+<g class='svglite'>
 <defs>
   <style type='text/css'><![CDATA[
     .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
@@ -12,6 +13,10 @@
     .svglite text {
       white-space: pre;
     }
+    .svglite g.glyphgroup path {
+      fill: inherit;
+      stroke: none;
+    }
   ]]></style>
 </defs>
 <rect width='100%' height='100%' style='stroke: none; fill: none;'/>
@@ -23,70 +28,71 @@
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMC4wMHw1NzYuMDB8MC4wMHwyMTYuOTA='>
-    <rect x='0.00' y='0.00' width='576.00' height='216.90' />
+  <clipPath id='cpMC4wMHw1NzYuMDB8NzEuNTV8Mjg4LjQ1'>
+    <rect x='0.00' y='71.55' width='576.00' height='216.90' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwyMTYuOTA=)'>
-<rect x='0.00' y='-0.000000000000028' width='576.00' height='216.90' style='stroke-width: 1.07; stroke: none;' />
+<g clip-path='url(#cpMC4wMHw1NzYuMDB8NzEuNTV8Mjg4LjQ1)'>
+<rect x='0.00' y='71.55' width='576.00' height='216.90' style='stroke-width: 1.07; stroke: none;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
 </g>
 <defs>
-  <clipPath id='cpMjc1Ljg2fDU3MC41Mnw0NC42OHwxODUuMDA='>
-    <rect x='275.86' y='44.68' width='294.66' height='140.32' />
+  <clipPath id='cpMjI5LjQ5fDU3MC41MnwxMTYuMjN8MjU2LjU2'>
+    <rect x='229.49' y='116.23' width='341.03' height='140.33' />
   </clipPath>
 </defs>
-<g clip-path='url(#cpMjc1Ljg2fDU3MC41Mnw0NC42OHwxODUuMDA=)'>
-<rect x='275.86' y='44.68' width='294.66' height='140.32' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='289.25' cy='175.58' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='289.25' cy='160.39' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='296.78' cy='145.21' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='330.85' cy='130.02' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='351.58' cy='114.84' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='356.22' cy='99.65' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='428.19' cy='84.46' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<circle cx='472.39' cy='69.28' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<circle cx='557.13' cy='54.09' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<g clip-path='url(#cpMjI5LjQ5fDU3MC41MnwxMTYuMjN8MjU2LjU2)'>
+<rect x='229.49' y='116.23' width='341.03' height='140.33' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='244.99' cy='247.14' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='244.99' cy='231.96' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='253.71' cy='216.77' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='293.14' cy='201.58' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='317.13' cy='186.39' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='322.50' cy='171.21' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='405.80' cy='156.02' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<circle cx='456.95' cy='140.83' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<circle cx='555.02' cy='125.64' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1NzYuMDB8MC4wMHwzNjAuMDA=)'>
-<polyline points='275.86,185.00 275.86,44.68 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<text x='270.93' y='178.73' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='223.84px' lengthAdjust='spacingAndGlyphs'>                                         gabaergic neuron differentiation</text>
-<text x='270.93' y='163.55' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='216.93px' lengthAdjust='spacingAndGlyphs'>                                                     forebrain development</text>
-<text x='270.93' y='148.36' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='217.39px' lengthAdjust='spacingAndGlyphs'>                                                        pallium development</text>
-<text x='270.93' y='133.18' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='227.24px' lengthAdjust='spacingAndGlyphs'>                                                 telencephalon development</text>
-<text x='270.93' y='117.99' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='245.46px' lengthAdjust='spacingAndGlyphs'>                  cerebral cortex gabaergic interneuron differentiation</text>
-<text x='270.93' y='102.80' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='246.41px' lengthAdjust='spacingAndGlyphs'>                    lncrna mediated post transcriptional gene silencing</text>
-<text x='270.93' y='87.62' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='210.56px' lengthAdjust='spacingAndGlyphs'>                                                        gpcr ligand binding</text>
-<text x='270.93' y='72.43' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='221.82px' lengthAdjust='spacingAndGlyphs'>                                               sensory perception of smell</text>
-<text x='270.93' y='57.25' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='220.36px' lengthAdjust='spacingAndGlyphs'>                                               olfactory signaling pathway</text>
-<polyline points='273.12,175.58 275.86,175.58 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,160.39 275.86,160.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,145.21 275.86,145.21 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,130.02 275.86,130.02 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,114.84 275.86,114.84 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,99.65 275.86,99.65 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,84.46 275.86,84.46 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,69.28 275.86,69.28 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='273.12,54.09 275.86,54.09 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='275.86,185.00 570.52,185.00 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
-<polyline points='297.45,187.74 297.45,185.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='353.42,187.74 353.42,185.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='409.38,187.74 409.38,185.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='465.34,187.74 465.34,185.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<polyline points='521.31,187.74 521.31,185.00 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
-<text x='297.45' y='196.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>1.5</text>
-<text x='353.42' y='196.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.0</text>
-<text x='409.38' y='196.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>2.5</text>
-<text x='465.34' y='196.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.0</text>
-<text x='521.31' y='196.23' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.23px' lengthAdjust='spacingAndGlyphs'>3.5</text>
-<text x='423.19' y='209.00' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.52px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
-<rect x='329.44' y='5.48' width='187.50' height='28.24' style='stroke-width: 1.07; stroke: none;' />
-<rect x='334.92' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='343.56' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
-<rect x='451.19' y='10.96' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
-<circle cx='459.83' cy='19.60' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
-<text x='357.68' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='86.06px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
-<text x='473.95' y='22.75' style='font-size: 8.80px; font-family: "Arial";' textLength='36.68px' lengthAdjust='spacingAndGlyphs'>reactome</text>
+<polyline points='229.49,256.56 229.49,116.23 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<text x='224.56' y='250.29' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='123.48px' lengthAdjust='spacingAndGlyphs'>gabaergic neuron differentiation</text>
+<text x='224.56' y='235.11' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='87.48px' lengthAdjust='spacingAndGlyphs'>forebrain development</text>
+<text x='224.56' y='219.92' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='80.66px' lengthAdjust='spacingAndGlyphs'>pallium development</text>
+<text x='224.56' y='204.73' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='107.56px' lengthAdjust='spacingAndGlyphs'>telencephalon development</text>
+<text x='224.56' y='189.54' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='201.17px' lengthAdjust='spacingAndGlyphs'>cerebral cortex gabaergic interneuron differentiation</text>
+<text x='224.56' y='174.36' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='197.47px' lengthAdjust='spacingAndGlyphs'>lncrna mediated post transcriptional gene silencing</text>
+<text x='224.56' y='159.17' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='73.81px' lengthAdjust='spacingAndGlyphs'>gpcr ligand binding</text>
+<text x='224.56' y='143.98' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='107.05px' lengthAdjust='spacingAndGlyphs'>sensory perception of smell</text>
+<text x='224.56' y='128.79' text-anchor='end' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='105.59px' lengthAdjust='spacingAndGlyphs'>olfactory signaling pathway</text>
+<polyline points='226.75,247.14 229.49,247.14 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,231.96 229.49,231.96 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,216.77 229.49,216.77 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,201.58 229.49,201.58 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,186.39 229.49,186.39 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,171.21 229.49,171.21 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,156.02 229.49,156.02 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,140.83 229.49,140.83 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='226.75,125.64 229.49,125.64 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='229.49,256.56 570.52,256.56 ' style='stroke-width: 1.07; stroke-linecap: butt;' />
+<polyline points='254.48,259.30 254.48,256.56 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='319.25,259.30 319.25,256.56 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='384.02,259.30 384.02,256.56 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='448.79,259.30 448.79,256.56 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<polyline points='513.56,259.30 513.56,256.56 ' style='stroke-width: 1.07; stroke: #333333; stroke-linecap: butt;' />
+<text x='254.48' y='267.79' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>1.5</text>
+<text x='319.25' y='267.79' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.0</text>
+<text x='384.02' y='267.79' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>2.5</text>
+<text x='448.79' y='267.79' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>3.0</text>
+<text x='513.56' y='267.79' text-anchor='middle' style='font-size: 8.80px;fill: #4D4D4D; font-family: "Arial";' textLength='12.22px' lengthAdjust='spacingAndGlyphs'>3.5</text>
+<text x='400.01' y='280.55' text-anchor='middle' style='font-size: 11.00px; font-family: "Arial";' textLength='60.50px' lengthAdjust='spacingAndGlyphs'>-log10(FDR)</text>
+<rect x='306.26' y='77.03' width='187.50' height='28.24' style='stroke-width: 1.07; stroke: none;' />
+<rect x='311.74' y='82.51' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='320.38' cy='91.15' r='3.02' style='stroke-width: 0.71; stroke: #F8766D; fill: #F8766D;' />
+<rect x='428.01' y='82.51' width='17.28' height='17.28' style='stroke-width: 1.07; stroke: none;' />
+<circle cx='436.65' cy='91.15' r='3.02' style='stroke-width: 0.71; stroke: #00BFC4; fill: #00BFC4;' />
+<text x='334.50' y='94.30' style='font-size: 8.80px; font-family: "Arial";' textLength='86.05px' lengthAdjust='spacingAndGlyphs'>GO biological process</text>
+<text x='450.76' y='94.30' style='font-size: 8.80px; font-family: "Arial";' textLength='36.66px' lengthAdjust='spacingAndGlyphs'>reactome</text>
+</g>
 </g>
 </svg>

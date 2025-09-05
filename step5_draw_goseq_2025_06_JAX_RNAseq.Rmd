@@ -118,11 +118,11 @@ for(k in 1:length(df_list)){
     space_positions = gregexpr(" ", x)[[1]]
     if (nchar(x) > nchar_limit) {
       break_pos = max(space_positions[space_positions < nchar_limit])
-      return(paste0(paste0(rep(" ", nchar_limit-break_pos), collapse=""), 
-                    substr(x, 1, break_pos), "\n", 
+      return(paste0(paste0(rep(" ", nchar_limit-break_pos), collapse=""),
+                    substr(x, 1, break_pos), "\n",
                     substr(x, break_pos+1, nchar(x))))
     } else {
-      x = paste0(paste0(rep(" ", 1.1*(nchar_limit-nchar(x))), collapse=""), x)
+      # x = paste0(paste0(rep(" ", 1.1*(nchar_limit-nchar(x))), collapse=""), x)
       return(x)
     }
   })
@@ -187,14 +187,15 @@ for(k in 1:length(df_list)){
         panel.background = element_rect(fill = "transparent", color = NA),
         plot.background = element_rect(fill = "transparent", color = NA),
         legend.background = element_rect(fill = "transparent", color = NA)
+        # axis.text.y = element_text(size = 10)
        )
     
     h1 = 0.75*(nrow(d1)+0.4)/20 + 0.25
     if (nrow(d1)<=2){
       h1 = 0.75*(nrow(d1)+1)/20 + 0.25
     }
-    
-    canvas2 <- ggdraw() + draw_plot(g2, x = 0, y = 1-h1, width = 1, height = h1)    
+
+    canvas2 <- ggdraw() + draw_plot(g2, x = 0, y = 0.5 - h1/2, width = 1, height = h1)
     
     saved_figure_name = gsub("\n", "_", nm1)
     saved_figure_name = paste0(gsub(" ", "_", saved_figure_name), ".svg")
