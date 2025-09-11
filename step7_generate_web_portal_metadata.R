@@ -30,7 +30,11 @@ data1 = NULL
 for (dataset in datasets) {
   Dataset = dataset
   # Specify Gene Symbol later
-  DRACC_Matrix = paste0(dataset, '.xlsx')
+  if (dataset != 'JAX_RNAseq11') {
+    DRACC_Matrix = paste0(dataset, '.xlsx')
+  } else {
+    DRACC_Matrix = 'v7_JAX_RNAseq3_Prod.xlsx'
+  }
   Analysis_Type = 'VolcanoPlot'
   Assay_Type = 'Bulk RNAseq'
   # Specify DAV Matrix Name later
@@ -93,7 +97,11 @@ data2 = NULL
 for (dataset in datasets) {
   Dataset = dataset
   # Specify Gene Symbol later
-  DRACC_Matrix = paste0(dataset, '.xlsx')
+  if (dataset != 'JAX_RNAseq11') {
+    DRACC_Matrix = paste0(dataset, '.xlsx')
+  } else {
+    DRACC_Matrix = 'v7_JAX_RNAseq3_Prod.xlsx'
+  }
   Analysis_Type = 'GOPlot'
   Assay_Type = 'Bulk RNAseq'
   DAV_Matrix_Name = paste0('2025_06_', dataset, '_enrichment.rds')
