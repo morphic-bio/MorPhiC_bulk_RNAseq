@@ -28,7 +28,11 @@ datasets = paste0('JAX_RNAseq', c('08', '09', '10', '11'))
 # List Volcano plots
 data1 = NULL
 for (dataset in datasets) {
-  Dataset = dataset
+  if (dataset != 'JAX_RNAseq11') {
+    Dataset = dataset
+  } else {
+    Dataset = 'JAX_RNAseq_Neuroectoderm'
+  }
   # Specify Gene Symbol later
   if (dataset != 'JAX_RNAseq11') {
     DRACC_Matrix = paste0(dataset, '.xlsx')
@@ -95,7 +99,11 @@ for (dataset in datasets) {
 # List GOPlot figures
 data2 = NULL
 for (dataset in datasets) {
-  Dataset = dataset
+  if (dataset != 'JAX_RNAseq11') {
+    Dataset = dataset
+  } else {
+    Dataset = 'JAX_RNAseq_Neuroectoderm'
+  }
   # Specify Gene Symbol later
   if (dataset != 'JAX_RNAseq11') {
     DRACC_Matrix = paste0(dataset, '.xlsx')
