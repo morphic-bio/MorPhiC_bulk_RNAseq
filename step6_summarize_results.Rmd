@@ -1,6 +1,6 @@
 ---
 title: "Summerize results"
-author: "Si Liu, Wei Sun"
+author: "Si Liu, Bo Yu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -44,82 +44,180 @@ releases_all
 
 DE_gene_list = list()
 
-release = gene = nGenes = nDE_05 = nDE_01 = NULL
+release = gene = condition = day = nGenes = nDE_05 = nDE_01 = gene1 =  NULL
 
 for(r1 in releases_all){
   fnms = list.files(file.path("results", r1, "processed"), full.names = TRUE)
+  fnms = fnms[!grepl("_hyp_vs_nor_", fnms)]
+
+  cat("------------------------------------------------\n")
+  cat(r1, "\n")
+  cat("------------------------------------------------\n")
   
   for(f1 in fnms){
-    d1 = fread(f1)
-    g1 = str_extract(f1, "(?<=_)[A-Za-z0-9]+(?=_DEseq2)")
-    col_nm = paste0(g1, "_PTC_padj")
+    c1 = ""
     
-    if(g1 == "nor"){
-      if(grepl("EPAS1_PTC_hyp_vs_nor", basename(f1))){
-        g1 = "EPAS1_hyp_vs_nor"
-        col_nm = "hyp_vs_nor_padj"
-      }else if(grepl("EPAS1_reverted_hyp_vs_nor", basename(f1))){
-        g1 = "EPAS1_reverted_hyp_vs_nor"
-        col_nm = "hyp_vs_nor_padj"
-      }else{
-        print(paste("skip", basename(f1)))
-        next
-      }
-    }else{
-      if(grepl("reverted_", basename(f1))){
-        g1 = paste0(g1, "_reverted")
-        col_nm = paste0(g1, "_padj")
-      }
+    dat1 = fread(f1)
+    g1 = str_extract(f1, "(?<=_)[A-Za-z0-9|-]+(?=_DEseq2)")
+    col_nm = paste0(g1, "_PTC_padj")
+    col_nm = gsub("-", ".", col_nm)
+    
+    if(grepl("reverted", basename(f1))){
+      c1 = "Reversion"
+      col_nm = paste0(g1, "_reverted_padj")
     }
     
     if(grepl("Diverse", basename(f1))){
-      g1 = paste0(g1, "_Diverse")
+      c1 = "Diverse"
     }
     
-    if(grepl("EPAS1", g1) && (! grepl("hyp_vs_nor", g1))){
-      if(grepl("_hyp_", basename(f1))){
-        g1 = paste0(g1, "_hyp")
-      }else if(grepl("_nor_", basename(f1))){
-        g1 = paste0(g1, "_nor")
-      }else{
-        stop("unexpected. EPAS1 should have condition hyp or nor")
-      }
+    if(grepl("_hyp_", basename(f1))){
+      if(c1 == ""){c1 = "hypoxia"} else{c1 = paste(c1, "hypoxia", sep=";")}
+    }
+
+    if(! col_nm %in% names(dat1)){
+      cat(sprintf("col_nm is %s, which is not found in names(dat1)", col_nm), "\n")
+      cat("available columns:")
+      cat(grep("_padj", names(dat1), value = TRUE), "\n", sep = ", ")
+      cat(paste("skip", basename(f1)), "\n\n")
+      next
     }
     
-    if(grepl("Neuroectoderm_CBO_day_", basename(f1))){
-      g1 = paste0(g1, str_extract(basename(f1), "_day_\\d+"))
-    }
-    
-    stopifnot(col_nm %in% names(d1))
-    
-    release = c(release, r1)
-    gene   = c(gene, g1)
-    nGenes = c(nGenes, nrow(d1))
-    nDE_05 = c(nDE_05, sum(d1[[col_nm]] < 0.05, na.rm = TRUE))
+    d1 = str_extract(basename(f1), "day_[0-9]+")
+
+    release   = c(release, r1)
+    gene      = c(gene, g1)
+    condition = c(condition, c1)
+    day       = c(day, d1)
+    nGenes    = c(nGenes, nrow(dat1))
+    nDE_05    = c(nDE_05, sum(dat1[[col_nm]] < 0.05, na.rm = TRUE))
     
     col2 = gsub("_padj", "_log2FoldChange", col_nm, fixed = TRUE)
-    stopifnot(col2 %in% names(d1))
+    stopifnot(col2 %in% names(dat1))
 
-    nDE_01 = c(nDE_01, sum(d1[[col_nm]] < 0.01 & abs(d1[[col2]]) > 0.585, 
+    nDE_01 = c(nDE_01, sum(dat1[[col_nm]] < 0.01 & abs(dat1[[col2]]) > 0.585, 
                            na.rm = TRUE))
     
     DE_gene_list[[g1]] = 
-      d1$gene_ID[d1[[col_nm]] < 0.01 & abs(d1[[col2]]) > 0.585]
+      dat1$gene_ID[dat1[[col_nm]] < 0.01 & abs(dat1[[col2]]) > 0.585]
   }
 }
 
-df1 = data.frame(release, gene, nGenes, nDE_05, nDE_01)
+df1 = data.frame(release, gene, condition, day, nGenes, nDE_05, nDE_01)
+
+dim(df1)
+df1[1:5,]
+```
+
+
+## Add annotation of the molecular system
+
+```{r}
+sort(table(df1$gene), decreasing = TRUE)[1:5]
+table(df1$release)
+
+meta_files <- list.files(path = "data", 
+                    pattern = "_meta_data\\.tsv$", 
+                    recursive = TRUE, 
+                    full.names = TRUE)
+print(meta_files)
+
+key_release <- gsub("^\\d{4}_\\d{2}_", "", releases_all)
+
+# Function to fuzzy match by shared substring
+get_match <- function(x, candidates) {
+  hits <- grep(x, candidates, value = TRUE, ignore.case = TRUE)
+  if (length(hits) == 0) return(NA)
+  hits[1]
+}
+
+# Match each release name to corresponding meta file
+matched_files <- sapply(key_release, get_match, candidates = meta_files, 
+                        USE.NAMES = FALSE)
+
+# Create named list
+release_meta_map <- as.list(matched_files)
+names(release_meta_map) <- releases_all
+
+release_meta_map
+
+```
+
+```{r}
+
+table(df1$condition)
+cols_keep <- c("ko_strategy",  "expression_alteration.label", "model_system", 
+               "model_organ", "label", "description")
+
+meta_info = NULL
+
+for(r1 in releases_all){
+  cat("\n", r1, "\n")
+  
+  ## this "2025_06_JAX_RNAseq11" is only WT used for the previous release
+  if(r1 == "2025_06_JAX_RNAseq11"){
+    meta_dat = fread(release_meta_map[["2024_06_JAX_RNAseq_Neuroectoderm"]])
+  }else{
+    meta_dat = fread(release_meta_map[[r1]])
+  }
+  
+  print(table(meta_dat$ko_gene, meta_dat$ko_strategy, useNA = "ifany"))
+  meta_dat = meta_dat[ko_strategy %in% c("PTC", "reverted"),]
+  print(table(meta_dat$ko_gene, meta_dat$treatment_condition, useNA = "ifany"))
+  print(table(meta_dat$timepoint_value, meta_dat$timepoint_unit, useNA = "ifany"))
+
+  stopifnot(all(cols_keep %in% names(meta_dat)))
+  
+  df_r1 = df1[df1$release == r1,]
+  
+  for(i in 1:nrow(df_r1)){
+    day_i = as.numeric(gsub("day_", "", df_r1$day[i]))
+    
+    if(grepl("hypoxia", df_r1$condition[i])){
+      meta_i = meta_dat[treatment_condition == "hypoxia",]
+    }else{
+      meta_i = meta_dat[treatment_condition != "hypoxia",]
+    }
+    
+    if(grepl("Reversion", df_r1$condition[i])){
+      meta_i = meta_i[ko_strategy == "reverted",]
+    }else{
+      meta_i = meta_i[ko_strategy != "reverted",]
+    }
+    
+    meta_i = meta_i[ko_gene == df_r1$gene[i] & timepoint_value == day_i,]
+
+    stopifnot(nrow(meta_i) == 3 || (nrow(meta_i) == 6 && df_r1$gene[i] == "LHX5"))
+    
+    meta_summary <- meta_i[, lapply(.SD, function(x) paste(unique(na.omit(x)), 
+                                                           collapse = ";")), 
+                           .SDcols = cols_keep]
+    meta_info = rbind(meta_info, meta_summary)
+  }
+}
+
+dim(meta_info)
+meta_info[1:2,]
+
+cbind(df1[,1:4], meta_info[,1:2])
+```
+
+```{r}
+df = cbind(df1, meta_info)
+dim(df)
+df[1:2,]
+
+table(df$condition)
+table(df$model_system)
+table(df$model_organ, df$model_system)
+
 ```
 
 ## Summerize DE results
 ```{r fig.width = 7, fig.height = 4}
-sort(table(df1$gene), decreasing = TRUE)[1:5]
-df1 = df1[order(df1$gene),]
-dim(df1)
-df1[1:2,]
 
 df1 <- df1 %>%
-  mutate(base_gene = sub("_.*", "", gene))
+  mutate(base_gene = sub("_.*", "", gene1))
 
 df1 <- df1 %>%
   group_by(base_gene) %>%
@@ -155,7 +253,7 @@ ggplot(de_g2, aes(x = nDE_05, y = nDE_01, color = release,
 ```
 
 ## Barplot
-```{r fig.width = 6, fig.height = 3.8}
+```{r fig.width = 6, fig.height = 5.4}
 
 num_colors = length(unique(de_g1$base_gene))  # Number of unique base genes
 num_colors
@@ -164,8 +262,8 @@ num_colors = length(unique(de_g2$base_gene))  # Number of unique base genes
 num_colors
 
 # Generate colors from YlOrRd and PuBuGn, then concatenate
-color1 = colorRampPalette(brewer.pal(11, "RdYlBu"))(11)
-color2 = colorRampPalette(brewer.pal(11, "PRGn"))(11)
+color1 = colorRampPalette(brewer.pal(11, "RdYlBu"))(17)
+color2 = colorRampPalette(brewer.pal(11, "PRGn"))(17)
 set.seed(111)
 combined_colors = sample(c(color1, color2))
 
@@ -195,6 +293,11 @@ ggplot(de_g2, aes(x = nDE_01, y = reorder(gene, max_nDE_01 + 1e-6*nDE_01),
 
 ## Write out results
 ```{r fig.width = 6, fig.height = 3}
+
+df1[df1$gene == "ISL1",]
+df1[df1$gene == "LHX5",]
+
+
 fwrite(df1, "results/summary_DE_results.tsv", sep = "\t")
 ```
 
