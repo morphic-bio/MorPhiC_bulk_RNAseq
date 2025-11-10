@@ -1,0 +1,241 @@
+---
+title: "Summerize results"
+author: "Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(data.table)
+library(ggplot2)
+library(ggpubr)
+library(ggrepel)
+library(stringr)
+library(cowplot)
+library(dplyr)
+library(RColorBrewer)
+library(truncnorm)
+library(pheatmap)
+library(patchwork)
+
+library(tidyr)
+theme_set(theme_classic())
+```
+
+## Read in DE results
+
+```{r}
+mat <- read.table("step6_summarize_results/JAX_DE_data.tsv", sep = "\t")
+dim(mat)
+mat[1:2, 1:5]
+
+info <- fread("step6_summarize_results/JAX_DE_summary.tsv", sep = "\t")
+dim(info)
+info[1:2,1:5]
+
+```
+
+## ExM + PrS
+
+```{r fig.width = 7, fig.height = 5}
+
+
+mat_em = mat[,names(mat) %in% info$key[info$model_system %in% c("ExM", "PrS")]]
+dim(mat_em)
+
+dim(mat_em)
+mat_em[1:2,1:4]
+
+gene_means = rowMeans(mat_em, na.rm = TRUE)
+gene_sds = apply(mat_em, 1, sd, na.rm = TRUE)
+
+summary(gene_means)
+summary(gene_sds)
+
+table(gene_sds > 0.1)
+
+mat_em = mat_em[gene_sds > 0.1,]
+
+ko_means = colMeans(mat_em, na.rm = TRUE)
+ko_sds = apply(mat_em, 2, sd, na.rm = TRUE)
+
+summary(ko_means)
+summary(ko_sds)
+
+
+df_ko = data.frame(mean = ko_means, sd = ko_sds)
+library(ggrepel)
+
+ggplot(df_ko, aes(x = mean, y = sd, label = rownames(df_ko))) +
+  geom_point(color = "tomato", size = 3) +
+  geom_text_repel(size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "Mean Expression",
+    y = "Standard Deviation",
+    title = "Mean vs. SD of Knockout Profiles"
+  )
+
+
+pca_res <- prcomp(t(mat_em), scale. = TRUE, center = TRUE)
+pve <- (pca_res$sdev^2) / sum(pca_res$sdev^2)
+round(pve[1:5],3)
+
+# Extract the first two PCs
+pca_df <- data.frame(
+  PC1 = pca_res$x[, 1],
+  PC2 = pca_res$x[, 2],
+  key = colnames(mat_em)
+)
+
+df_info = merge(pca_df, info, all.x = TRUE, all.y = FALSE)
+dim(df_info)
+df_info[1:2,]
+
+# Scatter plot of PC1 vs PC2
+ggplot(df_info, aes(x = PC1, y = PC2, color = model_system, label = key)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_text_repel(max.overlaps = 30, size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "PC1",
+    y = "PC2",
+    color = "Model System",
+    title = "PCA: PC1 vs PC2"
+  ) +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey90")
+  )
+```
+
+```{r fig.width = 7, fig.height = 5}
+ht <- pheatmap(
+  mat_em,
+  color = colorRampPalette(c("blue", "white", "red"))(100),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scale = "none",
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  na_col = "grey90",
+  fontsize_col = 8,
+  main = "PrS + ExM"
+)
+
+```
+
+## CBO
+
+```{r fig.width = 6, fig.height = 5}
+
+mat_cb = mat[,names(mat) %in% info$key[info$model_system %in% c("CBO")]]
+dim(mat_cb)
+
+dim(mat_cb)
+mat_cb[1:2,1:4]
+
+gene_means = rowMeans(mat_cb, na.rm = TRUE)
+gene_sds = apply(mat_cb, 1, sd, na.rm = TRUE)
+
+summary(gene_means)
+summary(gene_sds)
+
+table(gene_sds > 0.1)
+
+mat_cb = mat_cb[gene_sds > 0.1,]
+
+ko_means = colMeans(mat_cb, na.rm = TRUE)
+ko_sds = apply(mat_cb, 2, sd, na.rm = TRUE)
+
+summary(ko_means)
+summary(ko_sds)
+
+
+df_ko = data.frame(mean = ko_means, sd = ko_sds)
+library(ggrepel)
+
+ggplot(df_ko, aes(x = mean, y = sd, label = rownames(df_ko))) +
+  geom_point(color = "tomato", size = 3) +
+  geom_text_repel(size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "Mean Expression",
+    y = "Standard Deviation",
+    title = "Mean vs. SD of Knockout Profiles"
+  )
+
+
+pca_res <- prcomp(t(mat_cb), scale. = TRUE, center = TRUE)
+pve <- (pca_res$sdev^2) / sum(pca_res$sdev^2)
+round(pve[1:5],3)
+
+# Extract the first two PCs
+pca_df <- data.frame(
+  PC1 = pca_res$x[, 1],
+  PC2 = pca_res$x[, 2],
+  key = colnames(mat_cb)
+)
+
+df_info = merge(pca_df, info, all.x = TRUE, all.y = FALSE)
+dim(df_info)
+df_info[1:2,]
+
+# Scatter plot of PC1 vs PC2
+ggplot(df_info, aes(x = PC1, y = PC2, color = model_system, label = key)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_text_repel(max.overlaps = 30, size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "PC1",
+    y = "PC2",
+    color = "Model System",
+    title = "PCA: PC1 vs PC2"
+  ) +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey90")
+  )
+
+```
+
+```{r fig.width = 5, fig.height = 5}
+ht <- pheatmap(
+  mat_cb,
+  color = colorRampPalette(c("blue", "white", "red"))(100),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scale = "none",
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  na_col = "grey90",
+  fontsize_col = 8,
+  main = "CBO"
+)
+
+```
+
+```{r}
+gc()
+sessionInfo()
+```
+

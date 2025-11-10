@@ -10,7 +10,7 @@ output:
     toc: true
     toc_depth: 3
     toc_float:
-      collapsed: true
+      collapsed: false
       smooth_scroll: false
     number_sections: false
   df_print: paged
@@ -31,6 +31,9 @@ library(stringr)
 library(cowplot)
 library(dplyr)
 library(RColorBrewer)
+library(truncnorm)
+library(pheatmap)
+library(patchwork)
 
 library(tidyr)
 theme_set(theme_classic())
@@ -43,6 +46,8 @@ releases_all = list.files("results", pattern = "JAX")
 releases_all
 
 DE_gene_list = list()
+DE_gene_df = list()
+DE_all = list()
 
 release = gene = condition = day = nGenes = nDE_05 = nDE_01 = gene1 =  NULL
 
@@ -55,6 +60,7 @@ for(r1 in releases_all){
   cat("------------------------------------------------\n")
   
   for(f1 in fnms){
+    
     c1 = ""
     
     dat1 = fread(f1)
@@ -85,6 +91,17 @@ for(r1 in releases_all){
     
     d1 = str_extract(basename(f1), "day_[0-9]+")
 
+    # There is redundancy for LHX5 that need to be removed
+    #                             release gene condition   day nGenes nDE_05 nDE_01         key
+    # 16 2024_06_JAX_RNAseq_Neuroectoderm LHX5           day_3  23242     12      9 LHX5;;day_3
+    # 18 2024_06_JAX_RNAseq_Neuroectoderm LHX5           day_6  23818      0      0 LHX5;;day_6
+    # 79             2025_06_JAX_RNAseq11 LHX5           day_3  24015     66     11 LHX5;;day_3
+    # 80             2025_06_JAX_RNAseq11 LHX5           day_4  24015     68     12 LHX5;;day_4
+
+    if(r1 == "2024_06_JAX_RNAseq_Neuroectoderm" && g1 == "LHX5" && d1 == "day_3"){
+      next
+    }
+
     release   = c(release, r1)
     gene      = c(gene, g1)
     condition = c(condition, c1)
@@ -92,21 +109,194 @@ for(r1 in releases_all){
     nGenes    = c(nGenes, nrow(dat1))
     nDE_05    = c(nDE_05, sum(dat1[[col_nm]] < 0.05, na.rm = TRUE))
     
-    col2 = gsub("_padj", "_log2FoldChange", col_nm, fixed = TRUE)
-    stopifnot(col2 %in% names(dat1))
+    col_fc = gsub("_padj", "_log2FoldChange", col_nm, fixed = TRUE)
+    stopifnot(col_fc %in% names(dat1))
 
-    nDE_01 = c(nDE_01, sum(dat1[[col_nm]] < 0.01 & abs(dat1[[col2]]) > 0.585, 
-                           na.rm = TRUE))
     
-    DE_gene_list[[g1]] = 
-      dat1$gene_ID[dat1[[col_nm]] < 0.01 & abs(dat1[[col2]]) > 0.585]
+    dat1 = dat1[which(!is.na(dat1[[col_nm]])),]
+    dim(dat1)
+    
+    nDE_01 = c(nDE_01, sum(dat1[[col_nm]] < 0.01 & abs(dat1[[col_fc]]) > 0.585, 
+                           na.rm = TRUE))
+
+    # combine p-value with log2 fold change
+    pv = dat1[[col_nm]]
+    pv[which(pv < 1e-5)] = 1e-5
+    pv <- -log10(pv)
+
+    fc <- dat1[[col_fc]]
+    fc[which(fc >  2)] <-  2
+    fc[which(fc < -2)] <- -2
+    
+    w_by_pv <- function(x){
+      ifelse(x < 2, 0.5, 0.5 + 0.5 * (x - 2) / (5 - 2))
+    }
+    
+    weight_pv <- w_by_pv(pv)
+    
+    df_f1 = data.frame(gene_ID = dat1$gene_ID, hgnc_symbol = dat1$hgnc_symbol, 
+                       DE_score = fc*weight_pv)
+                       
+    key1 = paste(c(g1, c1, d1), collapse = "_")
+    key1 = gsub("__", "_", key1)
+    
+    DE_all[[key1]] = dat1
+    DE_gene_df[[key1]] = df_f1
+
+    DE_gene_list[[key1]] = 
+      dat1$gene_ID[dat1[[col_nm]] < 0.01 & abs(dat1[[col_fc]]) > 0.585]
+
   }
 }
 
 df1 = data.frame(release, gene, condition, day, nGenes, nDE_05, nDE_01)
+df1$key = apply(df1[,c("gene", "condition", "day")], 1, paste, collapse = "_")
+df1$key = gsub("__", "_", df1$key)
+
+tb1 = table(df1$key)
+table(tb1)
+tb1[tb1 > 1]
 
 dim(df1)
 df1[1:5,]
+
+df1[df1$gene == "LHX5",]
+```
+
+
+## Process the DE signals
+
+```{r}
+
+length(DE_gene_df)
+table(names(DE_gene_df) == df1$key)
+
+table(sapply(DE_gene_df, ncol))
+n_genes = sapply(DE_gene_df, nrow)
+n_genes[1:5]
+
+df_n_genes = data.table(gene_ID = names(n_genes), n = n_genes)
+summary(n_genes)
+df_n_genes = df_n_genes[order(n_genes),]
+df_n_genes[1:5,]
+
+names(DE_gene_df)[1:5]
+
+# rename DE_score column in each data.frame to match its list name
+DE_gene_df_renamed <- Map(function(df, nm) {
+  setNames(df, sub("DE_score", nm, names(df)))
+}, DE_gene_df, names(DE_gene_df))
+
+# merge all by 'gene_ID' and 'hgnc_symbol' (keep all genes)
+DE_combined <- Reduce(function(x, y) 
+  merge(x, y, by = c("gene_ID", "hgnc_symbol"), all = TRUE), 
+  DE_gene_df_renamed)
+
+DE_combined = data.table(DE_combined)
+# check result
+dim(DE_combined)
+DE_combined[1:2,1:5]
+```
+
+
+Compare DE score with p-value/fold change in two exmaples
+
+GCM1 and GCM1 reverse
+```{r fig.width = 6, fig.height=3}
+
+plotIt <- function(DE_all, DE_combined, key1, g1){
+  dat1 = DE_all[[key1]]
+  dim(dat1)
+  dat1[1:2,]
+  
+  dim(DE_combined)
+  DE_combined[1:2,1:4]
+  
+  de_index = merge(dat1, DE_combined[,c("gene_ID", "hgnc_symbol", key1),
+                                     with = FALSE], 
+                   by = c("gene_ID", "hgnc_symbol"))
+  dim(de_index)
+  de_index[1:2,]
+  
+  str_fc = sprintf("%s_PTC_log2FoldChange", g1)
+  str_pv = sprintf("%s_PTC_padj", g1)
+
+  if(grepl("Reversion", key1)){
+    str_fc = gsub("_PTC_", "_reverted_", str_fc)
+    str_pv = gsub("_PTC_", "_reverted_", str_pv)
+  }
+  
+  pp1 = ggplot(de_index, aes(x = .data[[key1]], y = .data[[str_fc]])) +
+    geom_point(alpha = 0.6, color = "steelblue") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+    labs(x = key1, y = str_fc)
+  
+  
+  pp2 = ggplot(de_index, aes(x = .data[[key1]], y = -log10(.data[[str_pv]]))) +
+    geom_point(alpha = 0.6, color = "steelblue") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+    labs(x = key1, y = str_pv)
+  
+  print((pp1 | pp2))
+}
+
+df1[df1$gene == "GCM1",]
+plotIt(DE_all, DE_combined, key1 = "GCM1_day_6", g1= "GCM1")
+plotIt(DE_all, DE_combined, key1 = "GCM1_Reversion_day_6", g1= "GCM1")
+plotIt(DE_all, DE_combined, key1 = "HIF1A_day_6", g1= "HIF1A")
+plotIt(DE_all, DE_combined, key1 = "TWIST2_day_6", g1= "TWIST2")
+
+```
+
+
+```{r}
+
+ko2use = df1$key[which(df1$nDE_01 > 10)]
+length(ko2use)
+
+mat <- as.matrix(DE_combined[, -c(1, 2), with = FALSE])
+# set row names to gene or hgnc_symbol
+rownames(mat) <- ifelse(
+  DE_combined$hgnc_symbol == "" | is.na(DE_combined$hgnc_symbol),
+  DE_combined$gene,
+  DE_combined$hgnc_symbol
+)
+
+dim(mat)
+table(ko2use %in% colnames(mat))
+
+mat = mat[,ko2use]
+dim(mat)
+
+mat[is.na(mat)] = 0
+
+gene_ave = rowMeans(mat)
+gene_sd  = apply(mat, 1, sd)
+
+summary(gene_ave)
+summary(gene_sd)
+
+df_gene = data.frame(ave = gene_ave, sd = gene_sd)
+
+ggplot(df_gene, aes(x = ave, y = sd)) +
+  geom_point(size = 2, alpha = 0.5, col = "seagreen")
+
+table(gene_ave < 0.01, gene_sd < 0.1)
+
+gene2kp = which(gene_sd > 0.1)
+mat = mat[gene2kp,]
+dim(mat)
+mat[1:2,1:4]
+
+tb.gene.name = table(rownames(mat))
+tb.gene.name[tb.gene.name > 1]
+
+mat <- mat[!duplicated(rownames(mat)), ]
+dim(mat)
+mat[1:2,1:4]
+
 ```
 
 
@@ -199,13 +389,14 @@ for(r1 in releases_all){
 dim(meta_info)
 meta_info[1:2,]
 
-cbind(df1[,1:4], meta_info[,1:2])
+cbind(df1[,2], meta_info[,2])
 ```
 
 ```{r}
 df = cbind(df1, meta_info)
 dim(df)
 df[1:2,]
+
 
 table(df$condition)
 table(df$model_system)
@@ -216,17 +407,15 @@ table(df$model_organ, df$model_system)
 ## Summerize DE results
 ```{r fig.width = 7, fig.height = 4}
 
-df1 <- df1 %>%
-  mutate(base_gene = sub("_.*", "", gene1))
-
-df1 <- df1 %>%
-  group_by(base_gene) %>%
+df1 <- df %>%
+  group_by(gene) %>%
   mutate(max_nDE_01 = max(nDE_01)) %>%
   ungroup()
+df1 = data.frame(df1)
 dim(df1)
 df1[1:2,]
 
-t1 = table(df1$base_gene)
+t1 = table(df1$gene)
 length(t1)
 sort(t1, decreasing = TRUE)[1:10]
 
@@ -238,67 +427,217 @@ dim(de_g0)
 dim(de_g1)
 dim(de_g2)
 
-de_g0
+de_g0[,1:7]
 
-ggplot(de_g1, aes(x = nDE_05, y = nDE_01, color = release, 
-                  label = gene)) +
-  geom_point(size = 2) + 
-  geom_text_repel(show.legend = FALSE) 
+all_models <- unique(c(de_g1$model_system, de_g2$model_system))
 
-ggplot(de_g2, aes(x = nDE_05, y = nDE_01, color = release, 
-                  label = gene)) +
-  geom_point(size = 2) + 
-  geom_text_repel(show.legend = FALSE) 
+model_colors <- setNames(RColorBrewer::brewer.pal(length(all_models), "Set2"), all_models)
+
+ggplot(de_g1, aes(x = nDE_05, y = nDE_01, color = model_system, 
+                  label = key)) +
+  geom_point(size = 2) +
+  geom_text_repel(show.legend = FALSE) +
+  scale_color_manual(values = model_colors) +
+  theme_classic()
+
+ggplot(de_g2, aes(x = nDE_05, y = nDE_01, color = model_system, 
+                  label = key)) +
+  geom_point(size = 2) +
+  geom_text_repel(show.legend = FALSE) +
+  scale_color_manual(values = model_colors) +
+  theme_classic()
+
 
 ```
 
 ## Barplot
 ```{r fig.width = 6, fig.height = 5.4}
 
-num_colors = length(unique(de_g1$base_gene))  # Number of unique base genes
+num_colors = length(unique(de_g1$gene_condition))  # Number of unique base genes
 num_colors
 
-num_colors = length(unique(de_g2$base_gene))  # Number of unique base genes
+num_colors = length(unique(de_g2$gene_condition))  # Number of unique base genes
 num_colors
 
 # Generate colors from YlOrRd and PuBuGn, then concatenate
-color1 = colorRampPalette(brewer.pal(11, "RdYlBu"))(17)
-color2 = colorRampPalette(brewer.pal(11, "PRGn"))(17)
+color1 = colorRampPalette(brewer.pal(11, "RdYlBu"))(19)
+color2 = colorRampPalette(brewer.pal(11, "PRGn"))(19)
 set.seed(111)
 combined_colors = sample(c(color1, color2))
 
-ggplot(de_g1, aes(x = nDE_01, y = reorder(gene, max_nDE_01 + 1e-6*nDE_01), 
-                  fill = base_gene)) +
+ggplot(de_g1, aes(x = nDE_01, y = reorder(key, 
+                                          max_nDE_01 + 1e-6*nDE_01), 
+                  fill = key)) +
   geom_bar(stat = "identity", color = "royalblue4", width = 0.8) + 
   labs(x = "# of DE genes", y="") + theme(legend.position = "none") + 
   scale_fill_manual(values = combined_colors)
 ```
 
 ```{r fig.width = 6, fig.height = 3.7}
-de_g2 <- de_g2 %>%
-  mutate(base_gene = sub("_.*", "", gene))
 
-de_g2 <- de_g2 %>%
-  group_by(base_gene) %>%
-  mutate(max_nDE_01 = max(nDE_01)) %>%
-  ungroup()
-
-ggplot(de_g2, aes(x = nDE_01, y = reorder(gene, max_nDE_01 + 1e-6*nDE_01),
-                  fill = base_gene)) +
+ggplot(de_g2, aes(x = nDE_01, y = reorder(key, 
+                                          max_nDE_01 + 1e-6*nDE_01),
+                  fill = key)) +
   geom_bar(stat = "identity", color = "royalblue4", width = 0.8) + 
   labs(x = "# of DE genes", y="") + theme(legend.position = "none") + 
   scale_fill_manual(values = combined_colors)
 
 ```
 
-## Write out results
+
+# Summarize reults
+
 ```{r fig.width = 6, fig.height = 3}
+df_info = data.table(df1)
+dim(df_info)
+df_info[1:2,]
 
-df1[df1$gene == "ISL1",]
-df1[df1$gene == "LHX5",]
+table(df_info$model_organ, df_info$model_system)
+df_info[model_organ == "extra-embryonic primitive syncytial cells", 
+        model_organ := "Extra-embryonic primitive syncytial cells"]
+
+df_info[model_organ == "primitive syncytium", 
+        model_organ := "Extra-embryonic primitive syncytial cells"]
+
+df_info[model_organ == "extra-embryonic mesenchymal cells", 
+        model_organ := "Fibroblast of villous mesenchyme (CL:0002558)"]
+
+df_info[model_organ == "fibroblast of villous mesenchyme (CL:0002558)", 
+        model_organ := "Fibroblast of villous mesenchyme (CL:0002558)"]
+
+df_info[model_organ == "mesoderm", 
+        model_organ := "Mesoderm"]
+
+df_info[model_organ == "extra-embryonic mesenchymal cells", 
+        model_organ := "Extra-embryonic mesenchymal cells"]
+
+table(df_info$model_organ, df_info$model_system)
+
+df_info[model_organ == "Mesoderm",]
+
+dim(df_info)
+df_info[1:2,1:12]
+
+table(df_info$ko_strategy)
+table(df_info$condition, df_info$model_system)
+
+fwrite(df_info, file = "step6_summarize_results/JAX_DE_summary.tsv", sep = "\t")
+```
+
+# Generate the heatmap
+
+```{r fig.width = 9, figh.height = 6}
+annotation_col <- data.frame(
+  model_system = df_info$model_system[match(colnames(mat), df_info$key)]
+)
+rownames(annotation_col) <- colnames(mat)
+
+ht <- pheatmap(
+  mat,
+  color = colorRampPalette(c("blue", "white", "red"))(100),
+  cluster_rows = TRUE,
+  cluster_cols = TRUE,
+  scale = "none",
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  na_col = "grey90",
+  fontsize_col = 8,
+  annotation_col = annotation_col,
+  main = "Differential Expression Strength across Conditions"
+)
+
+write.table(mat, file = "step6_summarize_results/JAX_DE_data.tsv", sep = "\t")
+```
 
 
-fwrite(df1, "results/summary_DE_results.tsv", sep = "\t")
+## Draw clustering plots
+
+```{r fig.width = 9, figh.height = 5}
+
+row_dend = ht$tree_row
+plot(row_dend, main = "Clustering of genes", labels = FALSE)
+abline(h=40)
+
+col_dend = ht$tree_col
+plot(col_dend, main = "Clustering of KOs", hang = -1, cex = 0.6)
+abline(h=4700)
+
+row_clusters <- cutree(row_dend, k = 6)
+col_clusters <- cutree(col_dend, k = 6)
+
+table(row_clusters)
+table(col_clusters)
+
+df_cluster <- data.frame(
+  cluster = col_clusters,
+  key = names(col_clusters),
+  row.names = NULL
+)
+
+df = merge(df, df_cluster)
+dim(df)
+df[1:2,]
+
+table(df$condition, df$cluster)
+table(df$model_system, df$cluster)
+```
+
+## PCA of the DE directoin matrix
+
+```{r fig.width = 7, fig.height = 5}
+dim(mat)
+mat[1:2,1:4]
+
+ko_means = colMeans(mat, na.rm = TRUE)
+ko_sds = apply(mat, 2, sd, na.rm = TRUE)
+
+df_ko = data.frame(mean = ko_means, sd = ko_sds, key = colnames(mat))
+df_ko = merge(df_ko, df_info)
+dim(df_ko)
+df_ko[1:2,]
+
+ggplot(df_ko, aes(x = mean, y = sd, color = model_system, label = key)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_text_repel(size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "Mean Expression",
+    y = "Standard Deviation",
+    title = "Mean vs. SD of Knockout Profiles"
+  )
+
+
+pca_res <- prcomp(t(mat), scale. = TRUE, center = TRUE)
+pve <- (pca_res$sdev^2) / sum(pca_res$sdev^2)
+round(pve[1:5],3)
+
+# Extract the first two PCs
+pca_df <- data.frame(
+  PC1 = pca_res$x[, 1],
+  PC2 = pca_res$x[, 2],
+  key = colnames(mat)
+)
+
+df_info = merge(df_info, pca_df)
+dim(df_info)
+df_info[1:2,]
+
+# Scatter plot of PC1 vs PC2
+ggplot(df_info, aes(x = PC1, y = PC2, color = model_system, label = key)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_text_repel(max.overlaps = 30, size = 3) +
+  theme_minimal(base_size = 14) +
+  labs(
+    x = "PC1",
+    y = "PC2",
+    color = "Model System",
+    title = "PCA: PC1 vs PC2"
+  ) +
+  theme(
+    legend.position = "right",
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(color = "grey90")
+  )
 ```
 
 ```{r}
