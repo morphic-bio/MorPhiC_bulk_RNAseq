@@ -32,5 +32,5 @@ File locations are written as repo-relative paths (no `MorPhiC_bulk_RNAseq/` pre
 Run from repo root:
 
 ```bash
-/home/byu2/anaconda3/envs/morphic/bin/Rscript meta_data_web_portal/generate_dav_input_2025_12_JAX_RNAseq12_13.R
+Rscript meta_data_web_portal/generate_dav_input_2025_12_JAX_RNAseq12_13.R
 ```
