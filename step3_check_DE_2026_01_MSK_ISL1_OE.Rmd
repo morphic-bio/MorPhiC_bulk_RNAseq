@@ -1,0 +1,615 @@
+---
+title: "Check the results of differential expression analysis for 2026_01_MSK_ISL1_OE"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+library(svglite)
+
+# path = "../../MorPhiC/data/MorPhiC_internal_releases/MorPhiC_Release_January_2026/MSK_bulkRNAseq_ISL1_OE"
+path = "./data"
+dat_path = file.path(path, "processed/Tables")
+
+meta_save_path = "./data/Jan_2026"
+meta_file = file.path(meta_save_path, "MSK_bulkRNAseq_ISL1_OE_meta_data.tsv")
+
+```
+
+
+## Read in meta data
+```{r fig.width = 3, fig.height=3}
+meta = fread(meta_file, sep="\t", data.table = FALSE)
+dim(meta)
+
+table(table(meta$clonal.label))
+# table(table(meta$library_preparation.label))
+table(table(meta$label))
+```
+
+
+## Read in gene count data and filter genes
+
+There are redundancy in the count data file.
+
+    The 2nd and 3rd columns are the same and only one of them should be kept. 
+    Only keep the columns that show up in the sequence table
+
+```{r fig.width = 4, fig.height=3}
+cts_lanes = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts_lanes)
+cts_lanes[1:2, c(1:2, (ncol(cts_lanes)-1):ncol(cts_lanes))]
+
+names(cts_lanes)[1:6]
+
+length(unique(colnames(cts_lanes)[2:ncol(cts_lanes)]))
+
+# remove the third column from the cts_lanes object since it is a duplicate of the second column
+cts_lanes = cts_lanes[,-3]
+names(cts_lanes)[1:6]
+
+# only keep the columns that show up in the sequence table
+# summarized as the info in the sample_id column of meta data table
+names_short = gsub("_L00[1-8]$", "", names(cts_lanes))
+cols2kp = which(names_short %in% meta$sample_id)
+length(cols2kp)
+cts_lanes = cts_lanes[, c(1, cols2kp)]
+dim(cts_lanes)
+
+names_short_filterd = gsub("_L00[1-8]$", "", names(cts_lanes))
+
+stopifnot(setequal(names_short_filterd[-1], meta$sample_id))
+
+# Separate the gene ID column from the count columns
+gene_column <- cts_lanes$Name
+counts   <- as.matrix(cts_lanes[, -1])   # drop the "Name" column
+
+# Derive sample ID from each column name by stripping "_L00X" at the end
+sample_id <- sub("_L00[1-8]$", "", colnames(counts))
+
+# Sum lane columns belonging to the same sample.
+collapsed <- t(rowsum(t(counts), group = sample_id))
+
+# shorten column names further to just "ISL1-BFP-1" etc.
+colnames(collapsed) <- sub("_IGO.*", "", colnames(collapsed))
+
+# Put the gene IDs back as a column
+cts <- data.frame(Name = gene_column, collapsed, check.names = FALSE)
+
+head(cts)
+dim(cts_lanes)        # original
+dim(cts)   # should have ~1/4 the columns + 1 for Name
+
+# reorder the meta data table to match the samples in the processed count data
+meta = meta[match(names(cts)[-1], meta$clonal.label),]
+table(names(cts)[-1] == meta$clonal.label, useNA="ifany")
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+
+table(meta$timepoint_value, useNA="ifany")
+meta$timepoint = as.character(meta$timepoint_value)
+
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r fig.width = 4, fig.height=3}
+model_s = meta$model_system
+table(model_s, useNA="ifany")
+
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+gene_info = data.frame(Name = cts$Name,
+                       apply(cts_dat, 1, min), 
+                       apply(cts_dat, 1, median), 
+                       apply(cts_dat, 1, get_q75), 
+                       apply(cts_dat, 1, max))
+
+dim(gene_info)
+gene_info[1:2,]
+table(row.names(gene_info)==gene_info$Name, useNA="ifany")
+
+names(gene_info)[2:5] = paste0(rep(c(model_s), times=4), 
+                               rep(c("min", "median", "q75", "max"), each=1))
+dim(gene_info)
+gene_info[1:2,]
+
+summary(gene_info[,-1])
+
+w2kp = which(gene_info$Pancreatic_Isletq75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+dim(gene_info)
+```
+
+## Read in gene annotation
+```{r fig.width = 4, fig.height=3}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+table(gene_info$Name %in% gene_anno$ensembl_gene_id)
+# all ensembl gene IDs are contained in the annotation
+setdiff(gene_info$Name, gene_anno$ensembl_gene_id)
+
+gene_info = merge(gene_anno, gene_info, by.x="ensembl_gene_id", by.y = "Name", 
+                  all.x = FALSE, all.y = TRUE)
+dim(gene_info)
+gene_info[1:2,]
+
+gene_info$gene_symbol = gene_info$hgnc_symbol
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+
+wEns = which(gene_info$gene_symbol == "" | is.na(gene_info$gene_symbol))
+gene_info$gene_symbol[wEns] = gene_info$ensembl_gene_id[wEns]
+
+table(gene_info$gene_symbol == "")
+table(is.na(gene_info$gene_symbol))
+```
+
+## Prepare for reading in DE results
+
+Use each combination of (model system, condition) as DE group. 
+
+Run analysis for each DE group separately.
+
+The specific DE groups can be found in the file with naming in the format:
+
+    ${dataset_name}_DE_n_samples.tsv
+    
+There are also DE results under control between samples under knockout and WT settings.
+
+```{r fig.width = 4, fig.height=3}
+release_name = "2026_01_MSK_bulkRNAseq_ISL1_OE"
+result_dir = file.path("results", release_name)
+processed_output_dir = file.path(result_dir, "processed")
+
+all_result_files = list.files(path=processed_output_dir, pattern=".tsv", 
+                              all.files=TRUE, full.names=FALSE)
+all_result_files = sort(all_result_files)
+
+regular_DE_files = all_result_files[!grepl("KO_vs_WT", all_result_files)]
+condition_DE_files = all_result_files[grepl("KO_vs_WT", all_result_files)]
+
+extract_cores <- function(x){
+  x_core = sub(paste0(release_name, "_"), "", x, fixed = TRUE)
+  x_core = sub("_DEseq2.tsv", "", x_core, fixed = TRUE)
+  x_split = str_split(x_core, "_")[[1]]
+  x_end = length(x_split)
+  x_d_group = paste(x_split[1:(x_end-3)], collapse="_")
+  x_cline = paste(x_split[(x_end-2):(x_end-2)], collapse="_")
+  if (x_end > 7){
+    x_cline = paste(x_split[(x_end-3):(x_end-2)], collapse="_")
+    x_d_group = paste(x_split[1:(x_end-4)], collapse="_")
+  }
+  x_gene = x_split[x_end-1]
+  return(c(x_d_group, x_cline, x_gene))
+}
+
+df_file_info = NULL
+
+for (x in regular_DE_files){
+  df_file_info = rbind(df_file_info, extract_cores(x))
+}
+
+df_file_info = as.data.frame(df_file_info)
+colnames(df_file_info) = c("DE_general_group", "cell_line", "gene")
+df_file_info
+
+
+extract_cores_cond <- function(x){
+  x_core = sub(paste0(release_name, "_"), "", x, fixed = TRUE)
+  x_core = sub("_DEseq2.tsv", "", x_core, fixed = TRUE)
+  x_split = str_split(x_core, "_")[[1]]
+  x_end = length(x_split)
+  x_d_group = paste(x_split[1:(x_end-5)], collapse="_")
+  x_OE = x_split[x_end-4]
+  x_gene = x_split[x_end-3]
+  return(c(x_d_group, x_OE, x_gene))
+}
+
+df_file_info_cond = NULL
+
+for (x in condition_DE_files){
+  df_file_info_cond = rbind(df_file_info_cond, extract_cores_cond(x))
+}
+
+df_file_info_cond = as.data.frame(df_file_info_cond)
+colnames(df_file_info_cond) = c("DE_general_group", "OE_setting", "gene")
+df_file_info_cond
+
+```
+
+
+## Prepare output directories for saving figure files out
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+figure_dir = file.path("figures", release_name)
+volcano_figure_dir = file.path(figure_dir, "volcano_plots")
+volcano_png_width_px = 1920
+volcano_png_height_px = 1230
+volcano_max_overlaps = 20
+volcano_label_top_n = 20
+
+if (!file.exists(volcano_figure_dir)){
+  dir.create(volcano_figure_dir, recursive = TRUE)
+}
+
+```
+
+
+
+## Number of DE genes and properties of ISL1
+
+```{r fig.width = 7, fig.height=4}
+
+fc0 = log2(1.5)
+p0  = 0.05
+
+make_result_summary <- function(file_name, comparison_name, figure_group){
+  
+  res = fread(file.path(processed_output_dir, file_name), data.table = FALSE)
+  
+  fc = paste0(comparison_name, "_log2FoldChange")
+  padj = paste0(comparison_name, "_padj")
+  stopifnot(all(c("gene_ID", fc, padj) %in% names(res)))
+  
+  data.frame(file_name = file_name,
+             figure_group = figure_group,
+             comparison_name = comparison_name,
+             nDE = sum(abs(res[[fc]]) > fc0 & res[[padj]] < p0, na.rm = TRUE))
+}
+
+make_volcano_data <- function(file_name, comparison_name){
+  
+  res = fread(file.path(processed_output_dir, file_name), data.table = FALSE)
+  
+  fc = paste0(comparison_name, "_log2FoldChange")
+  pvalue = paste0(comparison_name, "_pvalue")
+  padj = paste0(comparison_name, "_padj")
+  stopifnot(all(c("gene_ID", fc, pvalue, padj) %in% names(res)))
+  
+  res_k = res[, c("gene_ID", "hgnc_symbol", fc, pvalue, padj)]
+  names(res_k) = c("gene_ID", "hgnc_symbol", "log2FoldChange", "pvalue", "padj")
+  
+  n_total = nrow(res_k)
+  n_padj_na = sum(is.na(res_k$padj))
+  n_lfc_na = sum(is.na(res_k$log2FoldChange))
+  n_padj0 = sum(!is.na(res_k$padj) & is.finite(res_k$padj) & res_k$padj == 0)
+  
+  keep = is.finite(res_k$log2FoldChange) & !is.na(res_k$padj) &
+    is.finite(res_k$padj) & res_k$padj >= 0
+  res_k = res_k[keep, , drop = FALSE]
+  
+  if (nrow(res_k) == 0){
+    return(list(data = res_k,
+                diagnostics = data.frame(n_total = n_total,
+                                         n_padj_na = n_padj_na,
+                                         n_lfc_na = n_lfc_na,
+                                         n_padj0 = n_padj0,
+                                         n_plotted = nrow(res_k))))
+  }
+  
+  res_k$gene_symbol = res_k$hgnc_symbol
+  res_k$gene_symbol[is.na(res_k$gene_symbol) | res_k$gene_symbol == ""] =
+    res_k$gene_ID[is.na(res_k$gene_symbol) | res_k$gene_symbol == ""]
+  
+  res_k$DE = "No"
+  res_k$DE[which(res_k$log2FoldChange > fc0 & res_k$padj < p0)] = "Up"
+  res_k$DE[which(res_k$log2FoldChange < -fc0 & res_k$padj < p0)] = "Down"
+  
+  res_k$log2FoldChange_plot = pmin(pmax(res_k$log2FoldChange, -3), 3)
+  res_k$padj_plot = pmax(res_k$padj, .Machine$double.xmin)
+  
+  res_k$delabel = NA
+  w_de = which(res_k$DE != "No")
+  if (length(w_de) > 0) {
+    ord = order(res_k$padj[w_de], decreasing = FALSE, na.last = NA)
+    w_lbl = w_de[ord][seq_len(min(length(ord), volcano_label_top_n))]
+    res_k$delabel[w_lbl] = res_k$gene_symbol[w_lbl]
+  }
+  
+  list(data = res_k,
+       diagnostics = data.frame(n_total = n_total,
+                                n_padj_na = n_padj_na,
+                                n_lfc_na = n_lfc_na,
+                                n_padj0 = n_padj0,
+                                n_plotted = nrow(res_k)))
+}
+
+plot_volcano <- function(res_k, plot_title){
+  
+  col2use = c("blue", "grey", "red")
+  names(col2use) = c("Down", "No", "Up")
+  
+  ggplot(res_k, aes(x = log2FoldChange_plot, y = -log10(padj_plot),
+                    col = DE, label = delabel)) +
+    geom_point() +
+    geom_text_repel(point.padding = 0.5,
+                    min.segment.length = 0,
+                    size = 3,
+                    box.padding = 0.5,
+                    max.overlaps = volcano_max_overlaps,
+                    show.legend = FALSE) +
+    scale_color_manual(values = col2use) +
+    labs(title = plot_title,
+         x = "log2FoldChange",
+         y = "-log10(padj)")
+}
+
+regular_de_info = df_file_info
+regular_de_info$file_name = regular_DE_files
+regular_de_info$comparison_name = paste0(regular_de_info$gene, "_OE")
+regular_de_info$background = regular_de_info$cell_line
+
+regular_de_info
+
+df_regular = do.call(rbind, lapply(seq_len(nrow(regular_de_info)), function(k){
+  make_result_summary(file_name = regular_de_info$file_name[k],
+                      comparison_name = regular_de_info$comparison_name[k],
+                      figure_group = regular_de_info$background[k])
+}))
+
+df_regular$background = factor(df_regular$figure_group,
+                               levels = regular_de_info$background)
+df_regular
+
+p_regular_nDE = ggplot(df_regular, aes(x = background, y = nDE, fill = background)) +
+  geom_col(width = 0.75) +
+  geom_text(aes(label = nDE), vjust = -0.35, size = 3) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(title = "Number of DE genes from ISL1 OE",
+       x = "Cell line / background",
+       y = "Number of DE genes") +
+  theme(legend.position = "none")
+
+print(p_regular_nDE)
+
+```
+
+
+### ISL1 OE effect on ISL1
+
+```{r fig.width = 6, fig.height=4}
+
+isl1_gene_ids = gene_info$ensembl_gene_id[which(gene_info$gene_symbol == "ISL1")]
+isl1_gene_ids
+stopifnot(length(isl1_gene_ids) == 1)
+
+df_isl1 = do.call(rbind, lapply(seq_len(nrow(regular_de_info)), function(k){
+  
+  res = fread(file.path(processed_output_dir, regular_de_info$file_name[k]),
+              data.table = FALSE)
+  
+  fc = paste0(regular_de_info$comparison_name[k], "_log2FoldChange")
+  padj = paste0(regular_de_info$comparison_name[k], "_padj")
+  w_isl1 = which(res$gene_ID == isl1_gene_ids)
+  stopifnot(length(w_isl1) == 1)
+  
+  data.frame(background = regular_de_info$background[k],
+             log2FoldChange = res[[fc]][w_isl1],
+             padj = res[[padj]][w_isl1])
+}))
+
+df_isl1$background = factor(df_isl1$background,
+                            levels = regular_de_info$background)
+df_isl1
+
+p_isl1_effect = ggplot(df_isl1, aes(x = log2FoldChange,
+                                    y = -log10(padj),
+                                    color = background)) +
+  geom_point(size = 3) +
+  geom_text_repel(aes(label = background),
+                  point.padding = 0.5,
+                  min.segment.length = 0,
+                  size = 3,
+                  box.padding = 0.5,
+                  max.overlaps = 20,
+                  show.legend = FALSE) +
+  scale_color_brewer(palette = "Dark2") +
+  geom_hline(yintercept = -log10(p0), color = "grey", linetype = "dashed") +
+  geom_vline(xintercept = c(-fc0, fc0), color = "grey", linetype = "dashed") +
+  labs(title = "ISL1 OE effect on ISL1",
+       x = "ISL1 log2 fold change",
+       y = "-log10(adjusted p-value)")
+
+print(p_isl1_effect)
+
+```
+
+
+### Control knockout versus WT
+
+```{r fig.width = 5, fig.height=3.5}
+
+condition_de_info = df_file_info_cond
+condition_de_info$file_name = condition_DE_files
+condition_de_info$comparison_name = paste0(condition_de_info$gene, "_KO")
+
+condition_de_info
+
+df_condition = do.call(rbind, lapply(seq_len(nrow(condition_de_info)), function(k){
+  make_result_summary(file_name = condition_de_info$file_name[k],
+                      comparison_name = condition_de_info$comparison_name[k],
+                      figure_group = condition_de_info$gene[k])
+}))
+
+df_condition$gene = factor(df_condition$figure_group,
+                           levels = condition_de_info$gene)
+df_condition
+
+p_condition_nDE = ggplot(df_condition, aes(x = gene, y = nDE, fill = gene)) +
+  geom_col(width = 0.75) +
+  geom_text(aes(label = nDE), vjust = -0.35, size = 3) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(title = "Number of DE genes under control",
+       subtitle = "KO versus WT",
+       x = "Knockout gene",
+       y = "Number of DE genes") +
+  theme(legend.position = "none")
+
+print(p_condition_nDE)
+
+```
+
+
+## Generate volcano plots
+
+### ISL1 OE under each background
+
+```{r fig.width = 5, fig.height=3.5}
+
+for(k in seq_len(nrow(regular_de_info))){
+  
+  volcano_k = make_volcano_data(file_name = regular_de_info$file_name[k],
+                                comparison_name = regular_de_info$comparison_name[k])
+  res_k = volcano_k$data
+  diag_k = volcano_k$diagnostics
+  
+  print(table(res_k$DE))
+  cat(regular_de_info$comparison_name[k],
+      " @ ",
+      regular_de_info$background[k],
+      ": genes=",
+      diag_k$n_total,
+      ", padj_NA=",
+      diag_k$n_padj_na,
+      ", log2FC_NA=",
+      diag_k$n_lfc_na,
+      ", padj_0=",
+      diag_k$n_padj0,
+      ", plotted=",
+      diag_k$n_plotted,
+      "\n",
+      sep = "")
+  if (nrow(res_k) == 0) next
+  
+  plot_title = paste0(regular_de_info$background[k], "\n",
+                      regular_de_info$comparison_name[k])
+  g2 = plot_volcano(res_k, plot_title)
+  print(g2)
+  
+  g3 = g2 + theme(
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.background = element_rect(fill = "transparent", color = NA),
+    legend.background = element_rect(fill = "transparent", color = NA)
+  )
+  
+  saved_figure_name = paste0(regular_de_info$background[k], "_",
+                             regular_de_info$comparison_name[k],
+                             "_volcano.png")
+  ggsave(filename = file.path(volcano_figure_dir, saved_figure_name),
+         plot = g3,
+         device = grDevices::png,
+         width = volcano_png_width_px,
+         height = volcano_png_height_px,
+         units = "px",
+         bg = "transparent")
+}
+
+```
+
+
+### Control knockout versus WT
+
+```{r fig.width = 5, fig.height=3.5}
+
+for(k in seq_len(nrow(condition_de_info))){
+  
+  volcano_k = make_volcano_data(file_name = condition_de_info$file_name[k],
+                                comparison_name = condition_de_info$comparison_name[k])
+  res_k = volcano_k$data
+  diag_k = volcano_k$diagnostics
+  
+  print(table(res_k$DE))
+  cat(condition_de_info$comparison_name[k],
+      " @ ",
+      condition_de_info$OE_setting[k],
+      ": genes=",
+      diag_k$n_total,
+      ", padj_NA=",
+      diag_k$n_padj_na,
+      ", log2FC_NA=",
+      diag_k$n_lfc_na,
+      ", padj_0=",
+      diag_k$n_padj0,
+      ", plotted=",
+      diag_k$n_plotted,
+      "\n",
+      sep = "")
+  if (nrow(res_k) == 0) next
+  
+  plot_title = paste0(condition_de_info$OE_setting[k], " ",
+                      condition_de_info$comparison_name[k],
+                      "\nKO versus WT")
+  g2 = plot_volcano(res_k, plot_title)
+  print(g2)
+  
+  g3 = g2 + theme(
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.background = element_rect(fill = "transparent", color = NA),
+    legend.background = element_rect(fill = "transparent", color = NA)
+  )
+  
+  saved_figure_name = paste0(condition_de_info$OE_setting[k], "_",
+                             condition_de_info$comparison_name[k],
+                             "_KO_vs_WT_volcano.png")
+  ggsave(filename = file.path(volcano_figure_dir, saved_figure_name),
+         plot = g3,
+         device = grDevices::png,
+         width = volcano_png_width_px,
+         height = volcano_png_height_px,
+         units = "px",
+         bg = "transparent")
+}
+
+```
+
+
+```{r}
+gc()
+sessionInfo()
+```

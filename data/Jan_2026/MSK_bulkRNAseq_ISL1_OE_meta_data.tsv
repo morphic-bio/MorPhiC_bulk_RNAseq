@@ -1,0 +1,22 @@
+clonal.label	label	sample_id	timepoint_value	model_system	cell_line	OE_status	condition
+ISL1-BFP-1	ISL1-BFP	ISL1-BFP-1_IGO_17695_16_S6	18	Pancreatic_Islet	ISL1	BFP	not applicable
+ISL1-BFP-2	ISL1-BFP	ISL1-BFP-2_IGO_17695_24_S116	18	Pancreatic_Islet	ISL1	BFP	not applicable
+ISL1-BFP-3	ISL1-BFP	ISL1-BFP-3_IGO_17695_7_S111	18	Pancreatic_Islet	ISL1	BFP	not applicable
+ISL1-ISL1-1	ISL1-ISL1	ISL1-ISL1-1_IGO_17695_17_S124	18	Pancreatic_Islet	ISL1	ISL1	not applicable
+ISL1-ISL1-2	ISL1-ISL1	ISL1-ISL1-2_IGO_17695_25_S115	18	Pancreatic_Islet	ISL1	ISL1	not applicable
+ISL1-ISL1-3	ISL1-ISL1	ISL1-ISL1-3_IGO_17695_8_S110	18	Pancreatic_Islet	ISL1	ISL1	not applicable
+PAX6-BFP-1	PAX6-BFP	PAX6-BFP-1_IGO_17695_14_S8	18	Pancreatic_Islet	PAX6	BFP	not applicable
+PAX6-BFP-2	PAX6-BFP	PAX6-BFP-2_IGO_17695_22_S118	18	Pancreatic_Islet	PAX6	BFP	not applicable
+PAX6-BFP-3	PAX6-BFP	PAX6-BFP-3_IGO_17695_5_S113	18	Pancreatic_Islet	PAX6	BFP	not applicable
+PAX6-ISL1-1	PAX6-ISL1	PAX6-ISL1-1_IGO_17695_15_S7	18	Pancreatic_Islet	PAX6	ISL1	not applicable
+PAX6-ISL1-2	PAX6-ISL1	PAX6-ISL1-2_IGO_17695_23_S117	18	Pancreatic_Islet	PAX6	ISL1	not applicable
+PAX6-ISL1-3	PAX6-ISL1	PAX6-ISL1-3_IGO_17695_6_S112	18	Pancreatic_Islet	PAX6	ISL1	not applicable
+PDX1-BFP-1	PDX1-BFP	PDX1-BFP-1_IGO_17695_12_S125	18	Pancreatic_Islet	PDX1	BFP	not applicable
+PDX1-BFP-2	PDX1-BFP	PDX1-BFP-2_IGO_17695_20_S120	18	Pancreatic_Islet	PDX1	BFP	not applicable
+PDX1-BFP-3	PDX1-BFP	PDX1-BFP-3_IGO_17695_3_S5	18	Pancreatic_Islet	PDX1	BFP	not applicable
+PDX1-ISL1-2	PDX1-ISL1	PDX1-ISL1-2_IGO_17695_21_S119	18	Pancreatic_Islet	PDX1	ISL1	not applicable
+PDX1-ISL1-4	PDX1-ISL1	PDX1-ISL1-4_IGO_17695_9_S109	18	Pancreatic_Islet	PDX1	ISL1	not applicable
+WT-BFP-1	WT-BFP	WT-BFP-1_IGO_17695_10_S9	18	Pancreatic_Islet	WT	BFP	not applicable
+WT-BFP-3	WT-BFP	WT-BFP-3_IGO_17695_1_S121	18	Pancreatic_Islet	WT	BFP	not applicable
+WT-ISL1-1	WT-ISL1	WT-ISL1-1_IGO_17695_11_S126	18	Pancreatic_Islet	WT	ISL1	not applicable
+WT-ISL1-2	WT-ISL1	WT-ISL1-2_IGO_17695_19_S122	18	Pancreatic_Islet	WT	ISL1	not applicable

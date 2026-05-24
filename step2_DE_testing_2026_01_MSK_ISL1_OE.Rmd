@@ -1,0 +1,1216 @@
+---
+title: "Differential expression analysis for 2026-01 release MSK_ISL1_OE"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Differential expression using the bulk RNAseq MSK_ISL1_OE the Jan. 2026 release.
+
+This dataset spans
+
+* H1,
+* day18, (final_timepoint: "unknown"),
+* four different colonal cell lines,
+* pancreatic islet,
+* OE of BFP only as control, and OE of ISL1 as case. 
+
+The test of DE analysis planned:
+
+* for each colonal cell line, ISL1 OE vs control
+* for baseline, the other three colonal cell lines vs the WT cell line
+
+## R libraries.
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/MorPhiC_internal_releases/MorPhiC_Release_January_2026/MSK_bulkRNAseq_ISL1_OE"
+dat_path = file.path(path, "processed/Tables")
+
+meta_save_path = "./data/Jan_2026"
+meta_file = file.path(meta_save_path, "MSK_bulkRNAseq_ISL1_OE_meta_data.tsv")
+  
+qc_path = "./qc_figures"
+# create the figure path if it does not exist
+dir.create(qc_path, showWarnings = FALSE, recursive = TRUE)
+
+```
+
+## Load processed meta data table
+```{r fig.width = 3, fig.height=3}
+meta = fread(meta_file, sep="\t", data.table = FALSE)
+dim(meta)
+```
+
+
+## Read in gene count data and filter genes
+
+There are redundancy in the count data file.
+
+    The 2nd and 3rd columns are the same and only one of them should be kept. 
+    Only keep the columns that show up in the sequence table
+
+```{r fig.width = 4, fig.height=3}
+cts_lanes = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts_lanes)
+cts_lanes[1:2, c(1:2, (ncol(cts_lanes)-1):ncol(cts_lanes))]
+
+names(cts_lanes)[1:6]
+
+length(unique(colnames(cts_lanes)[2:ncol(cts_lanes)]))
+
+# remove the third column from the cts_lanes object since it is a duplicate of the second column
+cts_lanes = cts_lanes[,-3]
+names(cts_lanes)[1:6]
+
+# only keep the columns that show up in the sequence table
+# summarized as the info in the sample_id column of meta data table
+names_short = gsub("_L00[1-8]$", "", names(cts_lanes))
+cols2kp = which(names_short %in% meta$sample_id)
+length(cols2kp)
+cts_lanes = cts_lanes[, c(1, cols2kp)]
+dim(cts_lanes)
+
+names_short_filterd = gsub("_L00[1-8]$", "", names(cts_lanes))
+
+stopifnot(setequal(names_short_filterd[-1], meta$sample_id))
+
+# Separate the gene ID column from the count columns
+gene_column <- cts_lanes$Name
+counts   <- as.matrix(cts_lanes[, -1])   # drop the "Name" column
+
+# Derive sample ID from each column name by stripping "_L00X" at the end
+sample_id <- sub("_L00[1-8]$", "", colnames(counts))
+
+# Sum lane columns belonging to the same sample.
+collapsed <- t(rowsum(t(counts), group = sample_id))
+
+# shorten column names further to just "ISL1-BFP-1" etc.
+colnames(collapsed) <- sub("_IGO.*", "", colnames(collapsed))
+
+# Put the gene IDs back as a column
+cts <- data.frame(Name = gene_column, collapsed, check.names = FALSE)
+
+head(cts)
+dim(cts_lanes)        # original
+dim(cts)   # should have ~1/4 the columns + 1 for Name
+
+# reorder the meta data table to match the samples in the processed count data
+meta = meta[match(names(cts)[-1], meta$clonal.label),]
+table(names(cts)[-1] == meta$clonal.label, useNA="ifany")
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+
+table(meta$timepoint_value, useNA="ifany")
+meta$timepoint = as.character(meta$timepoint_value)
+
+```
+
+### Read in gene annoation
+```{r}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+dim(gene_anno)
+gene_anno[1:2,]
+
+table(rownames(cts_dat) %in% gene_anno$ensembl_gene_id)
+# all ensembl gene IDs are contained in the annotation
+setdiff(rownames(cts_dat), gene_anno$ensembl_gene_id)
+```
+
+### Discard genes whose expression is 0 in more than 75% of samples
+
+```{r fig.width = 4, fig.height=3}
+model_s = meta$model_system
+table(model_s, useNA="ifany")
+
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+gene_info = data.frame(Name = cts$Name,
+                       apply(cts_dat, 1, min), 
+                       apply(cts_dat, 1, median), 
+                       apply(cts_dat, 1, get_q75), 
+                       apply(cts_dat, 1, max))
+
+dim(gene_info)
+gene_info[1:2,]
+table(row.names(gene_info)==gene_info$Name, useNA="ifany")
+
+names(gene_info)[2:5] = paste0(rep(c(model_s), times=4), 
+                               rep(c("min", "median", "q75", "max"), each=1))
+dim(gene_info)
+gene_info[1:2,]
+
+summary(gene_info[,-1])
+
+w2kp = which(gene_info$Pancreatic_Isletq75 > 0)
+cts_dat = cts_dat[w2kp,]
+dim(cts_dat)
+
+gene_info = gene_info[w2kp,]
+
+meta$read_depth = colSums(cts_dat)/1e6
+meta$q75 = apply(cts_dat, 2, quantile, probs = 0.75)
+meta$detected_genes = colSums(cts_dat > 0)
+meta$top_gene_fraction = apply(cts_dat, 2, function(x) max(x)/sum(x))
+meta$top20_fraction = apply(cts_dat, 2, function(x) sum(sort(x, decreasing = TRUE)[1:20])/sum(x))
+meta$q75_outlier = meta$read_depth > 50 & meta$q75 < 1500
+
+# add label to the two points with read_depth above 50 and q75 below 1500
+
+g_counts = ggplot(meta, aes(x = read_depth, y = q75, color = cell_line, shape = OE_status)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_text_repel(
+    data = subset(meta, read_depth > 50 & q75 < 1500),
+    aes(label = clonal.label),     # whichever column holds the sample name
+    size = 3,
+    show.legend = FALSE,           # don't add a label glyph to the legend
+    max.overlaps = Inf,            # don't silently drop labels if crowded
+    box.padding = 0.4,
+    point.padding = 0.3,
+    min.segment.length = 0
+  ) +
+  ggtitle("Gene counts") +
+  xlab("read depth (million)") +
+  ylab("75 percentile of gene expression") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(7, 15, 16, 17)) +
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  )
+
+print(g_counts)
+
+g_detected_genes = ggplot(meta, aes(x = detected_genes, y = q75,
+                                    color = cell_line, shape = OE_status)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_text_repel(
+    data = subset(meta, q75_outlier),
+    aes(label = clonal.label),
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf,
+    box.padding = 0.4,
+    point.padding = 0.3,
+    min.segment.length = 0
+  ) +
+  ggtitle("Detected genes") +
+  xlab("number of detected genes") +
+  ylab("75 percentile of gene expression") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(7, 15, 16, 17)) +
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  )
+
+print(g_detected_genes)
+
+g_top20_fraction = ggplot(meta, aes(x = top20_fraction, y = q75,
+                                    color = cell_line, shape = OE_status)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_text_repel(
+    data = subset(meta, q75_outlier),
+    aes(label = clonal.label),
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf,
+    box.padding = 0.4,
+    point.padding = 0.3,
+    min.segment.length = 0
+  ) +
+  ggtitle("Top 20 genes") +
+  xlab("fraction of counts in top 20 genes") +
+  ylab("75 percentile of gene expression") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(7, 15, 16, 17)) +
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  )
+
+print(g_top20_fraction)
+
+g_top_gene_fraction = ggplot(meta, aes(x = top_gene_fraction, y = q75,
+                                       color = cell_line, shape = OE_status)) +
+  geom_point(size = 2, alpha = 0.7) +
+  geom_text_repel(
+    data = subset(meta, q75_outlier),
+    aes(label = clonal.label),
+    size = 3,
+    show.legend = FALSE,
+    max.overlaps = Inf,
+    box.padding = 0.4,
+    point.padding = 0.3,
+    min.segment.length = 0
+  ) +
+  ggtitle("Top gene") +
+  xlab("fraction of counts in top gene") +
+  ylab("75 percentile of gene expression") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_shape_manual(values = c(7, 15, 16, 17)) +
+  guides(
+    color = guide_legend(title = NULL, order = 1),
+    shape = guide_legend(title = NULL, order = 2)
+  )
+
+print(g_top_gene_fraction)
+
+g_qc_2x2 = ggarrange(g_counts, g_detected_genes, g_top20_fraction, g_top_gene_fraction,
+                     ncol = 2, nrow = 2)
+qc_pdf = file.path(qc_path, "MSK_ISL1_OE_q75_outlier_qc.pdf")
+ggsave(qc_pdf, g_qc_2x2, width = 9, height = 7, units = "in")
+#print(g_qc_2x2)
+
+
+qc_df = meta[, c("clonal.label", "label", "read_depth", "q75", "detected_genes",
+                 "top_gene_fraction", "top20_fraction", "q75_outlier")]
+head(qc_df[order(qc_df$q75),])
+
+outlier_samples = meta$clonal.label[meta$q75_outlier]
+top2_outlier_genes = do.call(rbind, lapply(outlier_samples, function(cur_sample) {
+  cur_counts = cts_dat[, cur_sample]
+  top2_idx = head(order(cur_counts, decreasing = TRUE), 2)
+  data.frame(
+    sample = cur_sample,
+    gene_id = rownames(cts_dat)[top2_idx],
+    hgnc_symbol = gene_anno$hgnc_symbol[match(rownames(cts_dat)[top2_idx],
+                                               gene_anno$ensembl_gene_id)],
+    count = cur_counts[top2_idx],
+    fraction = cur_counts[top2_idx]/sum(cur_counts),
+    row.names = NULL
+  )
+}))
+
+top2_outlier_genes
+
+cts_dat_n_qc = log10(t(cts_dat) + 1)
+stopifnot(all(rownames(cts_dat_n_qc) == meta$clonal.label))
+
+plot_top2_gene_pair = function(cur_sample) {
+  cur_top2 = top2_outlier_genes[top2_outlier_genes$sample == cur_sample,]
+  stopifnot(nrow(cur_top2) == 2)
+
+  cur_df = data.frame(
+    gene1_expr = cts_dat_n_qc[, cur_top2$gene_id[1]],
+    gene2_expr = cts_dat_n_qc[, cur_top2$gene_id[2]],
+    meta
+  )
+
+  ggplot(cur_df, aes(x = gene1_expr, y = gene2_expr,
+                     color = cell_line, shape = OE_status)) +
+    geom_point(size = 2, alpha = 0.7) +
+    geom_text_repel(
+      data = subset(cur_df, clonal.label %in% outlier_samples),
+      aes(label = clonal.label),
+      size = 3,
+      show.legend = FALSE,
+      max.overlaps = Inf,
+      box.padding = 0.4,
+      point.padding = 0.3,
+      min.segment.length = 0
+    ) +
+    ggtitle(cur_sample) +
+    xlab(paste0(cur_top2$hgnc_symbol[1], " log10(count + 1)")) +
+    ylab(paste0(cur_top2$hgnc_symbol[2], " log10(count + 1)")) +
+    scale_color_brewer(palette = "Dark2") +
+    scale_shape_manual(values = c(7, 15, 16, 17)) +
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    )
+}
+
+g_top2_gene_pairs = lapply(outlier_samples, plot_top2_gene_pair)
+
+cts_dat_n_qc_q75 = t(cts_dat)
+cts_dat_n_qc_q75 = log10(median(meta$q75)*cts_dat_n_qc_q75/meta$q75 + 1)
+
+plot_top2_gene_pair_q75_norm = function(cur_sample) {
+  cur_top2 = top2_outlier_genes[top2_outlier_genes$sample == cur_sample,]
+  stopifnot(nrow(cur_top2) == 2)
+
+  cur_df = data.frame(
+    gene1_expr = cts_dat_n_qc_q75[, cur_top2$gene_id[1]],
+    gene2_expr = cts_dat_n_qc_q75[, cur_top2$gene_id[2]],
+    meta
+  )
+
+  ggplot(cur_df, aes(x = gene1_expr, y = gene2_expr,
+                     color = cell_line, shape = OE_status)) +
+    geom_point(size = 2, alpha = 0.7) +
+    geom_text_repel(
+      data = subset(cur_df, clonal.label %in% outlier_samples),
+      aes(label = clonal.label),
+      size = 3,
+      show.legend = FALSE,
+      max.overlaps = Inf,
+      box.padding = 0.4,
+      point.padding = 0.3,
+      min.segment.length = 0
+    ) +
+    ggtitle(paste0(cur_sample, ": q75-normalized")) +
+    xlab(paste0(cur_top2$hgnc_symbol[1], " cts_dat_n, log10")) +
+    ylab(paste0(cur_top2$hgnc_symbol[2], " cts_dat_n, log10")) +
+    scale_color_brewer(palette = "Dark2") +
+    scale_shape_manual(values = c(7, 15, 16, 17)) +
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    )
+}
+
+g_top2_gene_pairs_q75_norm = lapply(outlier_samples, plot_top2_gene_pair_q75_norm)
+
+for (i in seq_along(outlier_samples)){
+  print(g_top2_gene_pairs[[i]])
+  print(g_top2_gene_pairs_q75_norm[[i]])
+}
+
+g_top2_gene_pairs_combined = ggarrange(plotlist = c(g_top2_gene_pairs,
+                                                    g_top2_gene_pairs_q75_norm),
+                                       ncol = 2, nrow = 2)
+top2_gene_pair_combined_pdf = file.path(qc_path,
+                                        "MSK_ISL1_OE_q75_outlier_top2_gene_pairs_combined.pdf")
+ggsave(top2_gene_pair_combined_pdf, g_top2_gene_pairs_combined,
+       width = 7, height = 6.6, units = "in")
+# print(g_top2_gene_pairs_combined)
+  
+```
+
+## Analyze samples of different model systems or conditions
+
+Explore the PC plots first, to decide which level to run DESeq2 on. 
+
+Then run the DE analysis. 
+
+Since there is only one day value for each model system, do not include day value in each scatter plot.
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+meta$model_condition = meta$model_system
+table(meta$model_condition)
+
+unique_model_condition_ss = unique(meta$model_condition)
+unique_model_condition_ss = sort(unique_model_condition_ss)
+
+scatterplots_to_save = list(g_counts)
+
+for(cur_mc in unique_model_condition_ss){
+  
+  print(cur_mc)
+  sample2kp = which(meta$model_condition == cur_mc)
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+
+  stopifnot(all(meta_m$clonal.label == colnames(cts_dat_m)))
+  q75 = apply(cts_dat_m, 1, quantile, probs=0.75)
+
+  cts_dat_n = t(cts_dat_m[q75 > 0,])
+  cts_dat_n = log(median(meta_m$q75)*cts_dat_n/meta_m$q75 + 1)
+  dim(cts_dat_n)
+  
+  sample_pca = prcomp(cts_dat_n, center = TRUE, scale. = TRUE)
+  names(sample_pca)
+  pc_scores = sample_pca$x
+  eigen_vals = sample_pca$sdev^2
+  eigen_vals[1:5]/sum(eigen_vals)
+  pvs = round(eigen_vals[1:5]/sum(eigen_vals)*100,1)
+  pvs
+
+  PC_df = data.frame(pc_scores)
+  PC_df = cbind(PC_df, meta_m)
+  pc1_rightmost_samples = head(PC_df$clonal.label[order(-PC_df$PC1)], 2)
+  
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=OE_status, color=cell_line)) +
+    geom_point(size=2.5, alpha=0.7) + scale_color_brewer(palette = "Dark2") +
+    geom_text_repel(
+      data = subset(PC_df, PC1 > 100),
+      aes(label = clonal.label),     # whichever column holds the sample name
+      size = 3,
+      show.legend = FALSE,           # don't add a label glyph to the legend
+      max.overlaps = Inf,            # don't silently drop labels if crowded
+      box.padding = 0.4,
+      point.padding = 0.3,
+      min.segment.length = 0
+    ) + 
+      scale_shape_manual(values = c(7, 15, 16, 17)) + 
+    xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+    ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+    ggtitle(cur_mc) + 
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    ) +
+    theme(
+      legend.margin = margin(0, 0, 0, 0), 
+      legend.box.just = "left", 
+      legend.direction = "vertical" 
+    )
+
+  print(gPC)
+  scatterplots_to_save[[length(scatterplots_to_save) + 1]] = gPC
+
+  # All PC1 loadings, named by gene
+  pc1_loadings <- sample_pca$rotation[, "PC1"]
+  df_pc1_loadings = data.frame(gene_id = names(pc1_loadings), 
+                               pc1_loading = pc1_loadings)
+  # assign the hgnc_symbol
+  df_pc1_loadings$hgnc_symbol = gene_anno$hgnc_symbol[match(df_pc1_loadings$gene_id, 
+                                                            gene_anno$ensembl_gene_id)]
+  any(duplicated(df_pc1_loadings$gene_id))
+  sum(is.na(df_pc1_loadings$hgnc_symbol))
+  sum(df_pc1_loadings$hgnc_symbol == "", na.rm = TRUE)
+  
+  rownames(df_pc1_loadings) = NULL
+   
+  df_pc1_loadings_top <- df_pc1_loadings[order(-df_pc1_loadings$pc1_loading), ]
+  head(df_pc1_loadings_top, 20)
+   
+  df_pc1_loadings_bottom <- df_pc1_loadings[order(df_pc1_loadings$pc1_loading), ]
+  head(df_pc1_loadings_bottom, 20)
+
+  # generate a histogram of PC1 loadings
+  g_pc1_loadings = ggplot(df_pc1_loadings, aes(x=pc1_loading)) + 
+    geom_histogram(color="darkblue", fill="lightblue", bins = 200) + 
+    ggtitle(paste0(cur_mc, " PC1 loadings"))
+  g_pc1_loadings
+  
+  # for each of the genes in df_pc1_loadings_top and df_pc1_loadings_bottom
+  # compute the correlation with PC1 values
+  cor_top = cor(cts_dat_n[, df_pc1_loadings_top$gene_id[1:20]], pc_scores[, "PC1"])
+  cor_bottom = cor(cts_dat_n[, df_pc1_loadings_bottom$gene_id[1:20]], pc_scores[, "PC1"])
+  
+  as.numeric(cor_top)
+  as.numeric(cor_bottom)
+  
+  # Cell cycle hypothesis — score known cell-cycle genes
+  cc_genes <- c("MKI67", "TOP2A", "PCNA", "MCM2", "MCM5", "CCNB1", "CCNA2", "CDK1")
+  cc_ids <- gene_anno$ensembl_gene_id[gene_anno$hgnc_symbol %in% cc_genes]
+  cc_loadings <- df_pc1_loadings$pc1_loading[df_pc1_loadings$gene_id %in% cc_ids]
+  summary(cc_loadings)   # are they systematically positive or negative?
+    
+  lib_size <- colSums(cts_dat_m)
+  cor(sample_pca$x[, "PC1"], lib_size)
+  
+  oxphos_genes <- c("SDHA","SDHB","SDHC","SDHD",        # Complex II
+                    "COX4I1","COX5A","COX5B","COX6A1",  # Complex IV
+                    "NDUFA1","NDUFB1","NDUFS1",         # Complex I
+                    "ATP5F1A","ATP5F1B","ATP5F1C",      # Complex V
+                    "UQCRC1","UQCRC2")                   # Complex III
+  oxphos_ids <- gene_anno$ensembl_gene_id[gene_anno$hgnc_symbol %in% oxphos_genes]
+  oxphos_loadings <- df_pc1_loadings$pc1_loading[df_pc1_loadings$gene_id %in% oxphos_ids]
+  summary(oxphos_loadings)
+  
+  # PC plot if regressing out the read depth (in the format of q75)
+  
+  q75_m = apply(cts_dat_m[q75 > 0,], 2, quantile, probs = 0.75)
+  stopifnot(all(names(q75_m) == rownames(cts_dat_n)))
+
+  cts_dat_n_log = log(t(cts_dat_m[q75 > 0,]) + 1)
+  q75_m_log = log(q75_m + 1)
+
+  cts_dat_q75_resid = apply(cts_dat_n_log, 2, function(expr) {
+    residuals(lm(expr ~ q75_m_log))
+  })
+  rownames(cts_dat_q75_resid) = rownames(cts_dat_n_log)
+  resid_gene_sd = apply(cts_dat_q75_resid, 2, sd)
+  cts_dat_q75_resid = cts_dat_q75_resid[, resid_gene_sd > 0 & !is.na(resid_gene_sd)]
+  dim(cts_dat_q75_resid)
+
+  sample_pca_q75_resid = prcomp(cts_dat_q75_resid, center = TRUE, scale. = TRUE)
+  pc_scores_q75_resid = sample_pca_q75_resid$x
+  eigen_vals_q75_resid = sample_pca_q75_resid$sdev^2
+  pvs_q75_resid = round(eigen_vals_q75_resid[1:5]/sum(eigen_vals_q75_resid)*100, 1)
+
+  PC_df_q75_resid = data.frame(pc_scores_q75_resid)
+  PC_df_q75_resid = cbind(PC_df_q75_resid, meta_m)
+
+  gPC_q75_resid = ggplot(PC_df_q75_resid,
+                         aes(x = PC1, y = PC2, shape = OE_status, color = cell_line)) +
+    geom_point(size = 2.5, alpha = 0.7) +
+    scale_color_brewer(palette = "Dark2") +
+    geom_text_repel(
+      data = subset(PC_df_q75_resid, clonal.label %in% pc1_rightmost_samples),
+      aes(label = clonal.label),
+      size = 3,
+      show.legend = FALSE,
+      max.overlaps = Inf,
+      box.padding = 0.4,
+      point.padding = 0.3,
+      min.segment.length = 0
+    ) +
+    scale_shape_manual(values = c(7, 15, 16, 17)) +
+    xlab(sprintf("PC1 (%.1f%% variance)", pvs_q75_resid[1])) +
+    ylab(sprintf("PC2 (%.1f%% variance)", pvs_q75_resid[2])) +
+    ggtitle(paste0(cur_mc, ": residual after regressing out q75")) +
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    ) +
+    theme(
+      legend.margin = margin(0, 0, 0, 0),
+      legend.box.just = "left",
+      legend.direction = "vertical"
+    )
+
+  print(gPC_q75_resid)
+  scatterplots_to_save[[length(scatterplots_to_save) + 1]] = gPC_q75_resid
+  
+}
+
+g_scatterplots_2x2 = ggarrange(plotlist = scatterplots_to_save, ncol = 2, nrow = 2)
+scatterplot_pdf = file.path(qc_path, "MSK_ISL1_OE_exploratory_scatterplots.pdf")
+ggsave(scatterplot_pdf, g_scatterplots_2x2, width = 9, height = 7, units = "in")
+
+
+```
+
+
+Use each combination of (model system, condition) as DE group. 
+
+Run analysis for each DE group separately.
+
+For the output files, create two versions, one with direct information, one with padj set to NA for the genes when the number of 0 per test is >=4. 
+
+In more details, for both versions of the outputs, make it one file per knockout gene per DE group (DE group can be model system, model system + condition, model system + run_id, model system + day, etc.). 
+
+The first version of the output files contains 
+    
+    gene id, gene symbol
+
+and for each knockout strategy:
+
+    baseMean, log2FoldChange, lfcSE, stat, pvalue, padj
+    
+The second version of the output files contains  
+
+    gene id, gene symbol, chr, strand, position
+
+and for each knockout strategy:
+
+    log2FoldChange, pvalue, padj (set to be NA if the number of 0 per test >= 4), 
+
+In addition, save out a separate file of the sample size for each comparison. This needs to be by DE group. 
+
+In this setting, all samples were sequenced in the same batch. Do not consider run.id as a covariate or grouping factor. 
+
+### Prepare output directories for DE results
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+
+release_name = "2026_01_MSK_bulkRNAseq_ISL1_OE"
+
+output_dir = file.path("results", release_name)
+raw_output_dir = file.path(output_dir, "raw")
+processed_output_dir = file.path(output_dir, "processed")
+
+if (!file.exists(raw_output_dir)){
+  dir.create(raw_output_dir, recursive = TRUE)
+}
+
+if (!file.exists(processed_output_dir)){
+  dir.create(processed_output_dir, recursive = TRUE)
+}
+```
+
+### DE analysis for all genes
+```{r fig.width = 4.8, fig.height=3.2, message=FALSE, warning=FALSE}
+
+unique_model_ss = unique(meta$model_system)
+unique_model_ss = sort(unique_model_ss)
+unique_model_ss
+
+for (model1 in unique_model_ss){
+  
+  print(model1)
+  sample2kp = which(meta$model_system == model1)
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+
+  stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
+  print(table(meta_m$file_id == colnames(cts_dat_m), useNA="ifany"))  
+  
+  ## Generate sample information matrix
+  # cols2kp = c("model_system", "condition", "ko_strategy", "ko_gene", "run_id",
+  #             "run_id_short", "q75", "timepoint")
+  cols2kp = c("model_system", "cell_line", "OE_status", "q75", "timepoint")
+  sample_info = meta_m[,cols2kp]
+  colnames(sample_info)[which(colnames(sample_info)=="timepoint")] = "day"
+    
+  dim(sample_info)
+  sample_info[1:2,]
+      
+  print(table(sample_info$cell_line, sample_info$OE_status))
+  
+  sample_info$ko_group = paste(sample_info$cell_line, 
+                               sample_info$OE_status, sep="_")
+  print(table(sample_info$ko_group))
+  
+  # use the combination of (model system, condition) as DE group
+  
+  sample_info$model_day = paste0(sample_info$model_system, 
+                                 "_day_", 
+                                 as.character(sample_info$day))
+    
+  sample_info$de_grp = sample_info$model_day
+
+  sorted_de_grps = sort(unique(sample_info$de_grp))
+  sorted_de_grps
+
+  for(d_group in sorted_de_grps){
+    
+    print(d_group)
+    
+    dg_index = which(sample_info$de_grp==d_group)
+    cts_dat_m_dg = cts_dat_m[, dg_index]
+    sample_info_dg = sample_info[dg_index, ]
+
+    stopifnot(all(sample_info_dg$de_grp==d_group))   
+    
+    print("-----------------------------------")      
+    print(paste0("Model system: ", model1))  
+    print(sprintf("DE analysis group %s DESeq2 results:", d_group))
+    print("-----------------------------------")  
+      
+
+    # do two steps of filtering
+    # first, filter based on q75 of each gene
+    # second, filter based on whether each gene is expressed in at least 4 samples
+  
+    dg_q75 = apply(cts_dat_m_dg, 1, quantile, probs=0.75)
+    cts_dat_m_dg = cts_dat_m_dg[dg_q75 > 0,]
+    
+    print(sprintf("After filtering by gene expression q75, the number of genes reduces from %d to %d", 
+                  length(dg_q75), nrow(cts_dat_m_dg)))
+    
+    n_pos = rowSums(cts_dat_m_dg>0)
+    cts_dat_m_dg = cts_dat_m_dg[n_pos >= 4,]
+    
+    if (length(n_pos)==nrow(cts_dat_m_dg)){
+      print("After filtering by nonzero expression in at least 4 samples, the number of genes does not change.")
+    }else{
+      print(sprintf("After filtering by nonzero expression in at least 4 samples, the number of genes reduces from %d to %d", 
+                    length(n_pos), nrow(cts_dat_m_dg)))    
+    }
+  
+    # update the q75 based on only genes used in the process
+    sample_info_dg$q75 = apply(cts_dat_m_dg, 2, quantile, probs = 0.75)
+    sample_info_dg$log_q75 = log(sample_info_dg$q75)   
+    
+    # mean center log_q75 
+    sample_info_dg$log_q75 = sample_info_dg$log_q75 - mean(sample_info_dg$log_q75)
+
+    
+    # if (length(unique(sample_info_dg$run_id))==1){
+      dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                    ~ ko_group + log_q75)
+    # }else{
+    #   dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+    #                                 ~ ko_group + run_id + log_q75)     
+    # }
+    
+    start.time <- Sys.time()
+    dds = DESeq(dds)
+    end.time <- Sys.time()
+    
+    time.taken <- end.time - start.time
+    print(time.taken)
+    
+    ## association with read-depth
+    res_rd = results(dds, name = "log_q75")
+    res_rd = as.data.frame(res_rd)
+    dim(res_rd)
+    res_rd[1:2,]
+    
+    table(is.na(res_rd$padj))
+    
+    g0 = ggplot(res_rd %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      geom_histogram(color="darkblue", fill="lightblue", 
+                     breaks = seq(0,1,by=0.01)) + 
+      ggtitle(paste0(d_group, " read depth"))
+    print(g0)
+    
+    ## Rerun the analysis without read-depth if it is not significant for 
+    ## most genes, and the number of samples is small
+    ## i.e., proportion of non-null in the distribution is smaller than 0.01
+    ## (this needs to be restricted to the genes with not NA adjusted pvalue)
+    ## or if smaller than 0.1 and the number of samples is not greater than 6
+
+    pi_1_rd = max(0, mean(res_rd$pvalue[!is.na(res_rd$padj)] < 0.05) - 0.05)
+    pi_1_rd = max(pi_1_rd, 0, 1 - 2*mean(res_rd$pvalue[!is.na(res_rd$padj)] > 0.5))
+    
+    print(sprintf("prop of non-null for rd: %.2e", pi_1_rd))
+    
+    if(pi_1_rd < 0.01 || (ncol(cts_dat_m_dg) <= 6 && pi_1_rd < 0.1 )){
+      
+      print("rerun DESeq2 without read depth")
+      
+      include_rd = 0
+      # if (length(unique(sample_info_dg$run_id))==1){
+        dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+                                      ~ ko_group)
+      # }else{
+      #   dds = DESeqDataSetFromMatrix(cts_dat_m_dg, colData=sample_info_dg, 
+      #                                 ~ ko_group + run_id)     
+      # }
+      start.time <- Sys.time()
+      dds = DESeq(dds)
+      end.time <- Sys.time()
+      
+      time.taken <- end.time - start.time
+      print(time.taken)
+      
+    }else{
+      include_rd = 1
+    }
+    
+    
+     ## association with run_id
+    
+    # if (length(unique(sample_info_dg$run_id))>1){
+    #   
+    #   if(include_rd){
+    #     dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_group + log_q75)
+    #   }else{
+    #     dds_lrt = DESeq(dds, test="LRT", reduced = ~ ko_group)
+    #   }
+    #   
+    #   res_lrt = results(dds_lrt)
+    # 
+    #   res_run_id = as.data.frame(res_lrt)
+    #   dim(res_run_id)
+    #   res_run_id[1:2,]
+    # 
+    #   table(is.na(res_run_id$padj))
+    #   
+    #   g0 = ggplot(res_run_id %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+    #     geom_histogram(color="darkblue", fill="lightblue", 
+    #                    breaks = seq(0,1,by=0.01)) + 
+    #     ggtitle(paste0(d_group, " Run ID"))
+    #   print(g0)
+    #   
+    # }   
+    
+    ## DE analysis for two types of comparisons
+    ## 1. under each cell line, ISL1 OE vs BFP only
+    ## 2. under BFP only, each knockout gene vs WT
+    
+    table(sample_info_dg$OE_status)
+    table(sample_info_dg$OE_status, sample_info_dg$cell_line)
+    
+    target_OE_genes = "ISL1"
+    ko_type = "OE"
+    
+    cell_lines = unique(sample_info_dg$cell_line)
+    
+    # 1. under each cell line, ISL1 OE vs BFP only
+    
+    df_size = NULL
+    res_cellline = list()
+      
+    for(cline in cell_lines){
+      
+      res_cellline_df = NULL
+      res_cellline_reduced_df = NULL
+      
+      if (cline!="WT"){
+        cline_str = paste0(cline, "_KO")
+      }else{
+        cline_str = "WT"
+      }
+      
+      for(g_oe in target_OE_genes){
+        
+        res_g1 = results(dds, contrast = c("ko_group", 
+                                           paste0(cline, "_", g_oe), paste0(cline, "_BFP")))
+        res_g1 = signif(data.frame(res_g1), 3)
+        
+        # add a column to record the number of zeros per test
+        test_index = which(sample_info_dg$ko_group%in%c(paste0(cline, "_", g_oe), paste0(cline, "_BFP")))
+        
+        cts_dat_m_dg_test = cts_dat_m_dg[, test_index]
+        n_zero = rowSums(cts_dat_m_dg_test==0)
+        res_g1$n_zeros = n_zero
+        
+        # record the number of samples involved in the comparison
+        test_ko_group_vec = sample_info_dg$ko_group[test_index]
+        
+        df_size = rbind(df_size, 
+                        c(d_group, 
+                          cline_str, 
+                          paste0(g_oe, "_", ko_type), 
+                          sum(test_ko_group_vec!=paste0(cline, "_BFP")), 
+                          sum(test_ko_group_vec==paste0(cline, "_BFP"))))
+        
+        # prepare a processed version of output
+        res_g1_reduced = res_g1[, c("log2FoldChange", "pvalue", "padj", "n_zeros")]
+        res_g1_reduced$padj[which(res_g1_reduced$n_zeros>=4)] = NA
+        
+        if ((sum(test_ko_group_vec!=paste0(cline, "_BFP"))==1)|(sum(test_ko_group_vec==paste0(cline, "_BFP"))==1)){
+          res_g1_reduced$padj = NA
+        }
+        
+        res_g1_reduced = res_g1_reduced[, c("log2FoldChange", "pvalue", "padj")]
+        
+        res_cellline[[paste0(cline_str, "_", g_oe, "_", ko_type)]] = res_g1_reduced
+        
+        if ((sum(test_ko_group_vec!=paste0(cline, "_BFP"))>1) & (sum(test_ko_group_vec==paste0(cline, "_BFP"))>1)){
+          g1 = ggplot(res_g1_reduced %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+            geom_histogram(color="darkblue", fill="lightblue", 
+                           breaks = seq(0,1,by=0.01)) + 
+            ggtitle(paste0(d_group, " ", cline_str, " ", g_oe, "_", ko_type))
+          print(g1)
+        }
+
+        
+        tag1 = sprintf("%s_%s_", g_oe, ko_type)
+        colnames(res_g1) = paste0(tag1, colnames(res_g1))
+        colnames(res_g1_reduced) = paste0(tag1, colnames(res_g1_reduced))      
+        
+        if(is.null(res_cellline_df)){
+          res_cellline_df = res_g1
+        }else if(!is.null(res_cellline_df)){
+          stopifnot(all(rownames(res_cellline_df) == rownames(res_g1)))
+          res_cellline_df = cbind(res_cellline_df, res_g1)
+        }
+
+        if(is.null(res_cellline_reduced_df)){
+          res_cellline_reduced_df = res_g1_reduced
+        }else if(!is.null(res_cellline_reduced_df)){
+          stopifnot(all(rownames(res_cellline_reduced_df) == rownames(res_g1_reduced)))
+          res_cellline_reduced_df = cbind(res_cellline_reduced_df, res_g1_reduced)
+        }       
+
+      }
+
+    
+      dim(res_cellline_df)
+      res_cellline_df[1:2,]
+      
+      dim(res_cellline_reduced_df)
+      res_cellline_reduced_df[1:2,]
+      
+      res_df = data.frame(gene_ID=rownames(res_cellline_df), 
+                          res_cellline_df)
+      dim(res_df)
+      res_df[1:2,]
+  
+      res_reduced_gene_anno = gene_anno[match(rownames(res_cellline_reduced_df), 
+                                              gene_anno$ensembl_gene_id), ]
+      stopifnot(all(rownames(res_cellline_reduced_df)==res_reduced_gene_anno$ensembl_gene_id))
+  
+      # set gene hgnc_symbol that equal "" to NA
+      hgnc_symbol_vec = res_reduced_gene_anno$hgnc_symbol
+      hgnc_symbol_vec[which(hgnc_symbol_vec=="")] = NA
+        
+      res_reduced_df = data.frame(gene_ID=rownames(res_cellline_reduced_df), 
+                                  hgnc_symbol=hgnc_symbol_vec,
+                                  chr=res_reduced_gene_anno$chr, 
+                                  strand=res_reduced_gene_anno$strand, 
+                                  start=res_reduced_gene_anno$start, 
+                                  end=res_reduced_gene_anno$end, 
+                                  res_cellline_reduced_df)
+      
+      print("hgnc_symbol empty string and NA tables:")
+      print(table(res_reduced_df$hgnc_symbol=="", useNA="ifany"))
+      print(table(is.na(res_reduced_df$hgnc_symbol)))
+        
+      dim(res_reduced_df)
+      res_reduced_df[1:2,]
+      
+      setting_name = unique(paste0(sample_info_dg$model_day, "_", 
+#                                   sample_info_dg$condition, "_", 
+                                   cline_str))
+      
+      fwrite(res_df, 
+             sprintf("%s/%s_%s_%s_DEseq2_raw.tsv", 
+                     raw_output_dir, release_name, setting_name, 
+                     paste0(g_oe, "_", ko_type)), 
+             sep="\t")
+      fwrite(res_reduced_df, 
+             sprintf("%s/%s_%s_%s_DEseq2.tsv", 
+                     processed_output_dir, release_name, setting_name, 
+                     paste0(g_oe, "_", ko_type)),  
+             sep="\t")
+    
+    }
+    
+  }
+
+get_index <- function(x){
+  which(x$padj < 0.05 & abs(x$log2FoldChange) > log2(1.5))
+}
+
+# The four settings
+settings    <- names(res_cellline)
+short_names <- sub("_.*$", "", settings)
+
+settings
+short_names
+
+# DE indices and DE gene names per setting
+w_list   <- lapply(settings, function(s) get_index(res_cellline[[s]]))
+names(w_list) <- settings
+de_genes <- lapply(settings, function(s) rownames(res_cellline[[s]])[w_list[[s]]])
+names(de_genes) <- settings
+
+print(paste0("DE group ", d_group, " under OE gene ", g_oe, ":"))
+
+# Per-setting DE counts
+for (i in length(settings)) {
+  s <- settings[i]
+  short_s <- short_names[i]
+  print(paste0("number of DE genes from cell line with knock out gene ", short_s, ": ",
+               as.character(length(w_list[[s]]))))
+}
+
+# All pairwise overlaps (6 pairs for 4 settings)
+pairs <- combn(settings, 2, simplify = FALSE)
+for (p in pairs) {
+  ov <- length(intersect(de_genes[[p[1]]], de_genes[[p[2]]]))
+  print(paste0("number of common DE genes by cell lines with knock out gene ",
+               sub("_.*$", "", p[1]), " and ", sub("_.*$", "", p[2]), ": ", as.character(ov)))
+}
+
+# UpSet plot across all 4 sets (with shortened labels)
+if (max(sapply(w_list, length)) > 0) {
+  names(de_genes) <- short_names
+  m <- make_comb_mat(de_genes)
+  g_up <- UpSet(m)
+  print(g_up)
+  names(de_genes) <- settings   # restore for any downstream use
+}
+
+# padj matrix for correlations
+df1 <- as.data.frame(sapply(settings, function(s) res_cellline[[s]]$padj))
+colnames(df1) <- paste0("padj_", settings)
+
+# Every pairwise scatter (6 plots)
+for (p in pairs) {
+  x_col <- paste0("padj_", p[1])
+  y_col <- paste0("padj_", p[2])
+  cr <- cor(df1[[x_col]], df1[[y_col]], method = "spearman", use = "pair")
+
+  df_plot <- data.frame(x = -log10(df1[[x_col]]),
+                        y = -log10(df1[[y_col]]))
+  df_plot <- df_plot[is.finite(df_plot$x) & is.finite(df_plot$y), ]
+
+  if (nrow(df_plot) < 2) next   # nothing to plot for this pair
+
+  g <- ggplot(df_plot, aes(x = x, y = y)) +
+    geom_pointdensity() +
+    scale_color_viridis() +
+    xlab(paste0("-log10(padj) ", sub("_.*$", "", p[1]))) +
+    ylab(paste0("-log10(padj) ", sub("_.*$", "", p[2]))) +
+    ggtitle(sprintf("%s, %s, %s\n%s vs %s\nSpearman r = %.2f",
+                    d_group, g_oe, ko_type, sub("_.*$", "", p[1]), sub("_.*$", "", p[2]), cr))
+  print(g)
+}
+
+}
+```
+
+Save the size dataframe out
+```{r fig.width = 4.5, fig.height=3.2, message=FALSE, warning=FALSE}
+colnames(df_size) = c("DE_group", "cell_line", "knockout_gene_strategy", "n_ko", "n_WT")
+df_size = as.data.frame(df_size)
+
+multi_rows = which(table(df_size$knockout_gene_strategy)>1)
+multi_rows
+
+df_size[which(df_size$knockout_gene_strategy%in%names(multi_rows)),]
+
+fwrite(df_size, 
+       sprintf("%s/%s_DE_n_samples.tsv", output_dir, release_name), 
+       sep="\t")
+
+```
+
+
+
+
+## DE analysis under control (BFP OE) only, between KOs and WTs
+
+There is only one DE group for this dataset and DESeq2 model was already fit. 
+
+Directly use the fitted model to extract the DE results for this setting. 
+
+```{r fig.width = 4.8, fig.height=3.2, message=FALSE, warning=FALSE}
+
+df_size = NULL
+
+genos = setdiff(cell_lines, "WT")
+genos = sort(genos)
+genos
+
+res_geno = list()
+
+for(geno in genos){
+  
+  res_geno_df = NULL
+  res_geno_reduced_df = NULL
+    
+  res_g1 = results(dds, contrast = c("ko_group", 
+                                     paste0(geno, "_BFP"), paste0("WT_BFP")))
+  res_g1 = signif(data.frame(res_g1), 3)
+  
+  # add a column to record the number of zeros per test
+  test_index = which(sample_info_dg$ko_group%in%c(paste0(geno, "_BFP"), paste0("WT_BFP")))
+  
+  cts_dat_m_dg_test = cts_dat_m_dg[, test_index]
+  n_zero = rowSums(cts_dat_m_dg_test==0)
+  res_g1$n_zeros = n_zero
+  
+  # record the number of samples involved in the comparison
+  test_ko_group_vec = sample_info_dg$ko_group[test_index]
+  
+  df_size = rbind(df_size, 
+                  c(d_group, 
+                    paste0("control"), 
+                    paste0(geno, "_KO"), 
+                    sum(test_ko_group_vec!="WT_BFP"), 
+                    sum(test_ko_group_vec=="WT_BFP")))
+  
+  # prepare a processed version of output
+  res_g1_reduced = res_g1[, c("log2FoldChange", "pvalue", "padj", "n_zeros")]
+  res_g1_reduced$padj[which(res_g1_reduced$n_zeros>=4)] = NA
+  
+  if ((sum(test_ko_group_vec!=paste0(geno, "_BFP"))==1)|(sum(test_ko_group_vec==paste0("WT_BFP"))==1)){
+    res_g1_reduced$padj = NA
+  }
+  
+  res_g1_reduced = res_g1_reduced[, c("log2FoldChange", "pvalue", "padj")]
+  
+  res_geno[[paste0(geno, "_KO")]] = res_g1_reduced
+  
+  if ((sum(test_ko_group_vec!=paste0(geno, "_BFP"))>1) & (sum(test_ko_group_vec==paste0("WT_BFP"))>1)){
+    g1 = ggplot(res_g1_reduced %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+      geom_histogram(color="darkblue", fill="lightblue", 
+                     breaks = seq(0,1,by=0.01)) + 
+      ggtitle(paste0(d_group, " ", "control ", geno, "_KO "))
+    print(g1)
+  }
+
+  
+  tag1 = sprintf("%s_%s_", geno, "KO")
+  colnames(res_g1) = paste0(tag1, colnames(res_g1))
+  colnames(res_g1_reduced) = paste0(tag1, colnames(res_g1_reduced))      
+  
+  if(is.null(res_geno_df)){
+    res_geno_df = res_g1
+  }else if(!is.null(res_geno_df)){
+    stopifnot(all(rownames(res_geno_df) == rownames(res_g1)))
+    res_geno_df = cbind(res_geno_df, res_g1)
+  }
+
+  if(is.null(res_geno_reduced_df)){
+    res_geno_reduced_df = res_g1_reduced
+  }else if(!is.null(res_geno_reduced_df)){
+    stopifnot(all(rownames(res_geno_reduced_df) == rownames(res_g1_reduced)))
+    res_geno_reduced_df = cbind(res_geno_reduced_df, res_g1_reduced)
+  }       
+
+
+
+  dim(res_geno_df)
+  res_geno_df[1:2,]
+  
+  dim(res_geno_reduced_df)
+  res_geno_reduced_df[1:2,]
+  
+  res_df = data.frame(gene_ID=rownames(res_geno_df), 
+                      res_geno_df)
+  dim(res_df)
+  res_df[1:2,]
+
+  res_reduced_gene_anno = gene_anno[match(rownames(res_geno_reduced_df), 
+                                          gene_anno$ensembl_gene_id), ]
+  stopifnot(all(rownames(res_geno_reduced_df)==res_reduced_gene_anno$ensembl_gene_id))
+
+  # set gene hgnc_symbol that equal "" to NA
+  hgnc_symbol_vec = res_reduced_gene_anno$hgnc_symbol
+  hgnc_symbol_vec[which(hgnc_symbol_vec=="")] = NA
+    
+  res_reduced_df = data.frame(gene_ID=rownames(res_geno_reduced_df), 
+                              hgnc_symbol=hgnc_symbol_vec,
+                              chr=res_reduced_gene_anno$chr, 
+                              strand=res_reduced_gene_anno$strand, 
+                              start=res_reduced_gene_anno$start, 
+                              end=res_reduced_gene_anno$end, 
+                              res_geno_reduced_df)
+  
+  print("hgnc_symbol empty string and NA tables:")
+  print(table(res_reduced_df$hgnc_symbol=="", useNA="ifany"))
+  print(table(is.na(res_reduced_df$hgnc_symbol)))
+    
+  dim(res_reduced_df)
+  res_reduced_df[1:2,]
+
+  setting_name = unique(paste0(sample_info_dg$model_day, "_", 
+#                                   sample_info_dg$condition, "_", 
+                               "control"))
+  
+  fwrite(res_df, 
+         sprintf("%s/%s_%s_%s_vs_WT_DEseq2_raw.tsv", 
+                 raw_output_dir, release_name, setting_name, 
+                 paste0(geno, "_", "KO")), 
+         sep="\t")
+  fwrite(res_reduced_df, 
+         sprintf("%s/%s_%s_%s_vs_WT_DEseq2.tsv", 
+                 processed_output_dir, release_name, setting_name, 
+                 paste0(geno, "_", "KO")),  
+         sep="\t")
+
+}
+  
+colnames(df_size) = c("DE_group", "OE_setting", "knockout_gene_strategy", "n_ko", "n_WT")
+df_size = as.data.frame(df_size)
+
+fwrite(df_size, 
+       sprintf("%s/%s_DE_control_KO_vs_WT_n_samples.tsv", output_dir, release_name), 
+       sep="\t")
+
+
+```
+
+
+
+
+
+```{r}
+gc()
+sessionInfo()
+```

@@ -1,0 +1,5 @@
+DE_group	cell_line	knockout_gene_strategy	n_ko	n_WT
+Pancreatic_Islet_day_18	ISL1_KO	ISL1_OE	3	3
+Pancreatic_Islet_day_18	PAX6_KO	ISL1_OE	3	3
+Pancreatic_Islet_day_18	PDX1_KO	ISL1_OE	2	3
+Pancreatic_Islet_day_18	WT	ISL1_OE	2	2

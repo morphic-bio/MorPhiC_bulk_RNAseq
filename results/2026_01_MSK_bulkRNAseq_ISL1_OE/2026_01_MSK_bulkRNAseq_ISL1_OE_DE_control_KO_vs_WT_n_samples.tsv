@@ -1,0 +1,4 @@
+DE_group	OE_setting	knockout_gene_strategy	n_ko	n_WT
+Pancreatic_Islet_day_18	control	ISL1_KO	3	2
+Pancreatic_Islet_day_18	control	PAX6_KO	3	2
+Pancreatic_Islet_day_18	control	PDX1_KO	3	2
