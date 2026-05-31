@@ -660,8 +660,8 @@ for (model1 in unique_model_ss){
   cts_dat_m = cts_dat[,sample2kp]
   meta_m    = meta[sample2kp,]
 
-  stopifnot(all(meta_m$file_id == colnames(cts_dat_m)))
-  print(table(meta_m$file_id == colnames(cts_dat_m), useNA="ifany"))  
+  stopifnot(all(meta_m$clonal.label == colnames(cts_dat_m)))
+  print(table(meta_m$clonal.label == colnames(cts_dat_m), useNA="ifany"))  
   
   ## Generate sample information matrix
   # cols2kp = c("model_system", "condition", "ko_strategy", "ko_gene", "run_id",
