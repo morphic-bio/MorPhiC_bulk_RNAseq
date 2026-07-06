@@ -40,6 +40,11 @@ release_name
 
 ```
 
+## Set meta data item
+```{r}
+unique_tp = "day 18"
+```
+
 ## Read in results
 
 ```{r}
@@ -108,20 +113,15 @@ nchar_limit = 70
 
 format_current_dataset_label <- function(x){
   
-  x = gsub("_", " ", x)
-  x = gsub("Pancreatic Islet day 18 ", "", x)
-  x = gsub("WT KO ISL1 OE", "WT ISL1 OE", x)
-  x = gsub("BFP OE", "control", x)
-  x = gsub(" ISL1 OE ISL1 OE ", " ISL1 OE ", x)
-  x = gsub(" ISL1 KO vs WT ISL1 KO ", " ISL1 KO vs WT ", x)
-  x = gsub(" PAX6 KO vs WT PAX6 KO ", " PAX6 KO vs WT ", x)
-  x = gsub(" PDX1 KO vs WT PDX1 KO ", " PDX1 KO vs WT ", x)
-  x = gsub("up", "up-regulated", x)
-  x = gsub("down", "down-regulated", x)
+  x = gsub("_vs_", " vs ", x)
+  # x = gsub("_", " ", x)
+  x = gsub("Pancreatic_Islet_day_18_", "day 18\n", x)
+  x = gsub("_up", "\nUp-regulated", x)
+  x = gsub("_down", "\nDown-regulated", x)
   
-  substrings = str_split(x, " ")[[1]]
-  x = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
-             "\n", paste(substrings[length(substrings)], collapse = " "))
+  # substrings = str_split(x, " ")[[1]]
+  # x = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
+  #            "_", paste(substrings[length(substrings)], collapse = " "))
   
   x
 }
@@ -172,7 +172,7 @@ for(k in 1:length(df_list)){
       nm1 = sub("reverted ", "", nm1) # only replace the first occurrence of "reverted "
       substrings = str_split(nm1, " ")[[1]]
       nm1 = paste0(paste(substrings[1:(length(substrings)-1)], collapse = " "), 
-                   "\n", paste(substrings[length(substrings)], collapse = " "))
+                   " ", paste(substrings[length(substrings)], collapse = " "))
     }
   }
   

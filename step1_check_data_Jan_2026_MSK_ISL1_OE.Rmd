@@ -50,7 +50,7 @@ dat_path = file.path(path, "processed/Tables")
 
 metadata_path = path
 
-meta_file = paste0(metadata_path, "/v1_MSKCC_RNAseq_ISL1oe_AnuComments_12.05_DL.xlsx")
+meta_file = paste0(metadata_path, "/R4_MSK_RNAseq_Prod.xlsx")
 
 meta_save_path = "./data/Jan_2026"
 # create the directory if not exists
@@ -115,13 +115,21 @@ meta[1:6,]
 meta$timepoint_value = 18
 meta$model_system = "Pancreatic_Islet"
 
-meta$cell_line <- sub("-.*",  "", meta$label)   # part before "-"
-meta$OE_status <- sub(".*-",  "", meta$label)   # part after "-"
+meta$cell_line <- sub("_.*",  "", meta$label)   # part before "-"
+meta$OE_status <- sub(".*_",  "", meta$label)   # part after "-"
 
 table(meta$label, meta$cell_line)
 table(meta$label, meta$OE_status)
 
 meta$condition = "not applicable"
+
+# replace the "_" with "-" for the "label" column
+meta$label <- gsub("_", "-", meta$label)
+
+table(meta$label, meta$cell_line)
+table(meta$label, meta$OE_status)
+
+stopifnot(all(sub("-[^-]*$", "", meta$clonal.label)==meta$label))
 
 # save meta data table
 fwrite(meta, file.path(meta_save_path, "MSK_bulkRNAseq_ISL1_OE_meta_data.tsv"), sep="\t")

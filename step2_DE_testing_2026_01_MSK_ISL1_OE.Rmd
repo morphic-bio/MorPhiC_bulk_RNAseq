@@ -26,7 +26,7 @@ Differential expression using the bulk RNAseq MSK_ISL1_OE the Jan. 2026 release.
 This dataset spans
 
 * H1,
-* day18, (final_timepoint: "unknown"),
+* day18, (final_timepoint: "yes"),
 * four different colonal cell lines,
 * pancreatic islet,
 * OE of BFP only as control, and OE of ISL1 as case. 
@@ -35,6 +35,11 @@ The test of DE analysis planned:
 
 * for each colonal cell line, ISL1 OE vs control
 * for baseline, the other three colonal cell lines vs the WT cell line
+
+The dispersion parameter estimate for one gene GCG (ENSG00000115263) is patched
+
+* this is the gene with -log10(pvalue from limma-voom / pvalue from DESeq2) > 3
+* for this highly expressed genes, the dispersion estimate is patched to DESeq2's un-reverted niter=2 value, since the default niter=1 fit's noIncrease guard discarded the correct low dispersion and kept an inflated design-blind seed, inflating the standard error and masking a genuine effect.
 
 ## R libraries.
 
@@ -599,6 +604,183 @@ ggsave(scatterplot_pdf, g_scatterplots_2x2, width = 9, height = 7, units = "in")
 ```
 
 
+## PC after adjusting for read depth following the DESeq2 style scaling
+
+One PC plot after adjusting for read depth following the DESeq2 style scaling
+
+Another PC plot after additionally regressing out the log(q75) 
+
+```{r fig.width = 4.5, fig.height=3, message=FALSE, warning=FALSE}
+meta$model_condition = meta$model_system
+table(meta$model_condition)
+
+unique_model_condition_ss = unique(meta$model_condition)
+unique_model_condition_ss = sort(unique_model_condition_ss)
+
+scatterplots_to_save = list()
+
+for(cur_mc in unique_model_condition_ss){
+  
+  print(cur_mc)
+  sample2kp = which(meta$model_condition == cur_mc)
+  cts_dat_m = cts_dat[,sample2kp]
+  meta_m    = meta[sample2kp,]
+
+  stopifnot(all(meta_m$clonal.label == colnames(cts_dat_m)))
+  q75 = apply(cts_dat_m, 1, quantile, probs=0.75)
+
+  cts_dat_n = t(cts_dat_m[q75 > 0,])
+  
+  # do DESeq style scaling
+  
+  trec1 = t(cts_dat_n)
+  dim(trec1)
+
+  fun_k_i_r <- function(vec){
+    return(prod(vec^(1/length(vec))))
+  }
+  
+  K_i_R = apply(trec1, 1, fun_k_i_r)
+  summary(K_i_R)
+  
+  get_s_j <- function(vec1, vec2){
+    kept_vec1 = vec1[which(vec2!=0)]
+    kept_vec2 = vec2[which(vec2!=0)]  
+    return(median(kept_vec1/kept_vec2))
+  }
+  
+  s_j = NULL
+  
+  for (j in 1:ncol(trec1)){
+    s_j = c(s_j, get_s_j(trec1[, j], K_i_R))
+  }
+  
+  s_j
+  
+  # plot(s_j, colSums(trec1))
+  
+  q_ij = matrix(NA, nrow = nrow(trec1), ncol = ncol(trec1))
+  
+  for (j in 1:ncol(trec1)){
+    q_ij[, j] = trec1[, j]/s_j[j]
+  }
+  
+  q_mean = apply(q_ij, 1, mean)
+  q_median = apply(q_ij, 1, median)
+  
+  summary(q_mean)
+  summary(q_median)
+
+  q_ij_log = log(q_ij + 1)
+
+  cts_dat_n = t(q_ij_log)
+  
+  
+  sample_pca = prcomp(cts_dat_n, center = TRUE, scale. = TRUE)
+  names(sample_pca)
+  pc_scores = sample_pca$x
+  eigen_vals = sample_pca$sdev^2
+  eigen_vals[1:5]/sum(eigen_vals)
+  pvs = round(eigen_vals[1:5]/sum(eigen_vals)*100,1)
+  pvs
+
+  PC_df = data.frame(pc_scores)
+  PC_df = cbind(PC_df, meta_m)
+  pc1_rightmost_samples = head(PC_df$clonal.label[order(-PC_df$PC1)], 2)
+  
+  gPC = ggplot(PC_df, aes(x = PC1, y = PC2, shape=OE_status, color=cell_line)) +
+    geom_point(size=2.5, alpha=0.7) + scale_color_brewer(palette = "Dark2") +
+    geom_text_repel(
+      data = subset(PC_df, PC1 > 100),
+      aes(label = clonal.label),     # whichever column holds the sample name
+      size = 3,
+      show.legend = FALSE,           # don't add a label glyph to the legend
+      max.overlaps = Inf,            # don't silently drop labels if crowded
+      box.padding = 0.4,
+      point.padding = 0.3,
+      min.segment.length = 0
+    ) + 
+      scale_shape_manual(values = c(7, 15, 16, 17)) + 
+    xlab(sprintf("PC1 (%.1f%% variance)", pvs[1])) + 
+    ylab(sprintf("PC2 (%.1f%% variance)", pvs[2])) + 
+    ggtitle(paste0("DESeq2 scaling\n", cur_mc)) + 
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    ) +
+    theme(
+      legend.margin = margin(0, 0, 0, 0), 
+      legend.box.just = "left", 
+      legend.direction = "vertical" 
+    )
+
+  print(gPC)
+  scatterplots_to_save[[length(scatterplots_to_save) + 1]] = gPC
+
+  # PC plot if regressing out the read depth (in the format of q75)
+  
+  q75_m = apply(cts_dat_m[q75 > 0,], 2, quantile, probs = 0.75)
+  stopifnot(all(names(q75_m) == rownames(cts_dat_n)))
+
+  q75_m_log = log(q75_m + 1)
+
+  cts_dat_q75_resid = apply(cts_dat_n, 2, function(expr) {
+    residuals(lm(expr ~ q75_m_log))
+  })
+  rownames(cts_dat_q75_resid) = rownames(cts_dat_n)
+  resid_gene_sd = apply(cts_dat_q75_resid, 2, sd)
+  cts_dat_q75_resid = cts_dat_q75_resid[, resid_gene_sd > 0 & !is.na(resid_gene_sd)]
+  dim(cts_dat_q75_resid)
+
+  sample_pca_q75_resid = prcomp(cts_dat_q75_resid, center = TRUE, scale. = TRUE)
+  pc_scores_q75_resid = sample_pca_q75_resid$x
+  eigen_vals_q75_resid = sample_pca_q75_resid$sdev^2
+  pvs_q75_resid = round(eigen_vals_q75_resid[1:5]/sum(eigen_vals_q75_resid)*100, 1)
+
+  PC_df_q75_resid = data.frame(pc_scores_q75_resid)
+  PC_df_q75_resid = cbind(PC_df_q75_resid, meta_m)
+
+  gPC_q75_resid = ggplot(PC_df_q75_resid,
+                         aes(x = PC1, y = PC2, shape = OE_status, color = cell_line)) +
+    geom_point(size = 2.5, alpha = 0.7) +
+    scale_color_brewer(palette = "Dark2") +
+    geom_text_repel(
+      data = subset(PC_df_q75_resid, clonal.label %in% pc1_rightmost_samples),
+      aes(label = clonal.label),
+      size = 3,
+      show.legend = FALSE,
+      max.overlaps = Inf,
+      box.padding = 0.4,
+      point.padding = 0.3,
+      min.segment.length = 0
+    ) +
+    scale_shape_manual(values = c(7, 15, 16, 17)) +
+    xlab(sprintf("PC1 (%.1f%% variance)", pvs_q75_resid[1])) +
+    ylab(sprintf("PC2 (%.1f%% variance)", pvs_q75_resid[2])) +
+    ggtitle(paste0("DESeq2 scaling\n", cur_mc, ": residual after regressing out q75")) +
+    guides(
+      color = guide_legend(title = NULL, order = 1),
+      shape = guide_legend(title = NULL, order = 2)
+    ) +
+    theme(
+      legend.margin = margin(0, 0, 0, 0),
+      legend.box.just = "left",
+      legend.direction = "vertical"
+    )
+
+  print(gPC_q75_resid)
+  scatterplots_to_save[[length(scatterplots_to_save) + 1]] = gPC_q75_resid
+  
+}
+
+g_scatterplots_1x2 = ggarrange(plotlist = scatterplots_to_save, ncol = 2, nrow = 1)
+scatterplot_pdf = file.path(qc_path, "MSK_ISL1_OE_exploratory_PC_plots_DESeq2_scaling.pdf")
+ggsave(scatterplot_pdf, g_scatterplots_1x2, width = 9, height = 3.8, units = "in")
+
+
+```
+
+
 Use each combination of (model system, condition) as DE group. 
 
 Run analysis for each DE group separately.
@@ -653,7 +835,8 @@ unique_model_ss = unique(meta$model_system)
 unique_model_ss = sort(unique_model_ss)
 unique_model_ss
 
-for (model1 in unique_model_ss){
+# there is only one model system in this dataset
+model1 = unique_model_ss
   
   print(model1)
   sample2kp = which(meta$model_system == model1)
@@ -690,7 +873,8 @@ for (model1 in unique_model_ss){
   sorted_de_grps = sort(unique(sample_info$de_grp))
   sorted_de_grps
 
-  for(d_group in sorted_de_grps){
+  # there is only one de_group in this dataset
+  d_group = sorted_de_grps
     
     print(d_group)
     
@@ -797,8 +981,53 @@ for (model1 in unique_model_ss){
       include_rd = 1
     }
     
+
+    ## ---- Patch dispersion 'seed-revert' artifact (selected genes) -----------
+    ## After comparing the DE results with those generated by running limma-voom, 
+    ## in multiple settings of constrast, there is one gene GCG that have 
+    ## log10(pvalue from limma-voom / pvalue from DESeq2) > 3
+    ## in DESeq2, GCG had high counts and a large fold change but was not
+    ## significant because its final DESeq2 dispersion was very large.
+    ## GCG has its gene-wise dispersion reverted to DESeq2's design-blind moments 
+    ## seed: fitDisp reaches the correct value, 
+    ## but the 'noIncrease' guard (threshold = |initial_lp|/1e6,
+    ## which is huge for high-count genes) discards the improvement, leaving
+    ## dispGeneEst == the seed. Such a gene is then flagged as a dispOutlier and
+    ## left UNSHRUNK, so an inflated dispersion goes into the Wald test and
+    ## mis-tests it. Fix: re-estimate dispersion with niter=2 (which skips the
+    ## niter==1 revert guard), then override the FINAL dispersion for this gene
+    ## only and re-run the Wald test. Scoped edit -- all other genes unchanged.
+    patch_ids <- c("ENSG00000115263") # GCG
+    patch <- which(rownames(dds) %in% patch_ids)
     
-     ## association with run_id
+    if(length(patch) > 0){
+      dds_probe    <- estimateDispersionsGeneEst(dds, niter = 2)   # copy; dds unchanged
+      disp_before  <- mcols(dds)$dispGeneEst[patch]
+      final_before <- dispersions(dds)[patch]
+      disp_after   <- mcols(dds_probe)$dispGeneEst[patch]
+      rm(dds_probe)
+      ## only patch genes whose un-reverted estimate is materially lower (i.e. the
+      ## artifact is present); leave any that are genuinely high-dispersion as-is
+      keep <- which(!is.na(disp_after) & !is.na(disp_before) &
+                    disp_after < 0.5 * disp_before)
+      if(length(keep) > 0){
+        patch <- patch[keep]
+        print(sprintf("patching dispersion for %d gene(s): %s",
+                      length(patch), paste(rownames(dds)[patch], collapse = ", ")))
+        print(data.frame(gene               = rownames(dds)[patch],
+                         dispGeneEst_before = signif(disp_before[keep], 4),
+                         finalDisp_before   = signif(final_before[keep], 4),
+                         dispGeneEst_niter2 = signif(disp_after[keep], 4),
+                         dispFit            = signif(mcols(dds)$dispFit[patch], 4), 
+                         dispOutlier        = if ("dispOutlier" %in% names(mcols(dds))) mcols(dds)$dispOutlier[patch] else NA))
+  
+        dispersions(dds)[patch] <- disp_after[keep]
+        dds <- nbinomWaldTest(dds)               # re-fit SEs with patched dispersions
+      }
+    }
+    ## -------------------------------------------------------------------------
+    
+    ## association with run_id
     
     # if (length(unique(sample_info_dg$run_id))>1){
     #   
@@ -967,8 +1196,7 @@ for (model1 in unique_model_ss){
              sep="\t")
     
     }
-    
-  }
+
 
 get_index <- function(x){
   which(x$padj < 0.05 & abs(x$log2FoldChange) > log2(1.5))
@@ -990,7 +1218,7 @@ names(de_genes) <- settings
 print(paste0("DE group ", d_group, " under OE gene ", g_oe, ":"))
 
 # Per-setting DE counts
-for (i in length(settings)) {
+for (i in 1:length(settings)) {
   s <- settings[i]
   short_s <- short_names[i]
   print(paste0("number of DE genes from cell line with knock out gene ", short_s, ": ",
@@ -1040,7 +1268,6 @@ for (p in pairs) {
   print(g)
 }
 
-}
 ```
 
 Save the size dataframe out

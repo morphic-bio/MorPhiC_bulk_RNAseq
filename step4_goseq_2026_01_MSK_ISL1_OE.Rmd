@@ -148,7 +148,10 @@ colnames(df_file_info) = c("DE_general_group", "cell_line", "gene",
 df_file_info$file_name = regular_DE_files
 df_file_info$items = paste(df_file_info$DE_general_group,
                            df_file_info$cell_line,
-                           df_file_info$comparison_name, sep="_")
+                           df_file_info$comparison_name, 
+                           "vs", 
+                           df_file_info$cell_line, 
+                           "control", sep="_")
 df_file_info$items
 df_file_info
 
@@ -189,8 +192,9 @@ if (length(condition_DE_files)>0){
   
   df_file_info_cond$file_name = condition_DE_files
   df_file_info_cond$items = paste(df_file_info_cond$DE_general_group,
+                                  df_file_info_cond$comparison_name, 
                                   df_file_info_cond$OE_setting,
-                                  df_file_info_cond$comparison, sep="_")
+                                  "vs", "WT", "control", sep="_")
   print(df_file_info_cond$items)
   print(df_file_info_cond)
 }
@@ -231,8 +235,8 @@ for (i in 1:nrow(df_file_info)){
   ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
   ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
 
-  de_gene_sets[[paste0(compare_name, "_up")]] = res_k[ww_up,]$gene_ID
-  de_gene_sets[[paste0(compare_name, "_down")]] = res_k[ww_down,]$gene_ID
+  de_gene_sets[[paste0("up")]] = res_k[ww_up,]$gene_ID
+  de_gene_sets[[paste0("down")]] = res_k[ww_down,]$gene_ID
 
   print(sapply(de_gene_sets, length))
   
@@ -323,8 +327,8 @@ if (length(condition_DE_files)>0){
     ww_up = which((res_k$log2FoldChange > fc0) & (res_k$padj < p0))
     ww_down = which((res_k$log2FoldChange < ((-1)*fc0)) & (res_k$padj < p0))
   
-    de_gene_sets[[paste0(compare_name, "_up")]] = res_k[ww_up,]$gene_ID
-    de_gene_sets[[paste0(compare_name, "_down")]] = res_k[ww_down,]$gene_ID
+    de_gene_sets[[paste0("up")]] = res_k[ww_up,]$gene_ID
+    de_gene_sets[[paste0("down")]] = res_k[ww_down,]$gene_ID
   
     print(sapply(de_gene_sets, length))
     

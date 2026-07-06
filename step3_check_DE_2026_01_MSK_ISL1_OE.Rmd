@@ -42,8 +42,8 @@ theme_set(theme_classic())
 
 library(svglite)
 
-# path = "../../MorPhiC/data/MorPhiC_internal_releases/MorPhiC_Release_January_2026/MSK_bulkRNAseq_ISL1_OE"
-path = "./data"
+path = "../../MorPhiC/data/MorPhiC_internal_releases/MorPhiC_Release_January_2026/MSK_bulkRNAseq_ISL1_OE"
+# path = "./data"
 dat_path = file.path(path, "processed/Tables")
 
 meta_save_path = "./data/Jan_2026"
@@ -125,6 +125,11 @@ rownames(cts_dat) = cts$Name
 table(meta$timepoint_value, useNA="ifany")
 meta$timepoint = as.character(meta$timepoint_value)
 
+stopifnot(length(unique(meta$timepoint)) == 1)
+unique_tp = sprintf("day %s", unique(meta$timepoint))
+
+stopifnot(length(unique(meta$model_system)) == 1)
+unique_ms = unique(meta$model_system)
 ```
 
 ### Discard genes whose expression is 0 in more than 75% of samples
@@ -527,12 +532,13 @@ for(k in seq_len(nrow(regular_de_info))){
       sep = "")
   if (nrow(res_k) == 0) next
   
-  plot_title = paste0(regular_de_info$background[k], "\n",
-                      regular_de_info$comparison_name[k])
+  plot_title = paste0(unique_tp, " ", regular_de_info$background[k], "_", regular_de_info$comparison_name[k], " vs ",
+                      regular_de_info$background[k], "_", "control")
   g2 = plot_volcano(res_k, plot_title)
   print(g2)
   
-  g3 = g2 + theme(
+  #g3 = plot_volcano(res_k, "") + theme(
+  g3 = plot_volcano(res_k, "") + ggtitle(NULL) + theme(
     panel.background = element_rect(fill = "transparent", color = NA),
     plot.background = element_rect(fill = "transparent", color = NA),
     legend.background = element_rect(fill = "transparent", color = NA)
@@ -582,13 +588,14 @@ for(k in seq_len(nrow(condition_de_info))){
       sep = "")
   if (nrow(res_k) == 0) next
   
-  plot_title = paste0(condition_de_info$OE_setting[k], " ",
-                      condition_de_info$comparison_name[k],
-                      "\nKO versus WT")
+  plot_title = paste0(unique_tp, " ", 
+                      condition_de_info$comparison_name[k], "_", 
+                      condition_de_info$OE_setting[k], " vs ",
+                      "WT", "_", condition_de_info$OE_setting[k])
   g2 = plot_volcano(res_k, plot_title)
   print(g2)
   
-  g3 = g2 + theme(
+  g3 = plot_volcano(res_k, "") + ggtitle(NULL) + theme(
     panel.background = element_rect(fill = "transparent", color = NA),
     plot.background = element_rect(fill = "transparent", color = NA),
     legend.background = element_rect(fill = "transparent", color = NA)
