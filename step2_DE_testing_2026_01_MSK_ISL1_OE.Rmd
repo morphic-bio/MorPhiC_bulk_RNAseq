@@ -161,6 +161,8 @@ setdiff(rownames(cts_dat), gene_anno$ensembl_gene_id)
 model_s = meta$model_system
 table(model_s, useNA="ifany")
 
+model_s = unique(model_s)
+
 get_q75 <- function(x){quantile(x, probs = 0.75)}
 
 gene_info = data.frame(Name = cts$Name,
