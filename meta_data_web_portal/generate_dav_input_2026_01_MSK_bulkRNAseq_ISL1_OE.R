@@ -17,14 +17,11 @@ metadata_file <- file.path(repo_dir, "data", "Jan_2026",
 raw_metadata_xlsx <- file.path(repo_dir, "data", "Jan_2026",
                                "R4_MSK_RNAseq_Prod.xlsx")
 
-out_dir <- file.path(repo_dir, "dav_input")
+out_dir <- repo_dir
 out_xlsx <- file.path(out_dir,
                       "DAV_input_2026_01_MSK_bulkRNAseq_ISL1_OE.xlsx")
-out_tsv <- file.path(out_dir,
-                     "DAV_input_2026_01_MSK_bulkRNAseq_ISL1_OE.tsv")
 
 stopifnot(file.exists(metadata_file))
-stopifnot(file.exists(raw_metadata_xlsx))
 stopifnot(dir.exists(processed_dir))
 
 col_order <- c(
@@ -67,15 +64,25 @@ blank_row <- function() {
   as.data.frame(x, stringsAsFactors = FALSE, check.names = FALSE)
 }
 
-expr_alt <- read.xlsx(raw_metadata_xlsx,
-                      sheet = "Expression alteration",
-                      colNames = TRUE)
-expr_alt <- expr_alt[
-  !is.na(expr_alt$ALTERED.GENE.SYMBOL) &
-    !is.na(expr_alt$HGNC.ID) &
-    grepl("^HGNC:[0-9]+$", expr_alt$HGNC.ID),
-]
-hgnc_map <- setNames(expr_alt$HGNC.ID, expr_alt$ALTERED.GENE.SYMBOL)
+fallback_hgnc_map <- c(
+  ISL1 = "HGNC:6132",
+  PAX6 = "HGNC:8620",
+  PDX1 = "HGNC:6107"
+)
+hgnc_map <- fallback_hgnc_map
+if (file.exists(raw_metadata_xlsx)) {
+  expr_alt <- read.xlsx(raw_metadata_xlsx,
+                        sheet = "Expression alteration",
+                        colNames = TRUE)
+  expr_alt <- expr_alt[
+    !is.na(expr_alt$ALTERED.GENE.SYMBOL) &
+      !is.na(expr_alt$HGNC.ID) &
+      grepl("^HGNC:[0-9]+$", expr_alt$HGNC.ID),
+  ]
+  hgnc_map <- setNames(expr_alt$HGNC.ID, expr_alt$ALTERED.GENE.SYMBOL)
+  missing_fallback_names <- setdiff(names(fallback_hgnc_map), names(hgnc_map))
+  hgnc_map <- c(hgnc_map, fallback_hgnc_map[missing_fallback_names])
+}
 
 meta <- fread(metadata_file, data.table = FALSE)
 timepoint <- ""
@@ -207,7 +214,7 @@ build_control_dge_rows <- function() {
     } else {
       ""
     }
-    row$Script <- "step2_DE_testing_2026_01_MSK_ISL1_OE.Rmd"
+    row$Script <- "step2_DE_testing_2026_01_MSK_ISL1_OE_control.Rmd"
     row
   })
 
@@ -278,13 +285,11 @@ rows <- rows[, col_order, with = FALSE]
 rows[is.na(rows)] <- ""
 
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
-fwrite(rows, out_tsv, sep = "\t", quote = FALSE, na = "")
 
 wb <- createWorkbook()
 addWorksheet(wb, "Input_MSK_bulkRNAseq_ISL1_OE")
 writeData(wb, sheet = 1, x = rows, withFilter = TRUE)
 saveWorkbook(wb, file = out_xlsx, overwrite = TRUE)
 
-cat("Wrote DAV input TSV: ", out_tsv, "\n", sep = "")
 cat("Wrote DAV input XLSX: ", out_xlsx, "\n", sep = "")
 cat("Rows: ", nrow(rows), "\n", sep = "")

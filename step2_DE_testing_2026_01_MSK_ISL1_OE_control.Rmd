@@ -1,0 +1,394 @@
+---
+title: "Differential expression analysis for 2026-01 release MSK_bulkRNAseq_ISL1_OE: control (BFP_OE) KO vs WT model"
+author: "Si Liu, Wei Sun"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: hide
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+    number_sections: false
+  df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This file use the control (BFP_OE) samples from MSK_bulkRNAseq_ISL1_OE
+data to do DE analysis between each gene KO and WT. 
+
+* keep only BFP OE samples, which are the controls for OE,
+* fit one DESeq2 model using all BFP OE samples,
+* extract only the three control KO vs WT contrasts.
+
+## R libraries
+
+```{r load_libraries, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(stringr)
+library(MASS)
+library(RColorBrewer)
+library(DESeq2)
+
+library(viridis)
+library(ggpointdensity)
+library(dplyr)
+library(data.table)
+library(ComplexHeatmap)
+library(UpSetR)
+library(readxl)
+theme_set(theme_classic())
+
+path = "../../MorPhiC/data/MorPhiC_internal_releases/MorPhiC_Release_January_2026/MSK_bulkRNAseq_ISL1_OE"
+dat_path = file.path(path, "processed/Tables")
+
+meta_save_path = "./data/Jan_2026"
+meta_file = file.path(meta_save_path, "MSK_bulkRNAseq_ISL1_OE_meta_data.tsv")
+
+```
+
+## Load processed metadata
+
+```{r load_metadata}
+meta = fread(meta_file, sep="\t", data.table = FALSE)
+dim(meta)
+```
+
+## Read count data and filter genes
+
+```{r read_counts}
+cts_lanes = fread(file.path(dat_path, "genesCounts.csv"), data.table = FALSE)
+dim(cts_lanes)
+
+# remove the third column from the cts_lanes object since it is a duplicate
+# of the second column
+cts_lanes = cts_lanes[,-3]
+
+# only keep the columns that show up in the sequence table
+names_short = gsub("_L00[1-8]$", "", names(cts_lanes))
+cols2kp = which(names_short %in% meta$sample_id)
+cts_lanes = cts_lanes[, c(1, cols2kp)]
+
+names_short_filterd = gsub("_L00[1-8]$", "", names(cts_lanes))
+stopifnot(setequal(names_short_filterd[-1], meta$sample_id))
+
+gene_column <- cts_lanes$Name
+counts <- as.matrix(cts_lanes[, -1])
+sample_id <- sub("_L00[1-8]$", "", colnames(counts))
+
+# Sum lane columns belonging to the same sample.
+collapsed <- t(rowsum(t(counts), group = sample_id))
+colnames(collapsed) <- sub("_IGO.*", "", colnames(collapsed))
+
+cts <- data.frame(Name = gene_column, collapsed, check.names = FALSE)
+
+# reorder the metadata table to match the samples in the processed count data
+meta = meta[match(names(cts)[-1], meta$clonal.label),]
+stopifnot(all(names(cts)[-1] == meta$clonal.label))
+
+cts_dat = data.matrix(cts[,-1])
+rownames(cts_dat) = cts$Name
+
+meta$timepoint = as.character(meta$timepoint_value)
+
+table(meta$OE_status)
+
+BFP_kept = which(meta$OE_status == "BFP")
+meta = meta[BFP_kept,]
+cts_dat = cts_dat[, BFP_kept]
+
+table(meta$OE_status, useNA="ifany")
+table(colnames(cts_dat)==meta$clonal.label, useNA="ifany")
+
+```
+
+### Read gene annotation
+
+```{r read_gene_annotation}
+gene_anno = fread("data/gencode_v44_primary_assembly_info.tsv")
+stopifnot(all(rownames(cts_dat) %in% gene_anno$ensembl_gene_id))
+```
+
+### Initial gene filter and sample QC covariates
+
+```{r initial_gene_filter}
+model_s = meta$model_system
+table(model_s)
+model_s = unique(model_s)
+
+get_q75 <- function(x){quantile(x, probs = 0.75)}
+
+gene_info = data.frame(Name = cts$Name,
+                       apply(cts_dat, 1, min),
+                       apply(cts_dat, 1, median),
+                       apply(cts_dat, 1, get_q75),
+                       apply(cts_dat, 1, max))
+
+names(gene_info)[2:5] = paste0(rep(c(model_s), times=4),
+                               rep(c("min", "median", "q75", "max"), each=1))
+
+w2kp = which(gene_info$Pancreatic_Isletq75 > 0)
+cts_dat = cts_dat[w2kp,]
+gene_info = gene_info[w2kp,]
+
+meta$read_depth = colSums(cts_dat)/1e6
+meta$q75 = apply(cts_dat, 2, quantile, probs = 0.75)
+
+```
+
+## Prepare output directories
+
+```{r prepare_output_directories}
+release_name = "2026_01_MSK_bulkRNAseq_ISL1_OE"
+
+output_dir =  file.path("results", release_name)
+raw_output_dir = file.path(output_dir, "raw")
+processed_output_dir = file.path(output_dir, "processed")
+
+if (!file.exists(raw_output_dir)){
+  dir.create(raw_output_dir, recursive = TRUE)
+}
+
+if (!file.exists(processed_output_dir)){
+  dir.create(processed_output_dir, recursive = TRUE)
+}
+```
+
+## DE analysis under control only, fitting one model using all BFP_OE samples
+
+```{r control_bfp_only_model, fig.width = 4.8, fig.height=3.2, message=FALSE, warning=FALSE}
+unique_model_ss = unique(meta$model_system)
+unique_model_ss = sort(unique_model_ss)
+
+# there is only one model system in this dataset
+model1 = unique_model_ss
+print(model1)
+
+sample2kp = which(meta$model_system == model1)
+cts_dat_m = cts_dat[, sample2kp]
+meta_m = meta[sample2kp,]
+stopifnot(all(meta_m$clonal.label == colnames(cts_dat_m)))
+
+cols2kp = c("clonal.label", "model_system", "cell_line", "OE_status",
+            "q75", "timepoint")
+sample_info = meta_m[, cols2kp]
+colnames(sample_info)[which(colnames(sample_info) == "timepoint")] = "day"
+
+sample_info$ko_group = paste(sample_info$cell_line,
+                             sample_info$OE_status, sep = "_")
+sample_info$model_day = paste0(sample_info$model_system,
+                               "_day_",
+                               as.character(sample_info$day))
+sample_info$de_grp = sample_info$model_day
+
+sorted_de_grps = sort(unique(sample_info$de_grp))
+stopifnot(length(sorted_de_grps) == 1)
+d_group = sorted_de_grps
+
+dg_index = which(sample_info$de_grp == d_group)
+cts_dat_m_dg = cts_dat_m[, dg_index]
+sample_info_dg = sample_info[dg_index,]
+stopifnot(all(sample_info_dg$de_grp == d_group))
+stopifnot(all(sample_info_dg$clonal.label == colnames(cts_dat_m_dg)))
+
+# Keep only BFP OE samples, which are the controls for OE.
+bfp_index = which(sample_info_dg$OE_status == "BFP")
+cts_dat_bfp = cts_dat_m_dg[, bfp_index]
+sample_info_bfp = sample_info_dg[bfp_index,]
+stopifnot(all(sample_info_bfp$OE_status == "BFP"))
+stopifnot(all(sample_info_bfp$clonal.label == colnames(cts_dat_bfp)))
+
+print("-----------------------------------")
+print(sprintf("BFP-only DESeq2 model: %s control KO vs WT", d_group))
+print(table(sample_info_bfp$ko_group))
+print("-----------------------------------")
+
+# Do the same two expression filters as the original workflow, but within only
+# BFP OE samples.
+dg_q75 = apply(cts_dat_bfp, 1, quantile, probs = 0.75)
+cts_dat_bfp = cts_dat_bfp[dg_q75 > 0,]
+
+print(sprintf("After filtering by gene expression q75, the number of genes reduces from %d to %d",
+              length(dg_q75), nrow(cts_dat_bfp)))
+
+n_pos = rowSums(cts_dat_bfp > 0)
+cts_dat_bfp = cts_dat_bfp[n_pos >= 4,]
+
+if (length(n_pos) == nrow(cts_dat_bfp)){
+  print("After filtering by nonzero expression in at least 4 samples, the number of genes does not change.")
+}else{
+  print(sprintf("After filtering by nonzero expression in at least 4 samples, the number of genes reduces from %d to %d",
+                length(n_pos), nrow(cts_dat_bfp)))
+}
+
+# Update q75 using only genes retained for this BFP-only model.
+sample_info_bfp$q75 = apply(cts_dat_bfp, 2, quantile, probs = 0.75)
+sample_info_bfp$log_q75 = log(sample_info_bfp$q75)
+sample_info_bfp$log_q75 = sample_info_bfp$log_q75 - mean(sample_info_bfp$log_q75)
+
+sample_info_bfp$ko_group = factor(sample_info_bfp$ko_group)
+sample_info_bfp$ko_group = relevel(sample_info_bfp$ko_group, ref = "WT_BFP")
+rownames(sample_info_bfp) = colnames(cts_dat_bfp)
+
+dds = DESeqDataSetFromMatrix(cts_dat_bfp,
+                             colData = sample_info_bfp,
+                             design = ~ ko_group + log_q75)
+
+start.time <- Sys.time()
+dds = DESeq(dds)
+end.time <- Sys.time()
+print(end.time - start.time)
+
+res_rd = as.data.frame(results(dds, name = "log_q75"))
+dim(res_rd)
+res_rd[1:2,]
+
+table(is.na(res_rd$padj))
+
+g0 = ggplot(res_rd %>% subset(!is.na(padj)), aes(x=pvalue)) + 
+  geom_histogram(color="darkblue", fill="lightblue", 
+                 breaks = seq(0,1,by=0.01)) + 
+  ggtitle(paste0(d_group, " read depth"))
+print(g0)
+  
+## Rerun the analysis without read-depth if it is not significant for 
+## most genes, and the number of samples is small
+## i.e., proportion of non-null in the distribution is smaller than 0.01
+## (this needs to be restricted to the genes with not NA adjusted pvalue)
+## or if smaller than 0.1 and the number of samples is not greater than 6
+
+pi_1_rd = max(0, mean(res_rd$pvalue[!is.na(res_rd$padj)] < 0.05) - 0.05)
+pi_1_rd = max(pi_1_rd, 0, 1 - 2*mean(res_rd$pvalue[!is.na(res_rd$padj)] > 0.5))
+
+print(sprintf("prop of non-null for rd: %.2e", pi_1_rd))
+
+if(pi_1_rd < 0.01 || (ncol(cts_dat_bfp) <= 6 && pi_1_rd < 0.1 )){
+  
+  print("rerun DESeq2 without read depth")
+  
+  include_rd = 0
+
+  dds = DESeqDataSetFromMatrix(cts_dat_bfp, colData=sample_info_bfp, 
+                                ~ ko_group)
+
+  start.time <- Sys.time()
+  dds = DESeq(dds)
+  end.time <- Sys.time()
+  
+  time.taken <- end.time - start.time
+  print(time.taken)
+  
+}else{
+  include_rd = 1
+}
+
+
+df_size = NULL
+res_geno = list()
+cell_lines = unique(sample_info_bfp$cell_line)
+genos = setdiff(cell_lines, "WT")
+genos = sort(genos)
+
+for(geno in genos){
+
+  res_g1 = results(dds, contrast = c("ko_group",
+                                     paste0(geno, "_BFP"),
+                                     "WT_BFP"))
+  res_g1 = signif(data.frame(res_g1), 3)
+
+  test_index = which(sample_info_bfp$ko_group %in% c(paste0(geno, "_BFP"),
+                                                     "WT_BFP"))
+  cts_dat_test = cts_dat_bfp[, test_index]
+  n_zero = rowSums(cts_dat_test == 0)
+  res_g1$n_zeros = n_zero
+
+  test_ko_group_vec = sample_info_bfp$ko_group[test_index]
+  df_size = rbind(df_size,
+                  c(d_group,
+                    "control",
+                    paste0(geno, "_KO"),
+                    sum(test_ko_group_vec != "WT_BFP"),
+                    sum(test_ko_group_vec == "WT_BFP")))
+
+  res_g1_reduced = res_g1[, c("log2FoldChange", "pvalue", "padj", "n_zeros")]
+  res_g1_reduced$padj[which(res_g1_reduced$n_zeros >= 4)] = NA
+
+  if ((sum(test_ko_group_vec != "WT_BFP") == 1) |
+      (sum(test_ko_group_vec == "WT_BFP") == 1)){
+    res_g1_reduced$padj = NA
+  }
+
+  res_g1_reduced = res_g1_reduced[, c("log2FoldChange", "pvalue", "padj")]
+  res_geno[[paste0(geno, "_KO")]] = res_g1_reduced
+
+  if ((sum(test_ko_group_vec != "WT_BFP") > 1) &
+      (sum(test_ko_group_vec == "WT_BFP") > 1)){
+    g1 = ggplot(res_g1_reduced %>% subset(!is.na(padj)), aes(x = pvalue)) +
+      geom_histogram(color = "darkblue", fill = "lightblue",
+                     breaks = seq(0, 1, by = 0.01)) +
+      ggtitle(paste0(d_group, " control ", geno, "_KO"))
+    print(g1)
+  }
+
+  tag1 = sprintf("%s_%s_", geno, "KO")
+  colnames(res_g1) = paste0(tag1, colnames(res_g1))
+  colnames(res_g1_reduced) = paste0(tag1, colnames(res_g1_reduced))
+
+  res_df = data.frame(gene_ID = rownames(res_g1),
+                      res_g1)
+
+  res_reduced_gene_anno = gene_anno[match(rownames(res_g1_reduced),
+                                          gene_anno$ensembl_gene_id),]
+  stopifnot(all(rownames(res_g1_reduced) == res_reduced_gene_anno$ensembl_gene_id))
+
+  # set gene hgnc_symbol that equal "" to NA
+  hgnc_symbol_vec = res_reduced_gene_anno$hgnc_symbol
+  hgnc_symbol_vec[which(hgnc_symbol_vec == "")] = NA
+
+  res_reduced_df = data.frame(gene_ID = rownames(res_g1_reduced),
+                              hgnc_symbol = hgnc_symbol_vec,
+                              chr = res_reduced_gene_anno$chr,
+                              strand = res_reduced_gene_anno$strand,
+                              start = res_reduced_gene_anno$start,
+                              end = res_reduced_gene_anno$end,
+                              res_g1_reduced)
+  
+  print("hgnc_symbol empty string and NA tables:")
+  print(table(res_reduced_df$hgnc_symbol=="", useNA="ifany"))
+  print(table(is.na(res_reduced_df$hgnc_symbol)))
+  
+  setting_name = unique(paste0(sample_info_bfp$model_day, "_control"))
+
+  fwrite(res_df,
+         sprintf("%s/%s_%s_%s_vs_WT_DEseq2_raw.tsv",
+                 raw_output_dir, release_name, setting_name,
+                 paste0(geno, "_KO")),
+         sep = "\t")
+
+  fwrite(res_reduced_df,
+         sprintf("%s/%s_%s_%s_vs_WT_DEseq2.tsv",
+                 processed_output_dir, release_name, setting_name,
+                 paste0(geno, "_KO")),
+         sep = "\t")
+}
+
+colnames(df_size) = c("DE_group", "OE_setting", "knockout_gene_strategy", "n_ko", "n_WT")
+df_size = as.data.frame(df_size)
+
+fwrite(df_size,
+       sprintf("%s/%s_DE_control_KO_vs_WT_n_samples.tsv", output_dir, release_name),
+       sep = "\t")
+```
+
+```{r}
+gc()
+sessionInfo()
+```

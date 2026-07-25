@@ -1,5 +1,5 @@
 ---
-title: "Differential expression analysis for 2026-01 release MSK_ISL1_OE"
+title: "Differential expression analysis for 2026-01 release MSK_ISL1_OE, ISL1_OE vs control"
 author: "Si Liu, Wei Sun"
 date: "`r Sys.Date()`"
 output: 
@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-Differential expression using the bulk RNAseq MSK_ISL1_OE the Jan. 2026 release.
+Differential expression using the bulk RNAseq MSK_ISL1_OE from the Jan. 2026 release, for ISL1_OE vs control.
 
 This dataset spans
 
@@ -34,11 +34,10 @@ This dataset spans
 The test of DE analysis planned:
 
 * for each colonal cell line, ISL1 OE vs control
-* for baseline, the other three colonal cell lines vs the WT cell line
 
 The dispersion parameter estimate for one gene GCG (ENSG00000115263) is patched
 
-* this is the gene with -log10(pvalue from limma-voom / pvalue from DESeq2) > 3
+* this is the only gene with -log10(pvalue from limma-voom / pvalue from DESeq2) > 3
 * for this highly expressed genes, the dispersion estimate is patched to DESeq2's un-reverted niter=2 value, since the default niter=1 fit's noIncrease guard discarded the correct low dispersion and kept an inflated design-blind seed, inflating the standard error and masking a genuine effect.
 
 ## R libraries.
@@ -1287,156 +1286,6 @@ fwrite(df_size,
        sep="\t")
 
 ```
-
-
-
-
-## DE analysis under control (BFP OE) only, between KOs and WTs
-
-There is only one DE group for this dataset and DESeq2 model was already fit. 
-
-Directly use the fitted model to extract the DE results for this setting. 
-
-```{r fig.width = 4.8, fig.height=3.2, message=FALSE, warning=FALSE}
-
-df_size = NULL
-
-genos = setdiff(cell_lines, "WT")
-genos = sort(genos)
-genos
-
-res_geno = list()
-
-for(geno in genos){
-  
-  res_geno_df = NULL
-  res_geno_reduced_df = NULL
-    
-  res_g1 = results(dds, contrast = c("ko_group", 
-                                     paste0(geno, "_BFP"), paste0("WT_BFP")))
-  res_g1 = signif(data.frame(res_g1), 3)
-  
-  # add a column to record the number of zeros per test
-  test_index = which(sample_info_dg$ko_group%in%c(paste0(geno, "_BFP"), paste0("WT_BFP")))
-  
-  cts_dat_m_dg_test = cts_dat_m_dg[, test_index]
-  n_zero = rowSums(cts_dat_m_dg_test==0)
-  res_g1$n_zeros = n_zero
-  
-  # record the number of samples involved in the comparison
-  test_ko_group_vec = sample_info_dg$ko_group[test_index]
-  
-  df_size = rbind(df_size, 
-                  c(d_group, 
-                    paste0("control"), 
-                    paste0(geno, "_KO"), 
-                    sum(test_ko_group_vec!="WT_BFP"), 
-                    sum(test_ko_group_vec=="WT_BFP")))
-  
-  # prepare a processed version of output
-  res_g1_reduced = res_g1[, c("log2FoldChange", "pvalue", "padj", "n_zeros")]
-  res_g1_reduced$padj[which(res_g1_reduced$n_zeros>=4)] = NA
-  
-  if ((sum(test_ko_group_vec!=paste0(geno, "_BFP"))==1)|(sum(test_ko_group_vec==paste0("WT_BFP"))==1)){
-    res_g1_reduced$padj = NA
-  }
-  
-  res_g1_reduced = res_g1_reduced[, c("log2FoldChange", "pvalue", "padj")]
-  
-  res_geno[[paste0(geno, "_KO")]] = res_g1_reduced
-  
-  if ((sum(test_ko_group_vec!=paste0(geno, "_BFP"))>1) & (sum(test_ko_group_vec==paste0("WT_BFP"))>1)){
-    g1 = ggplot(res_g1_reduced %>% subset(!is.na(padj)), aes(x=pvalue)) + 
-      geom_histogram(color="darkblue", fill="lightblue", 
-                     breaks = seq(0,1,by=0.01)) + 
-      ggtitle(paste0(d_group, " ", "control ", geno, "_KO "))
-    print(g1)
-  }
-
-  
-  tag1 = sprintf("%s_%s_", geno, "KO")
-  colnames(res_g1) = paste0(tag1, colnames(res_g1))
-  colnames(res_g1_reduced) = paste0(tag1, colnames(res_g1_reduced))      
-  
-  if(is.null(res_geno_df)){
-    res_geno_df = res_g1
-  }else if(!is.null(res_geno_df)){
-    stopifnot(all(rownames(res_geno_df) == rownames(res_g1)))
-    res_geno_df = cbind(res_geno_df, res_g1)
-  }
-
-  if(is.null(res_geno_reduced_df)){
-    res_geno_reduced_df = res_g1_reduced
-  }else if(!is.null(res_geno_reduced_df)){
-    stopifnot(all(rownames(res_geno_reduced_df) == rownames(res_g1_reduced)))
-    res_geno_reduced_df = cbind(res_geno_reduced_df, res_g1_reduced)
-  }       
-
-
-
-  dim(res_geno_df)
-  res_geno_df[1:2,]
-  
-  dim(res_geno_reduced_df)
-  res_geno_reduced_df[1:2,]
-  
-  res_df = data.frame(gene_ID=rownames(res_geno_df), 
-                      res_geno_df)
-  dim(res_df)
-  res_df[1:2,]
-
-  res_reduced_gene_anno = gene_anno[match(rownames(res_geno_reduced_df), 
-                                          gene_anno$ensembl_gene_id), ]
-  stopifnot(all(rownames(res_geno_reduced_df)==res_reduced_gene_anno$ensembl_gene_id))
-
-  # set gene hgnc_symbol that equal "" to NA
-  hgnc_symbol_vec = res_reduced_gene_anno$hgnc_symbol
-  hgnc_symbol_vec[which(hgnc_symbol_vec=="")] = NA
-    
-  res_reduced_df = data.frame(gene_ID=rownames(res_geno_reduced_df), 
-                              hgnc_symbol=hgnc_symbol_vec,
-                              chr=res_reduced_gene_anno$chr, 
-                              strand=res_reduced_gene_anno$strand, 
-                              start=res_reduced_gene_anno$start, 
-                              end=res_reduced_gene_anno$end, 
-                              res_geno_reduced_df)
-  
-  print("hgnc_symbol empty string and NA tables:")
-  print(table(res_reduced_df$hgnc_symbol=="", useNA="ifany"))
-  print(table(is.na(res_reduced_df$hgnc_symbol)))
-    
-  dim(res_reduced_df)
-  res_reduced_df[1:2,]
-
-  setting_name = unique(paste0(sample_info_dg$model_day, "_", 
-#                                   sample_info_dg$condition, "_", 
-                               "control"))
-  
-  fwrite(res_df, 
-         sprintf("%s/%s_%s_%s_vs_WT_DEseq2_raw.tsv", 
-                 raw_output_dir, release_name, setting_name, 
-                 paste0(geno, "_", "KO")), 
-         sep="\t")
-  fwrite(res_reduced_df, 
-         sprintf("%s/%s_%s_%s_vs_WT_DEseq2.tsv", 
-                 processed_output_dir, release_name, setting_name, 
-                 paste0(geno, "_", "KO")),  
-         sep="\t")
-
-}
-  
-colnames(df_size) = c("DE_group", "OE_setting", "knockout_gene_strategy", "n_ko", "n_WT")
-df_size = as.data.frame(df_size)
-
-fwrite(df_size, 
-       sprintf("%s/%s_DE_control_KO_vs_WT_n_samples.tsv", output_dir, release_name), 
-       sep="\t")
-
-
-```
-
-
-
 
 
 ```{r}
