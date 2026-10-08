@@ -17,7 +17,7 @@ The major type of DE testing is between knockout samples and wild type samples. 
 
 To make the results more reliable, genes with low expression are excluded from DE testing or have adjusted pvalue marked as NA. 
 
-There are mutiple steps involved in the filtering procedure:
+There are multiple steps involved in the filtering procedure:
 
 - For each gene, compute the 75\% quantile of its expression among samples under each model system. If a gene has 75\% quantile being 0 under all model systems in the dataset, exclude the gene from further analysis.
   
@@ -29,7 +29,7 @@ There are mutiple steps involved in the filtering procedure:
 
 - DESeq2 internally excludes genes with mean normalized counts below a filtering threshold from multiple testing adjustment, and these genes will have adjusted pvalue being NA.
 
-- After running DESeq2, for the results from a specific contrast (e.g., KO of one gene vs. WT), if one gene has nonzero expression in fewer than 4 samples, its adjusted pvalue is assigned as NA.
+- After running DESeq2, for the results from a specific contrast (e.g., KO of one gene vs. WT), if one gene has zero expression in at least 4 samples, its adjusted pvalue is assigned as NA.
 
 
 
